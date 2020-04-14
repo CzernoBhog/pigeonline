@@ -9,6 +9,12 @@ class DAOUser {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'user', $orClause, $replaceWithLIKE, $orderBy, $select);
         $stmt = $conn->prepare($query);
+
+        foreach($params as $key => $value){
+            if($value != ""){
+                $stmt->bindValue($key, $value);
+            }
+        }
         
         try {
             $stmt->execute();
@@ -16,9 +22,9 @@ class DAOUser {
             return $e->getMessage();
         }
 
-        $resultSet = $stmt->fetchAll('DOUser');
+        $resultSet = $stmt->fetchAll();
 
-        if ( isset($resultSet) ) {
+        if ( count($resultSet) != 0 ) {
             return count($resultSet) > 1 ? $resultSet : $resultSet[0];
         }
         

@@ -6,7 +6,7 @@ class Database {
 
     private static $connection;
 
-    public function connect() {
+    public static function connect() {
 
         if (!isset(self::$connection)) {
             try {

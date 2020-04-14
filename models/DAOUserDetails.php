@@ -9,15 +9,21 @@ class DAOUserDetails {
         $query = \utils\Utility::createWhere($params, 'userDetails', $orClause, $replaceWithLIKE, $orderBy, $select);
         $stmt = $conn->prepare($query);
         
+        foreach($params as $key => $value){
+            if($value != ""){
+                $stmt->bindValue($key, $value);
+            }
+        }
+
         try {
             $stmt->execute();
         } catch (\Exception | \PDOException $e) {
             return $e->getMessage();
         }
 
-        $resultSet = $stmt->fetchAll('DOUserDetails');
+        $resultSet = $stmt->fetchAll();
 
-        if ( isset($resultSet) ) {
+        if ( count($resultSet) != 0 ) {
             return count($resultSet) > 1 ? $resultSet : $resultSet[0];
         }
         
