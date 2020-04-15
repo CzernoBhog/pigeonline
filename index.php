@@ -7,7 +7,8 @@ if (session_status() == PHP_SESSION_NONE) { //se la sessione non è avviata la a
 }
 
 $waf = new utils\WAF();
-$waf->start();  //controllo con WAF che non si tenti di passare parametri/cookie malevoli
+//$waf->getCSRF();
+//$waf->start();  //controllo con WAF che non si tenti di passare parametri/cookie malevoli
 
 if (isset($_REQUEST['controller'])) {
     $controller = 'controllers\\' . $_REQUEST['controller'];

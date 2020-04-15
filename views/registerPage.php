@@ -6,9 +6,23 @@
     <title>PigeOnLine Sign up</title>
     <?php require_once('./utils/includeHead.php'); ?>
     <link href="./utils/css/singIn.css" rel="stylesheet">
+    <link href="./utils/css/cover.css" rel="stylesheet">
 
     <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
     </style>
 
 </head>
@@ -17,35 +31,58 @@
 
     <!-- CONTENUTO DELLA PAGINA ... -->
 
-    <form class="form-signin" method="POST">
-        <img class="mb-4" src="./utils/imgs/logoProgetto.jpg" alt="" width="80" height="80">
-        <h1 class="h3 mb-3 font-weight-normal">Please sign up</h1>
+    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <header class="masthead mb-auto">
+            <div class="inner">
+                <h3 class="masthead-brand">PigeOnLine</h3>
+                <nav class="nav nav-masthead justify-content-center">
+                    <a class="nav-link active" href="#">Sign up</a>
+                    <a class="nav-link" href="index.php">First page</a>
+                </nav>
+            </div>
+        </header>
 
-        <label for="inputName" class="sr-only">Name</label>
-        <input type="text" id="inputName" minlength="2" maxlength="15" class="form-control" placeholder="Name" name="name" required autofocus>
+        <main role="main" class="inner cover">
+            <form class="form-signin" action="index.php" method="POST">
+                <input name="action" value="registraUtente" hidden>
 
-        <label for="inputSurname" class="sr-only">Surname</label>
-        <input type="text" id="inputSurname" minlength="2" maxlength="15" class="form-control" placeholder="Surname" name="surname" required>
+                <img class="mb-4" src="./utils/imgs/logoProgetto.png" alt="" width="80" height="80">
+                <h1 class="h3 mb-3 font-weight-normal">Please sign up</h1>
 
-        <label for="inputEmail" class="sr-only">Email</label>
-        <input type="text" id="inputEmail" class="form-control" placeholder="Email" name="email" required>
+                <label for="inputName" class="sr-only">Name</label>
+                <input type="text" id="inputName" minlength="2" maxlength="15" class="form-control" placeholder="Name" name="name" required autofocus>
 
-        <label for="inputUsername" class="sr-only">Username</label>
-        <input type="text" id="inputUsername" minlength="5" maxlength="15" class="form-control" placeholder="Username" name="username" required>
+                <label for="inputSurname" class="sr-only">Surname</label>
+                <input type="text" id="inputSurname" minlength="2" maxlength="15" class="form-control" placeholder="Surname" name="surname" required>
 
-        <div class="input-group">
-            <input placeholder="Password" id="inputPassword" minlength="6" maxlength="15" type="password" minlength="8" maxlength="50" name="password" class="form-control pwd" required>
-            <span class="input-group-btn">
-                <button style="height:46px" class="btn btn-default reveal" type="button">
-                    <i id="eye" class="fas fa-eye"></i>
-                </button>
-            </span>
-        </div>
+                <label for="inputEmail" class="sr-only">Email</label>
+                <input type="text" id="inputEmail" class="form-control" placeholder="Email" name="email" required>
 
-        <p>Already registered? <a href="index.php?controller=utentiController&action=viewLogin">Sing in</a></p>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
-        <p class="mt-5 mb-3 text-muted">&copy; 2020-2021</p>
-    </form>
+                <label for="inputUsername" class="sr-only">Username</label>
+                <input type="text" id="inputUsername" minlength="5" maxlength="15" class="form-control" placeholder="Username" name="username" required>
+
+                <div class="input-group">
+                    <input placeholder="Password" id="inputPassword" minlength="6" maxlength="15" type="password" minlength="8" maxlength="50" name="password" class="form-control pwd" required>
+                    <span class="input-group-btn">
+                        <button style="height:46px" class="btn btn-default reveal" type="button">
+                            <i id="eye" class="fas fa-eye"></i>
+                        </button>
+                    </span>
+                </div>
+
+                <div class="mastfoot mt-auto">
+                    <p>Already registered? <a href="index.php?controller=utentiController&action=viewLogin">Sign in</a></p>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+            </form>
+        </main>
+
+        <footer class="mastfoot mt-auto">
+            <div class="inner">
+                <p>By <a href="#">@Vego</a> and <a href="#">@Tonno</a>.</p>
+            </div>
+        </footer>
+    </div>
 
     <!-- CONTENUTO DELLA PAGINA  -->
 

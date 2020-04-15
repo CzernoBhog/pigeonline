@@ -1,4 +1,5 @@
 <?php
+namespace models;
 
 class DOUserDetails{
 

@@ -35,16 +35,16 @@
             <div class="inner">
                 <h3 class="masthead-brand">PigeOnLine</h3>
                 <nav class="nav nav-masthead justify-content-center">
-                    <a class="nav-link active" href="#">Initial page</a>
-                    <a class="nav-link" href="#">Features</a>
+                    <a class="nav-link active" href="#">Message page</a>
+                    <a class="nav-link" href="index.php">Initial page</a>
                 </nav>
             </div>
         </header>
 
         <main role="main" class="inner cover">
             <img class="mb-4" src="./utils/imgs/logoProgetto.png" alt="" width="80" height="80">
-            <h1 class="cover-heading">Chat with PiegOnLine.</h1>
-            <p class="lead">PigeOnLine is an instant messaging web application.</p>
+            <h1 class="cover-heading">PiegOnLine message:</h1>
+            <p class="lead"><?= $message ?></p>
             <br><br>
             <p class="lead">
                 <a style="margin-right: 10px" href="index.php?controller=utentiController&action=viewLogin" class="btn btn-lg btn-primary">Sign in</a>

@@ -10,25 +10,31 @@ class WAF
     private $CookieCheckParam;
 
     /**
-     * Costruttore dell'oggetto WAF
+     * Costruttore dell'oggetto WAF  (Web Application Firewall)
      */
     function __construct()
     {
-        $this->IPHeader = "REMOTE_ADDR";            // Imposta l'Header per ottenere l'IP del client,
-        $this->CookieCheck = true;                  // per il controllo dei cookies (vedi funzione cookieCheck)
-        $this->CookieCheckParam = 'username';       // e i parametri da controllare salvati nel cookie
+        $this->start();
+    }
 
-        // return true;
+    /**
+     * Avvia il WAF: vengono eseguite le operazioni di controllo sull'array GET, POST e COOKIE
+     */
+    function start()
+    {
+        $this->checkGET();
+        $this->checkPOST();
+        $this->checkCOOKIE();
     }
 
     /**
      *  display a view for blocking requests
      *  @todo
      */
-    function vulnDetectedHTML($Method, $BadWord, $DisplayName, $TypeVuln)
+    function vulnDetectedHTML($inj_ID, $TypeVuln)
     {
-        header('HTTP/1.0 403 Forbidden');
-        die( include('./views/denyPage.php') );          // Blocca la richiesta e mostra la View
+        header('HTTP/1.1 403 Forbidden');
+        die(include('./views/denyPage.php'));          // Blocca la richiesta e mostra la View
     }
 
     /**
@@ -36,14 +42,13 @@ class WAF
      * 
      * @param String $Type Il tipo di iniezione da cui ricavare i valori
      * 
-     * @return Array:Bool Gli array di valori malevoli oppure false nel caso non fosse XSS o SQLi
+     * @return Array Gli array di valori malevoli
      */
     function getArray($type)
     {
         switch ($type) {
             case 'SQL':                 // Iniezioni SQL
                 return array(
-                    "'",
                     '´',
                     'SELECT FROM',
                     'SELECT * FROM',
@@ -101,10 +106,6 @@ class WAF
                 );
 
                 break;
-
-            default:
-                return false;
-                break;
         }
     }
 
@@ -112,15 +113,14 @@ class WAF
      * Controlla se c'è stato un tentativo di SQL Injection
      * 
      * @param String $Value Stringa da controllare
-     * @param String $Method Stringa che indica che array globale ha usato (_POST, _GET, _COOKIE)
-     * @param String $DisplayName Stringa che indica la chiave del valore associato
      */
-    function sqlCheck($Value, $Method, $DisplayName)
+    function sqlCheck($Value)
     {
         $BadWords = $this->getArray('SQL');
         foreach ($BadWords as $BadWord) {
             if (strpos(strtolower($Value), strtolower($BadWord)) !== false) {           // Controlla se non contiene vulnerabilità
-                $this->vulnDetectedHTML($Method, $BadWord, $DisplayName, 'SQL Injection');    // Richiama la View
+                $inj_ID = array_keys($BadWords, $BadWord)[0];
+                $this->vulnDetectedHTML($inj_ID, 'SQL Injection');    // Richiama la View
             }
         }
     }
@@ -129,225 +129,148 @@ class WAF
      * Controlla se c'è stato un tentativo di XSS Injection
      * 
      * @param String $Value Stringa da controllare
-     * @param String $Method Stringa che indica che array globale ha usato (_POST, _GET, _COOKIE)
-     * @param String $DisplayName Stringa che indica la chiave del valore associato
      */
-    function xssCheck($Value, $Method, $DisplayName)
+    function xssCheck($Value)
     {
         $BadWords = $this->getArray('XSS');
 
         foreach ($BadWords as $BadWord) {
             if (strpos(strtolower($Value), strtolower($BadWord)) !== false) {
-                $this->vulnDetectedHTML($Method, $BadWord, $DisplayName, 'XSS (Cross-Site-Scripting)');
+                $inj_ID = array_keys($BadWords, $BadWord)[0];
+                $this->vulnDetectedHTML($inj_ID, 'XSS (Cross-Site-Scripting)');     // I primi tre parametri funzono solo per creare un Block ID
             }
         }
     }
 
     /**
-     * Controlla se è una stringa HTML
-     * 
-     * @param String $string Stringa da controllare
+     * Controlla se c'è stato un tentativo di HTML injection
      */
-    function is_html($string)
+    function htmlCheck($Value)
     {
-        return $string != strip_tags($string) ? true : false;
-    }
-
-
-
-    /* RIPRENDERE DA QUI */
-
-
-
-
-    function santizeString($String)
-    {
-        $String = escapeshellarg($String);
-        $String = htmlentities($String);
-        $XSS = $this->getArray('XSS');
-        foreach ($XSS as $replace) {
-            $String = str_replace($replace, '', $String);
-        }
-        $SQL = $this->getArray('SQL');
-        foreach ($SQL as $replace) {
-            $String = str_replace($replace, '', $String);
-        }
-        return $String;
-    }
-
-    function htmlCheck($value, $Method, $DisplayName)
-    {
-        if ($this->is_html(strtolower($value)) !== false) {
-            // HTML Detected!
-            $this->vulnDetectedHTML($Method, "HTML CHARS", $DisplayName, 'XSS (HTML)');
+        if ( strpos(htmlentities($Value), '&') !== FALSE || strpos(htmlentities($Value), '&') === 0 ) {
+            $inj_ID = "99";
+            $this->vulnDetectedHTML($inj_ID, 'XSS (HTML)');
         }
     }
 
+    /**
+     * Per ogni elemento passato tramite GET, viene verificato che non sia un tentativo di SQL, XSS e HTML injections
+     */
     function checkGET()
     {
-        foreach ($_GET as $key => $value) {
+        foreach ($_GET as $value) {
             if (is_array($value)) {
-                foreach ($value as $sub_key => $sub_value) {
-                    $this->sqlCheck($sub_value, "_GET", $sub_key);
-                    $this->xssCheck($sub_value, "_GET", $sub_key);
-                    $this->htmlCheck($sub_value, "_GET", $sub_key);
+                foreach ($value as $sub_value) {
+                    $this->sqlCheck($sub_value);
+                    $this->xssCheck($sub_value);
+                    $this->htmlCheck($sub_value);
                 }
             } else {
-                $this->sqlCheck($value, "_GET", $key);
-                $this->xssCheck($value, "_GET", $key);
-                $this->htmlCheck($value, "_GET", $key);
+                $this->sqlCheck($value);
+                $this->xssCheck($value);
+                $this->htmlCheck($value);
             }
         }
     }
 
+    /**
+     * Per ogni elemento passato tramite POST, viene verificato che non sia un tentativo di SQL, XSS e HTML injections
+     */
     function checkPOST()
     {
-        foreach ($_POST as $key => $value) {
+        foreach ($_POST as $value) {
             if (is_array($value)) {
-                foreach ($value as $sub_key => $sub_value) {
-                    $this->sqlCheck($sub_value, "_POST", $sub_key);
-                    $this->xssCheck($sub_value, "_POST", $sub_key);
-                    $this->htmlCheck($sub_value, "_POST", $sub_key);
+                foreach ($value as $sub_value) {
+                    $this->sqlCheck($sub_value);
+                    $this->xssCheck($sub_value);
+                    $this->htmlCheck($sub_value);
                 }
             } else {
-                $this->sqlCheck($value, "_POST", $key);
-                $this->xssCheck($value, "_POST", $key);
-                $this->htmlCheck($value, "_POST", $key);
+                $this->sqlCheck($value);
+                $this->xssCheck($value);
+                $this->htmlCheck($value);
             }
         }
     }
 
+    /**
+     * Per ogni elemento passato tramite COOKIE, viene verificato che non sia un tentativo di SQL, XSS e HTML injections
+     */
     function checkCOOKIE()
     {
-        foreach ($_COOKIE as $key => $value) {
+        foreach ($_COOKIE as $value) {
             if (is_array($value)) {
-                foreach ($value as $sub_key => $sub_value) {
-                    $this->sqlCheck($sub_value, "_COOKIE", $sub_key);
-                    $this->xssCheck($sub_value, "_COOKIE", $sub_key);
-                    $this->htmlCheck($sub_value, "_COOKIE", $sub_key);
+                foreach ($value as $sub_value) {
+                    $this->sqlCheck($sub_value);
+                    $this->xssCheck($sub_value);
+                    $this->htmlCheck($sub_value);
                 }
             } else {
-                $this->sqlCheck($value, "_COOKIE", $key);
-                $this->xssCheck($value, "_COOKIE", $key);
-                $this->htmlCheck($value, "_COOKIE", $key);
+                $this->sqlCheck($value);
+                $this->xssCheck($value);
+                $this->htmlCheck($value);
             }
         }
     }
 
-    function gua()
-    {
-        if (isset($_SERVER['HTTP_USER_AGENT'])) {
-            return $_SERVER['HTTP_USER_AGENT'];
-        }
-        return md5(rand());
-    }
 
-    function cutGua($string)
-    {
-        $five = substr($string, 0, 4);
-        $last = substr($string, -3);
-        return md5($five . $last);
-    }
-
+    /**
+     * Recupera il token CSRF oppure ne crea uno nuovo se non esiste o se scaduto
+     * 
+     * @return String Un token generato casualmente e salvato in sessione
+     */
     function getCSRF()
     {
         if (isset($_SESSION['token'])) {
-            $token_age = time() - $_SESSION['token_time'];
-            if ($token_age <= 300) {    /* Less than five minutes has passed. */
+            $tokenTTL = time() - $_SESSION['token_time'];       // Ottiene il tempo di vita del token
+
+            if($tokenTTL <= 300) {    // Se il tempo di vita del token è meno di 5 minuti allora è ancora attivo
                 return $_SESSION['token'];
-            } else {
-                $token = md5(uniqid(rand(), TRUE));
-                $_SESSION['token'] = $token . "asd648" . $this->cutGua($this->gua());
+            } else {        // altrimenti ne viene generato un altro
+                $_SESSION['token'] = md5(bin2hex(random_bytes(32)));
                 $_SESSION['token_time'] = time();
-                return $_SESSION['token'];
             }
-        } else {
-            $token = md5(uniqid(rand(), TRUE));
-            $_SESSION['token'] = $token . "asd648" . $this->cutGua($this->gua());
+        } else {        // Altrimenti ne genera uno nuovo
+            $_SESSION['token'] = md5(bin2hex(random_bytes(32)));
             $_SESSION['token_time'] = time();
-            return $_SESSION['token'];
         }
+
+        return $_SESSION['token'];
     }
 
-    function verifyCSRF($Value)
+    /**
+     * Verifica che il token passato dal form di login sia quello salvato in sessione,
+     * questo per evitare operazioni indesiderate di Cross-Site Request Forgery (CSRF)
+     * 
+     * @param String $formToken Il token passato dal form della log-in
+     * 
+     * @return True Nel caso sia stato validato il token
+     * 
+     * @throws Exception Nel caso il token non sia stato validato, fosse scaduto oppure non fosse esistente in sessione
+     */
+    function verifyCSRF($formToken)
     {
         if (isset($_SESSION['token'])) {
-            $token_age = time() - $_SESSION['token_time'];
-            if ($token_age <= 300) {    /* Less than five minutes has passed. */
-                if ($Value == $_SESSION['token']) {
-                    $Explode = explode('asd648', $_SESSION['token']);
-                    $gua = $Explode[1];
-                    if ($this->cutGua($this->gua()) == $gua) {
-                        // Validated, Done!
-                        unset($_SESSION['token']);
-                        unset($_SESSION['token_time']);
-                        return true;
-                    }
+            $tokenTTL = time() - $_SESSION['token_time'];
+
+            if($tokenTTL <= 300) {
+                if ($formToken === $_SESSION['token']) {
                     unset($_SESSION['token']);
                     unset($_SESSION['token_time']);
-                    return false;
+
+                    return true;
+                } else {
+                    unset($_SESSION['token']);
+                    unset($_SESSION['token_time']);
+                    
+                    throw new \Exception('Token non valido');
                 }
             } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    function useCloudflare()
-    {
-        $this->IPHeader = "HTTP_CF_CONNECTING_IP";
-    }
-
-    function useBlazingfast()
-    {
-        $this->IPHeader = "X-Real-IP";
-    }
-
-    function customIPHeader($String = 'REMOTE_ADDR')
-    {
-        $this->IPHeader = $String;
-    }
-
-    function antiCookieSteal($listparams = 'username')
-    {
-        $this->CookieCheck = true;
-        $this->CookieCheckParam = $listparams;
-    }
-
-    function cookieCheck()
-    {
-        // Check Anti-Cookie steal trick.
-        if ($this->CookieCheck == true) {
-            // Check then.
-            if (isset($_SESSION)) { // Session set.
-                if (isset($_SESSION[$this->CookieCheckParam])) { // Logged.
-                    if (!(isset($_SESSION['xWAF-IP']))) {
-                        $_SESSION['xWAF-IP'] = $_SERVER[$this->IPHeader];
-                        return true;
-                    } else {
-                        if (!($_SESSION['xWAF-IP'] == $_SERVER[$this->IPHeader])) {
-                            // Changed IP.
-                            unset($_SESSION['xWAF-IP']);
-                            unset($_SESSION);
-                            @session_destroy();
-                            @session_start();
-                            return true;
-                        }
-                    }
-                }
+                throw new \Exception('Token scaduto');
             }
         }
+
+        throw new \Exception('Token non impostato');
     }
-    function start()
-    {
-        // @session_start();
-        @$this->checkGET();
-        @$this->checkPOST();
-        @$this->checkCOOKIE();
-        if ($this->CookieCheck == true) {
-            $this->cookieCheck();
-        }
-    }
+    
 }
