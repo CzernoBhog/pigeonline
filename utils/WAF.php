@@ -5,22 +5,18 @@ namespace utils;
 class WAF
 {
 
-    private $IPHeader;
-    private $CookieCheck;
-    private $CookieCheckParam;
-
     /**
      * Costruttore dell'oggetto WAF  (Web Application Firewall)
      */
     function __construct()
     {
-        $this->start();
+        $this->filter();
     }
 
     /**
-     * Avvia il WAF: vengono eseguite le operazioni di controllo sull'array GET, POST e COOKIE
+     * Inizia le operazioni di controllo sull'array GET, POST e COOKIE
      */
-    function start()
+    function filter()
     {
         $this->checkGET();
         $this->checkPOST();
@@ -28,13 +24,58 @@ class WAF
     }
 
     /**
-     *  display a view for blocking requests
-     *  @todo
+     * Mostra la View di blocco
+     * 
+     * @param String $inj_ID ID che identifica che BadWord è stata usata
+     * @param String $TypeVuln Stringa che identifica il tipo di vulnerabilità identificata
      */
     function vulnDetectedHTML($inj_ID, $TypeVuln)
     {
         header('HTTP/1.1 403 Forbidden');
         die(include('./views/denyPage.php'));          // Blocca la richiesta e mostra la View
+    }
+
+    /**
+     * Controlla se l'IP passato non sia nella blacklist
+     * 
+     * @param String $ipAddr Indirizzo IP da controllare
+     * 
+     * @return TRUE:FALSE True nel caso fosse nella blacklist, false altrimenti
+     */
+    function checkForeignIP($ipAddr)
+    {
+        $blacklist = fopen("blacklistAddr.txt", "r") or die("Errore nell'apertura del file");
+        $content = fread( $blacklist, filesize("blacklistAddr.txt") );
+        $blockedIPs = explode("\n", $content);
+
+        foreach ($blockedIPs as $ip) {      // COntrolla se è presente nella lista degli IP bloccati
+            if($ipAddr == $ip) {
+                return true;
+            }
+        }
+        
+        fclose($blacklist);
+        return false;
+    }
+
+    /**
+     * Inserisce l'IP passato nella blacklist
+     * 
+     * @param String $ipAddr Indirizzo IP da controllare
+     */
+    function blacklistIP($ipAddr)
+    {
+        $blacklist = fopen("blacklistAddr.txt", "a") or die("Errore nell'apertura del file");
+        $content = fwrite( $blacklist, $ipAddr . "\n" );    // Bisogna lasciare la "new line" nel file, altrimenti viene scritto tutto attaccato
+        fclose($blacklist);
+    }
+
+    /**
+     * Funzione per filtrare una stringa da caratteri speciali
+     * @todo
+     */
+    function clearInput($string) {
+        return preg_replace("[^\w\.@-]", "", $string);      // Pag.520
     }
 
     /**
@@ -44,8 +85,9 @@ class WAF
      * 
      * @return Array Gli array di valori malevoli
      */
-    function getArray($type)
+    private function getArray($type)
     {
+        // Alcuni possibili valori di iniezione
         switch ($type) {
             case 'SQL':                 // Iniezioni SQL
                 return array(
