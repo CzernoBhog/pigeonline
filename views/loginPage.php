@@ -43,14 +43,20 @@
         </header>
 
         <main role="main" class="inner cover">
-            <form class="form-signin">
+            <form class="form-signin" method="POST">
                 <input value="<?= $waf->getCSRF() ?>" hidden>
                 <img class="mb-4" src="./utils/imgs/logoProgetto.png" alt="" width="80" height="80">
                 <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-                <label for="inputEmail" class="sr-only">Username</label>
-                <input type="text" id="inputEmail" class="form-control" placeholder="Username" <?= $username != null ? "value='$username'" : null ?> required autofocus>
-                <label for="inputPassword" class="sr-only">Password</label>
-                <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                <label for="inputUsername" class="sr-only">Username</label>
+                <input type="text" id="inputUsername" class="form-control" placeholder="Username" <?= $username != null ? "value='$username'" : null ?> required autofocus>
+                <div class="input-group">
+                    <input placeholder="Password" id="inputPassword" type="password" name="password" class="form-control pwd" required>
+                    <span class="input-group-btn">
+                        <button style="height:46px" class="btn btn-default reveal" type="button">
+                            <i id="eye" class="fas fa-eye"></i>
+                        </button>
+                    </span>
+                </div>
                 <div class="mastfoot mt-auto">
                     <p>New user? <a href="index.php?controller=utentiController&action=viewRegistration">create an account</a></p>
                 </div>
@@ -70,6 +76,47 @@
     <!-- JS -->
 
     <?php require_once('./utils/includeBody.php'); ?>
+
+    <script>
+        $(".reveal").on('click', function() {
+            var $eye = $('#eye');
+            var $pwd = $(".pwd");
+
+            if ($pwd.attr('type') === 'password') {
+                $pwd.attr('type', 'text');
+                $eye.attr('class', 'fas fa-eye-slash');
+            } else {
+                $pwd.attr('type', 'password');
+                $eye.attr('class', 'fas fa-eye');
+            }
+        });
+
+        $("#inputUsername").blur(function() {
+            controlInputStringFormat('inputUsername', $("#inputUsername").val());
+        });
+
+        $("#inputPassword").blur(function() {
+            controlInputPasswordFormat('inputPassword', $("#inputPassword").val());
+        });
+
+        function controlInputStringFormat(field, string) {
+            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/;
+            if (format.test(string)) {
+                document.getElementById(field).setCustomValidity('Carattere non valido');
+            } else {
+                document.getElementById(field).setCustomValidity('');
+            }
+        }
+
+        function controlInputPasswordFormat(field, string) {
+            var format = /[ `&*()+\-=\[\]{};':"\\|,<>\/~]/;
+            if (format.test(string)) {
+                document.getElementById(field).setCustomValidity('Carattere non valido');
+            } else {
+                document.getElementById(field).setCustomValidity('');
+            }
+        }
+    </script>
 
     <!-- JS -->
 </body>

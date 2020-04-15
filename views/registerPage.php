@@ -43,7 +43,7 @@
         </header>
 
         <main role="main" class="inner cover">
-            <form class="form-signin" action="index.php" method="POST">
+            <form id="registration" class="form-signin" action="index.php" method="POST">
                 <input name="action" value="registraUtente" hidden>
 
                 <img class="mb-4" src="./utils/imgs/logoProgetto.png" alt="" width="80" height="80">
@@ -62,7 +62,7 @@
                 <input type="text" id="inputUsername" minlength="5" maxlength="15" class="form-control" placeholder="Username" name="username" required>
 
                 <div class="input-group">
-                    <input placeholder="Password" id="inputPassword" minlength="6" maxlength="15" type="password" minlength="8" maxlength="50" name="password" class="form-control pwd" required>
+                    <input placeholder="Password" id="inputPassword" minlength="6" maxlength="15" type="password" name="password" class="form-control pwd" required>
                     <span class="input-group-btn">
                         <button style="height:46px" class="btn btn-default reveal" type="button">
                             <i id="eye" class="fas fa-eye"></i>
@@ -129,6 +129,11 @@
 
         $("#inputUsername").blur(function() {
             var username = $("#inputUsername").val();
+            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+            if (format.test(username)) {
+                document.getElementById('inputUsername').setCustomValidity('Carattere non valido');
+                return;
+            }
             $.ajax({
                 type: 'post',
                 url: 'index.php',
@@ -150,6 +155,35 @@
             });
         });
 
+        $("#inputName").blur(function() {
+            controlInputStringFormat('inputName', $("#inputName").val());
+        });
+
+        $("#inputSurname").blur(function() {
+            controlInputStringFormat('inputSurname', $("#inputSurname").val());
+        });
+
+        $("#inputPassword").blur(function() {
+            controlInputPasswordFormat('inputPassword', $("#inputPassword").val());
+        });
+
+        function controlInputStringFormat(field, string) {
+            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/;
+            if (format.test(string)) {
+                document.getElementById(field).setCustomValidity('Carattere non valido');
+            } else {
+                document.getElementById(field).setCustomValidity('');
+            }
+        }
+
+        function controlInputPasswordFormat(field, string) {
+            var format = /[ `*()+\-=\[\]{};':"\\|,<>\/~]/;
+            if (format.test(string)) {
+                document.getElementById(field).setCustomValidity('Carattere non valido');
+            } else {
+                document.getElementById(field).setCustomValidity('');
+            }
+        }
     </script>
 
     <!-- JS -->
