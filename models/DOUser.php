@@ -15,8 +15,9 @@ class DOUser
     private $pathProfilePicture;
     private $activated;
     private $token;
+    private $userIp;
 
-    public function __construct($userId = null, $name = null, $surname = null, $email = null, $mood = null, $username = null, $password = null, $pathProfilePicture = null, $activated = null, $token = null)
+    public function __construct($userId = null, $name = null, $surname = null, $email = null, $mood = null, $username = null, $password = null, $pathProfilePicture = null, $activated = null, $token = null, $userIp = null)
     {
         if (func_get_args() != null) {
             $this->userId = $userId;
@@ -28,6 +29,7 @@ class DOUser
             $this->password = $password;
             $this->pathProfilePicture = $pathProfilePicture;
             $this->token = $token;
+            $this->userIp = $userIp;
         }
     }
 
@@ -57,7 +59,7 @@ class DOUser
     }
 
     function getSurname()
-    {  
+    {
         return $this->surname;
     }
 
@@ -125,9 +127,19 @@ class DOUser
     {
         $this->token = $token;
     }
-    
+
     function getToken()
     {
         return $this->token;
+    }
+
+    function setUserIp($userIp)
+    {
+        $this->userIp = $userIp;
+    }
+
+    function getUserIp()
+    {
+        return $this->userIp;
     }
 }

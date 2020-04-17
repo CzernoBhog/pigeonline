@@ -10,6 +10,20 @@ class WAF
      */
     function __construct()
     {
+        //controllo che l'ip non sia stato bloccato
+        $ip = empty($_SERVER['REMOTE_ADDR']) ? null : $_SERVER['REMOTE_ADDR']; //prendo l'ip del client
+        if (($blockedIP = $this->isAlreadyBlocked($ip)) !== FALSE) {
+            $inj_ID = $blockedIP->getInjId();
+            $TypeVuln = $blockedIP->getTypeVuln();
+            $time = strtotime(explode(" ", $blockedIP->getTimestamp())[1]);
+            $currentTimeBlock = time() - $time;
+            if ($currentTimeBlock >= 3600) {
+                \models\DAOBlockedIp::removeBlockedIp($ip);
+            } else {
+                die(include('./views/denyPage.php'));
+            }
+        }
+        $this->startSession();
         $this->filter();
     }
 
@@ -29,53 +43,71 @@ class WAF
      * @param String $inj_ID ID che identifica che BadWord è stata usata
      * @param String $TypeVuln Stringa che identifica il tipo di vulnerabilità identificata
      */
-    function vulnDetectedHTML($inj_ID, $TypeVuln)
+    private function showBlockPage($inj_ID, $TypeVuln)
     {
         header('HTTP/1.1 403 Forbidden');
+        //TODO blocco dell'indirizzo ip e, se presente, del profilo per un'ora
+        $ip = empty($_SERVER['REMOTE_ADDR']) ? null : $_SERVER['REMOTE_ADDR']; //prendo l'ip del client
+        try {
+            $userId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
+            $inj_ID = md5($inj_ID);     // Creazione Block ID
+            $blockedIp = new \models\DOBlockedIp($ip, $userId, $inj_ID, $TypeVuln);
+            \models\DAOBlockedIp::insertBlockedIp($blockedIp);
+            $currentTimeBlock = 3600;
+        } catch (\Exception $e) {
+            die(include('./views/denyPage.php'));
+        }
         die(include('./views/denyPage.php'));          // Blocca la richiesta e mostra la View
     }
 
     /**
-     * Controlla se l'IP passato non sia nella blacklist
+     * Funzione che controlla se un determinato ip è gia bloccato
      * 
-     * @param String $ipAddr Indirizzo IP da controllare
+     * @param String $ip Indirizzo IP da controllare
      * 
-     * @return TRUE:FALSE True nel caso fosse nella blacklist, false altrimenti
+     * @return TRUE:FALSE True se trova l'IP altrimenti False
      */
-    function checkForeignIP($ipAddr)
+    private function isAlreadyBlocked($ip)
     {
-        $blacklist = fopen("blacklistAddr.txt", "r") or die("Errore nell'apertura del file");
-        $content = fread( $blacklist, filesize("blacklistAddr.txt") );
-        $blockedIPs = explode("\n", $content);
-
-        foreach ($blockedIPs as $ip) {      // COntrolla se è presente nella lista degli IP bloccati
-            if($ipAddr == $ip) {
-                return true;
-            }
+        try {
+            $blockedIP = \models\DAOBlockedIp::getBlockedIp(array('ip' => $ip));
+        } catch (\Exception $e) {
+            return $e->getMessage();
         }
-        
-        fclose($blacklist);
+
+        if ($blockedIP !== null) {
+            return $blockedIP;
+        }
         return false;
     }
 
     /**
-     * Inserisce l'IP passato nella blacklist
-     * 
-     * @param String $ipAddr Indirizzo IP da controllare
+     * Funzione per filtrare una stringa da caratteri speciali (per la messaggistica)
+     * @todo
      */
-    function blacklistIP($ipAddr)
+    function clearInput($string)
     {
-        $blacklist = fopen("blacklistAddr.txt", "a") or die("Errore nell'apertura del file");
-        $content = fwrite( $blacklist, $ipAddr . "\n" );    // Bisogna lasciare la "new line" nel file, altrimenti viene scritto tutto attaccato
-        fclose($blacklist);
+        return preg_replace("[^\w\.@-]", "", $string);      // Pag.520
     }
 
     /**
-     * Funzione per filtrare una stringa da caratteri speciali
+     * Inizializza la sessione oppure ricrea un nuovo ID di sessione per quelle vecchie
+     * 
      * @todo
      */
-    function clearInput($string) {
-        return preg_replace("[^\w\.@-]", "", $string);      // Pag.520
+    function startSession()
+    {
+        if (session_status() == PHP_SESSION_NONE) {     //se la sessione non è avviata la avvio
+            session_start();
+        } else {
+            if (!empty($_SESSION['sessionTTL']) && $_SESSION['sessionTTL'] < time() - 600) {        // se la sessione 
+                var_dump(session_id());
+                echo "<br>";
+                var_dump(session_regenerate_id());
+                echo "<br><br>Parmas Session<br>";
+                var_dump($_SESSION);
+            }
+        }
     }
 
     /**
@@ -162,7 +194,7 @@ class WAF
         foreach ($BadWords as $BadWord) {
             if (strpos(strtolower($Value), strtolower($BadWord)) !== false) {           // Controlla se non contiene vulnerabilità
                 $inj_ID = array_keys($BadWords, $BadWord)[0];
-                $this->vulnDetectedHTML($inj_ID, 'SQL Injection');    // Richiama la View
+                $this->showBlockPage($inj_ID, 'SQL Injection');    // Richiama la View
             }
         }
     }
@@ -179,7 +211,7 @@ class WAF
         foreach ($BadWords as $BadWord) {
             if (strpos(strtolower($Value), strtolower($BadWord)) !== false) {
                 $inj_ID = array_keys($BadWords, $BadWord)[0];
-                $this->vulnDetectedHTML($inj_ID, 'XSS (Cross-Site-Scripting)');     // I primi tre parametri funzono solo per creare un Block ID
+                $this->showBlockPage($inj_ID, 'XSS (Cross-Site-Scripting)');     // I primi tre parametri funzono solo per creare un Block ID
             }
         }
     }
@@ -189,9 +221,9 @@ class WAF
      */
     function htmlCheck($Value)
     {
-        if ( strpos(htmlentities($Value), '&') !== FALSE || strpos(htmlentities($Value), '&') === 0 ) {
+        if (strpos(htmlentities($Value), '&') !== FALSE || strpos(htmlentities($Value), '&') === 0) {
             $inj_ID = "99";
-            $this->vulnDetectedHTML($inj_ID, 'XSS (HTML)');
+            $this->showBlockPage($inj_ID, 'XSS (HTML)');
         }
     }
 
@@ -261,12 +293,12 @@ class WAF
      * 
      * @return String Un token generato casualmente e salvato in sessione
      */
-    function getCSRF()
+    static function getCSRF()
     {
         if (isset($_SESSION['token'])) {
             $tokenTTL = time() - $_SESSION['token_time'];       // Ottiene il tempo di vita del token
 
-            if($tokenTTL <= 300) {    // Se il tempo di vita del token è meno di 5 minuti allora è ancora attivo
+            if ($tokenTTL <= 300) {    // Se il tempo di vita del token è meno di 5 minuti allora è ancora attivo
                 return $_SESSION['token'];
             } else {        // altrimenti ne viene generato un altro
                 $_SESSION['token'] = md5(bin2hex(random_bytes(32)));
@@ -290,29 +322,26 @@ class WAF
      * 
      * @throws Exception Nel caso il token non sia stato validato, fosse scaduto oppure non fosse esistente in sessione
      */
-    function verifyCSRF($formToken)
+    static function verifyCSRF($formToken)
     {
         if (isset($_SESSION['token'])) {
             $tokenTTL = time() - $_SESSION['token_time'];
 
-            if($tokenTTL <= 300) {
+            if ($tokenTTL <= 300) {      // Controlla il Time To Live del token (5 Minuti)
                 if ($formToken === $_SESSION['token']) {
                     unset($_SESSION['token']);
                     unset($_SESSION['token_time']);
-
                     return true;
                 } else {
                     unset($_SESSION['token']);
                     unset($_SESSION['token_time']);
-                    
+
                     throw new \Exception('Token non valido');
                 }
             } else {
                 throw new \Exception('Token scaduto');
             }
         }
-
         throw new \Exception('Token non impostato');
     }
-    
 }

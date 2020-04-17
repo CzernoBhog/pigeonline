@@ -44,11 +44,12 @@
 
         <main role="main" class="inner cover">
             <form class="form-signin" method="POST">
-                <input value="<?= $waf->getCSRF() ?>" hidden>
+                <input name="action" value="login" hidden>
+                <input name="token" value="<?= \utils\WAF::getCSRF() ?>" hidden>
                 <img class="mb-4" src="./utils/imgs/logoProgetto.png" alt="" width="80" height="80">
                 <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
                 <label for="inputUsername" class="sr-only">Username</label>
-                <input type="text" id="inputUsername" class="form-control" placeholder="Username" <?= $username != null ? "value='$username'" : null ?> required autofocus>
+                <input name="username" type="text" id="inputUsername" class="form-control" placeholder="Username" <?= $username != null ? "value='$username'" : null ?> required autofocus>
                 <div class="input-group">
                     <input placeholder="Password" id="inputPassword" type="password" name="password" class="form-control pwd" required>
                     <span class="input-group-btn">

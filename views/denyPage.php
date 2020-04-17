@@ -57,13 +57,14 @@
             <h4>Web Application Firewall</h4>
             <p class="lead">If you think this block is an error please <a href="mailto:pigeonline.project@gmail.com">contact us</a> and make sure to include the block
                 details (displayed in the box below), so we can assist you in troubleshooting the issue.</p>
+            <p>You were stuck for an hour, time remaining: <b><?= $currentTimeBlock === 3600 ? date('H:i:s', 3600 - $currentTimeBlock) : date('H:i:s', 0 - $currentTimeBlock) ?></b></p>
             <br>
             <h2>Block details:</h2>
             <div class="table-wrapper-scroll-y my-custom-scrollbar">
                 <table class="table table-striped" style="text-align: left">
                     <tr>
                         <td>Your IP:</td>
-                        <td><span><?= $_SERVER["REMOTE_ADDR"] ?></span></td>
+                        <td><span><?= $ip ?></span></td>
                     </tr>
                     <tr>
                         <td>URL:</td>
@@ -80,8 +81,7 @@
                         <td>Block ID:</td>
                         <td>
                             <span>
-                                <!-- CREAZIONE DEL BLOCK ID  -->
-                                <?= md5($inj_ID) ?>
+                                <?= $inj_ID ?>
                             </span>
                         </td>
                     </tr>
@@ -90,8 +90,8 @@
                         <td><span>An attempted <?= $TypeVuln ?> was detected and blocked.</span></td>
                     </tr>
                     <tr>
-                        <td>Time:</td>
-                        <td><span><?= date('Y-m-d H:i:s') ?></span></td>
+                        <td>Time remaining:</td><!-- non si capisce perchè da sempre 2 o 1 ore/a -->
+                        <td><span><?= $currentTimeBlock === 3600 ? date('H:i:s', 3600 - $currentTimeBlock) : date('H:i:s', 0 - $currentTimeBlock) ?></span></td>
                     </tr>
                 </table>
             </div>

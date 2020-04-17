@@ -35,7 +35,7 @@ class DAOUser
     public static function insertUser($user)
     {
         $conn = \utils\Database::connect();
-        $query = 'INSERT INTO user (username, password, name, surname, email, token) VALUES(:un, :pw, :n, :s, :e, :t)';
+        $query = 'INSERT INTO user (username, password, name, surname, email, token, userIp) VALUES(:un, :pw, :n, :s, :e, :t, :ip)';
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":un", $user->getUsername());
@@ -44,8 +44,8 @@ class DAOUser
             $stmt->bindValue(":s", $user->getSurname());
             $stmt->bindValue(":e", $user->getEmail());
             $stmt->bindValue(":t", $user->getToken());
-            $result = $stmt->execute();
-            return $result;
+            $stmt->bindValue(":ip", $user->getUserIp());
+            return $stmt->execute();
         } catch (\Exception | \PDOException $e) {
             throw new \Exception('Errore inserimento utente');
         }
@@ -54,7 +54,7 @@ class DAOUser
     public static function updateUtente($user)
     {
         $conn = \utils\Database::connect();
-        $query = 'UPDATE user SET username=:un, password=:pw, name=:n, surname=:s, email=:e, mood=:m, pathProfilePicture=:ppp, activated=:a WHERE userId = :id';
+        $query = 'UPDATE user SET username=:un, password=:pw, name=:n, surname=:s, email=:e, mood=:m, pathProfilePicture=:ppp, activated=:a, userIp=:ip WHERE userId = :id';
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":id", $user->getUserId());
@@ -66,6 +66,7 @@ class DAOUser
             $stmt->bindValue(":m", $user->getMood());
             $stmt->bindValue(":ppp", $user->getPathProfilePicture());
             $stmt->bindValue(":a", $user->getActivated());
+            $stmt->bindValue(":ip", $user->getUserIp());
             $result = $stmt->execute();
             return $result;
         } catch (\Exception | \PDOException $e) {

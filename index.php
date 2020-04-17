@@ -1,10 +1,10 @@
 <?php
 
 require_once('utils/autoload.php');
-
-if (session_status() == PHP_SESSION_NONE) { //se la sessione non è avviata la avvio
+// here
+/* if (session_status() == PHP_SESSION_NONE) { //se la sessione non è avviata la avvio
     session_start();
-}
+} */
 
 $waf = new utils\WAF();
 //$waf->getCSRF();
