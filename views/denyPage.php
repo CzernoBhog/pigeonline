@@ -38,6 +38,11 @@
 
 <body class="text-center">
 
+    <?php
+    $timeRemaining = $currentTimeBlock === 3600 ? 3600 - $currentTimeBlock : 0 - $currentTimeBlock;
+    $futureDate = date('Y-m-d H:i:s', 3600 + strtotime(date('Y-m-d H:i:s')) + $timeRemaining);
+    ?>
+
     <!-- CONTENUTO DELLA PAGINA ... -->
 
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
@@ -57,7 +62,7 @@
             <h4>Web Application Firewall</h4>
             <p class="lead">If you think this block is an error please <a href="mailto:pigeonline.project@gmail.com">contact us</a> and make sure to include the block
                 details (displayed in the box below), so we can assist you in troubleshooting the issue.</p>
-            <p>You were stuck for an hour, time remaining: <b><?= $currentTimeBlock === 3600 ? date('H:i:s', 3600 - $currentTimeBlock) : date('H:i:s', 0 - $currentTimeBlock) ?></b></p>
+            <p>You were blocked for an hour, time remaining: <b id='demo'></b></p>
             <br>
             <h2>Block details:</h2>
             <div class="table-wrapper-scroll-y my-custom-scrollbar">
@@ -89,10 +94,6 @@
                         <td>Block reason:</td>
                         <td><span>An attempted <?= $TypeVuln ?> was detected and blocked.</span></td>
                     </tr>
-                    <tr>
-                        <td>Time remaining:</td><!-- non si capisce perchè da sempre 2 o 1 ore/a -->
-                        <td><span><?= $currentTimeBlock === 3600 ? date('H:i:s', 3600 - $currentTimeBlock) : date('H:i:s', 0 - $currentTimeBlock) ?></span></td>
-                    </tr>
                 </table>
             </div>
         </main>
@@ -109,6 +110,35 @@
     <!-- JS -->
 
     <?php require_once('./utils/includeBody.php'); ?>
+
+    <script>
+        var countDownDate = new Date('<?= $futureDate ?>').getTime();
+
+        // Update the count down every 1 second
+        var x = setInterval(function() {
+
+            // Get today's date and time
+            var now = new Date().getTime();
+
+            // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result in the element with id="demo"
+            document.getElementById("demo").innerHTML = minutes + "m " + seconds + "s ";
+
+            // If the count down is finished, write some text
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("demo").innerHTML = "EXPIRED, <a href='index.php'>go to initial page.</a>";
+            }
+        }, 1000);
+    </script>
 
     <!-- JS -->
 </body>

@@ -10,20 +10,9 @@ class WAF
      */
     function __construct()
     {
-        //controllo che l'ip non sia stato bloccato
-        $ip = empty($_SERVER['REMOTE_ADDR']) ? null : $_SERVER['REMOTE_ADDR']; //prendo l'ip del client
-        if (($blockedIP = $this->isAlreadyBlocked($ip)) !== FALSE) {
-            $inj_ID = $blockedIP->getInjId();
-            $TypeVuln = $blockedIP->getTypeVuln();
-            $time = strtotime(explode(" ", $blockedIP->getTimestamp())[1]);
-            $currentTimeBlock = time() - $time;
-            if ($currentTimeBlock >= 3600) {
-                \models\DAOBlockedIp::removeBlockedIp($ip);
-            } else {
-                die(include('./views/denyPage.php'));
-            }
-        }
-        $this->startSession();
+        session_start();        // Sistemare Sessione
+        $this->isBlockedIP();
+        //$this->startSession();
         $this->filter();
     }
 
@@ -35,6 +24,15 @@ class WAF
         $this->checkGET();
         $this->checkPOST();
         $this->checkCOOKIE();
+    }
+
+    /**
+     * Funzione per filtrare una stringa da caratteri speciali (per la messaggistica)
+     * @todo
+     */
+    function clearInput($string)
+    {
+        return preg_replace("[^\w\.@-]", "", $string);      // Pag.520
     }
 
     /**
@@ -61,33 +59,35 @@ class WAF
     }
 
     /**
-     * Funzione che controlla se un determinato ip è gia bloccato
-     * 
-     * @param String $ip Indirizzo IP da controllare
-     * 
-     * @return TRUE:FALSE True se trova l'IP altrimenti False
+     * Controlla se l'IP è bloccato e che l'utente registrato sia bloccato
      */
-    private function isAlreadyBlocked($ip)
+    private function isBlockedIP()
     {
         try {
-            $blockedIP = \models\DAOBlockedIp::getBlockedIp(array('ip' => $ip));
+            $ip = empty($_SERVER['REMOTE_ADDR']) ? null : $_SERVER['REMOTE_ADDR'];
+            // l'operatore "??" assegna la prima espressione se esiste ed è diversa da NULL e fa la stessa cosa per la seconda, nel caso la prima fosse NULL
+            $blocked = \models\DAOBlockedIp::getBlockedIp(array('ip' => $ip)) ?? ( isset($_SESSION['id']) ? \models\DAOBlockedIp::getBlockedIp(array('userId' => $_SESSION['id'])) : null );
+
+            if ($blocked !== NULL) {
+                $inj_ID = $blocked->getInjId();
+                $TypeVuln = $blocked->getTypeVuln();
+
+                // Converte le stringhe ottenute in Timestamps
+                $blockDate = strtotime($blocked->getTimestamp());
+                $currentDate = strtotime(date('Y-m-d H:i:s'));
+
+                // Calcola la differenza           
+                $currentTimeBlock = $currentDate - $blockDate;
+                if ($currentTimeBlock >= 3600) {
+                    \models\DAOBlockedIp::removeBlockedIp($ip);
+                } else {
+                    die(include('./views/denyPage.php'));
+                }
+            }
         } catch (\Exception $e) {
-            return $e->getMessage();
+            $message = "Qualcosa è andato storto, riprova più tardi";
+            die(include('./view/messagePage.php'));
         }
-
-        if ($blockedIP !== null) {
-            return $blockedIP;
-        }
-        return false;
-    }
-
-    /**
-     * Funzione per filtrare una stringa da caratteri speciali (per la messaggistica)
-     * @todo
-     */
-    function clearInput($string)
-    {
-        return preg_replace("[^\w\.@-]", "", $string);      // Pag.520
     }
 
     /**
@@ -139,13 +139,13 @@ class WAF
                     'concat(',
                     'OR boolean',
                     'or HAVING',
-                    "OR '1", # Famous skid Poc. 
+                    "OR '1",
                     '0x3c62723e3c62723e3c62723e',
                     '0x3c696d67207372633d22',
                     '+#1q%0AuNiOn all#qa%0A#%0AsEleCt',
                     'unhex(hex(Concat(',
                     'Table_schema,0x3e,',
-                    '0x00', // \0  [This is a zero, not the letter O]
+                    '0x00', // \0
                     '0x08', // \b
                     '0x09', // \t
                     '0x0a', // \n
