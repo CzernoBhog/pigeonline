@@ -6,18 +6,18 @@ class WAF
 {
 
     /**
-     * Costruttore dell'oggetto WAF  (Web Application Firewall)
+     * Costruttore dell'oggetto WAF  (Web Application Firewall): Avvia il WAF inizializzando la sessione,
+     * controllando se l'IP è bloccato o meno e controllando i dati ricevuti
      */
     function __construct()
     {
-        session_start();        // Sistemare Sessione
+        $this->startSession();
         $this->isBlockedIP();
-        //$this->startSession();
         $this->filter();
     }
 
     /**
-     * Inizia le operazioni di controllo sull'array GET, POST e COOKIE
+     * Inizia le operazioni di controllo sull'array GET, POST e COOKIE di PHP
      */
     function filter()
     {
@@ -27,12 +27,20 @@ class WAF
     }
 
     /**
-     * Funzione per filtrare una stringa da caratteri speciali (per la messaggistica)
-     * @todo
+     * Inizializza la sessione oppure ricrea un nuovo ID di sessione per quelle più vecchie di 10 minuti
      */
-    function clearInput($string)
+    function startSession()
     {
-        return preg_replace("[^\w\.@-]", "", $string);      // Pag.520
+        if (session_status() == PHP_SESSION_NONE) {     //se la sessione non è avviata la avvio
+            session_start();
+        }
+
+        // se la sessione è vecchia, rigenera il suo ID     (dopo 10 minuti)
+        if (!empty($_SESSION['sessionTTL']) && $_SESSION['sessionTTL'] < strtotime("-10 minutes", time())) {
+            session_regenerate_id();
+            $_SESSION['sessionTTL'] = time();
+        }
+
     }
 
     /**
@@ -66,7 +74,7 @@ class WAF
         try {
             $ip = empty($_SERVER['REMOTE_ADDR']) ? null : $_SERVER['REMOTE_ADDR'];
             // l'operatore "??" assegna la prima espressione se esiste ed è diversa da NULL e fa la stessa cosa per la seconda, nel caso la prima fosse NULL
-            $blocked = \models\DAOBlockedIp::getBlockedIp(array('ip' => $ip)) ?? ( isset($_SESSION['id']) ? \models\DAOBlockedIp::getBlockedIp(array('userId' => $_SESSION['id'])) : null );
+            $blocked = \models\DAOBlockedIp::getBlockedIp(array('ip' => $ip)) ?? (isset($_SESSION['id']) ? \models\DAOBlockedIp::getBlockedIp(array('userId' => $_SESSION['id'])) : null);
 
             if ($blocked !== NULL) {
                 $inj_ID = $blocked->getInjId();
@@ -87,26 +95,6 @@ class WAF
         } catch (\Exception $e) {
             $message = "Qualcosa è andato storto, riprova più tardi";
             die(include('./view/messagePage.php'));
-        }
-    }
-
-    /**
-     * Inizializza la sessione oppure ricrea un nuovo ID di sessione per quelle vecchie
-     * 
-     * @todo
-     */
-    function startSession()
-    {
-        if (session_status() == PHP_SESSION_NONE) {     //se la sessione non è avviata la avvio
-            session_start();
-        } else {
-            if (!empty($_SESSION['sessionTTL']) && $_SESSION['sessionTTL'] < time() - 600) {        // se la sessione 
-                var_dump(session_id());
-                echo "<br>";
-                var_dump(session_regenerate_id());
-                echo "<br><br>Parmas Session<br>";
-                var_dump($_SESSION);
-            }
         }
     }
 

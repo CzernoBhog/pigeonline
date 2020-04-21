@@ -380,7 +380,7 @@
                                                 <hr>
                                             </div>
                                             <h3></h3>
-                                            <p>Hi <?= $username ?>,</p>
+                                            <p style='font-size:20px;'>Hi <b><?= $username ?></b>,</p>
                                             <br>
                                             <?= $message ?>
                                         </td>

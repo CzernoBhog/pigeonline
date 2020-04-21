@@ -9,11 +9,15 @@ class utentiController
 
     /**
      * Esegue la login dell'utente
-     * 
-     * @return Void
      */
     public function login()
     {
+        //se la sessione ha id settato allora l'utente è gia loggato
+        if (isset($_SESSION['id'])) {
+            $this->viewHomePage();
+            return;
+        }
+
         try {
             $user = \models\DAOUser::getUser(array('username' => $_POST['username']));
         } catch (\Exception $e) {
@@ -28,9 +32,7 @@ class utentiController
                     \utils\WAF::verifyCSRF($_POST['token']); // lancia una serie di eccezzioni se: non è settato il token, se è scaduto o se non combacia
                     $hashedPws = $user->getPassword();
                     if (password_verify($_POST['password'], $hashedPws)) {
-                        // Generare un ID di sessione randomico, rigenerare un nuovo ID di sessione (vedere quando farlo), controllare se la sessione riguarda in certo IP (magari avvisare se è lui o no)
-                        //provo a vedere se va il login
-                        $_SESSION['id'] = $user->getUserId(); //TODO pensarci bene
+                        $_SESSION['id'] = $user->getUserId();
                         $_SESSION['sessionTTL'] = time();
                         $this->viewHomePage();
 
@@ -43,17 +45,21 @@ class utentiController
                             $country  = $json['country'];
                             $region   = $json['region'];
                             $city     = $json['city'];
-                            $message = "<p style='font-size:25px;'>È stato eseguito un nuovo accesso al tuo account da:</p><br>
-                            <ul><li>Stato: $country</li><li>Regione: $region</li><li>Città: $city</li></ul><br>
-                            <p>Se non sei stato tu ad effettuare l'accesso ti consigliamo di cambiare password al più presto.<br>Cordiali saluti, lo staff</p>";
-
+                            $message  = "<p style='font-size:25px;'>È stato eseguito un nuovo accesso al tuo account da:</p>
+                            <ul style='font-size:20px;'><li>Stato: <b>$country</b></li><li>Regione: <b>$region</b></li><li>Città: <b>$city</b></li></ul><br>
+                            <p>Se non sei stato tu ad effettuare l'accesso ti consigliamo di cambiare password al più presto.<br>Cordiali saluti, lo staff :)</p>";
+                            
+                            //$success = \utils\MailPHP::sendMail($user->getEmail(), $user->getUsername(), "Nuovo accesso a PigeOnLine", $message);
+                            /*if (!$success) {
+                                var_dump(error_get_last()['message']);
+                            }*/
+                            //$mail->invioMail(trim($_POST['email']), $user->getUsername(), $message, "Nuovo accesso a pigeOnLine");
                             $mail->invioMail(trim($_POST['email']), $user->getUsername(), $message, "Nuovo accesso a pigeOnLine");
                         }
 
                         return;
                     }
                 } catch (\Exception $e) {        // Eccezzione lanciata dal metodo verifyCSRF()
-                    //a, non so perchèdesso no guarda, entro su verify
                     $message = 'Login fallito, riprova a loggare';
                     $this->viewMessagePage($message);
                     return;
@@ -68,14 +74,27 @@ class utentiController
         $this->viewMessagePage($message);
     }
 
+    /**
+     * Visualizza la Home Page
+     */
     public function viewHomePage()
     {
-        //TODO controllo se utente è salavto nelle sessioni
+        // Riporta l'utente alla FirstPage nel caso non fosse autenticato
+        if (empty($_SESSION)) {
+            $this->viewFirstPage();
+            exit;
+        }
+
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+
         include('views/homePage.php');
     }
 
+    /**
+     * Visualizza la prima pagina e distrugge la sessione se esiste
+     */
     public function viewFirstPage()
-    {  //default action
+    {   //default action
         if (session_status() == 2) {
             session_destroy();
         }
@@ -83,16 +102,25 @@ class utentiController
         include('views/firstPage.php');
     }
 
+    /**
+     * Visualizza la View di Login
+     */
     public function viewLogin($username = null)
     {
         include('views/loginPage.php');
     }
 
+    /**
+     * Visualizza la View di Registrazione
+     */
     public function viewRegistration()
     {
         include('views/registerPage.php');
     }
 
+    /**
+     * Controlla che l'email non sia già stata usata o che sia valida
+     */
     public function controlloEmail()
     {   //richiamato da un ajax controlla che in fase di registrazione la mail sia valida e non sia stata già utilizzata
         if (filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
@@ -111,11 +139,19 @@ class utentiController
         }
     }
 
+    /**
+     * Controlla che l'Username non sia già stato usato
+     */
     public function controlloUsername()
     {    //richiamato da ajax controlla che in fase di registrazione l'username non sia già stato utilizzato
         echo \models\DAOUser::getUser(array('username' => $_POST['username'])) != null ? 'Username già in uso' : 'true';
     }
 
+    /**
+     * Registra l'utente iniziando un processo di transazione e manda un'email necessaria per l'attivazione dell'account
+     * 
+     * @throws Exception $e Nel caso la registrazione sia fallita, fa anche il rollback della transazione
+     */
     public function registraUtente()
     {
         \utils\Transaction::beginTransaction();
@@ -133,7 +169,8 @@ class utentiController
             $newUserDetails = new \models\DOUserDetails(null, 0, date('Y-m-d H:i:s'), null, $id);
             \models\DAOUserDetails::insertUserDetails($newUserDetails);
 
-            $linkAttivazione = "http://localhost:8080/esercizi/pigeonline/index.php?controller=utentiController&action=confermaRegistrazione&id=$id&token=$token";
+            $host  = $_SERVER['HTTP_HOST'];
+            $linkAttivazione = "http://$host:8080/index.php?controller=utentiController&action=confermaRegistrazione&id=$id&token=$token";
 
             //invio mail autenticazione
             $mail = new \utils\Mail();
@@ -159,6 +196,7 @@ class utentiController
             <br>
             <p>Grazie per esserti iscritto alla nostra piattaforma :)</p>";
 
+            //\utils\MailPHP::sendMail(trim($_POST['email']), $newUser->getUsername(), "Attivazione dell'account", $message);
             $mail->invioMail(trim($_POST['email']), $newUser->getUsername(), $message, "Attivazione dell'account");
         } catch (\Exception $e) {
             \utils\Transaction::rollBackTransaction();
@@ -172,12 +210,19 @@ class utentiController
         $this->viewMessagePage($message);
     }
 
-    //pagina default per visualizzare messaggi di errore o di conferma
+    /**
+     * Pagina default per visualizzare messaggi di errore o di conferma
+     */
     public function viewMessagePage($message)
     {
         include('./views/messagePage.php');
     }
 
+    /**
+     * Conferma la registrazione dell'utente abilitandolo all'uso del sito
+     * 
+     * @throws Exception $e In caso di errore imprevisto
+     */
     public function confermaRegistrazione()
     { //conferma account tramite link sulla mail
         $user = \models\DAOUser::getUser(array('userId' => $_GET['id']));

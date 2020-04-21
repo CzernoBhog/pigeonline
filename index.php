@@ -1,14 +1,8 @@
 <?php
 
 require_once('utils/autoload.php');
-// here
-/* if (session_status() == PHP_SESSION_NONE) { //se la sessione non è avviata la avvio
-    session_start();
-} */
 
-$waf = new utils\WAF();
-//$waf->getCSRF();
-//$waf->start();  //controllo con WAF che non si tenti di passare parametri/cookie malevoli
+$waf = new utils\WAF();     // Fa partire il Web Application Firewall
 
 if (isset($_REQUEST['controller'])) {
     $controller = 'controllers\\' . $_REQUEST['controller'];

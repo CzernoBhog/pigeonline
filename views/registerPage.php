@@ -106,6 +106,11 @@
 
         $("#inputEmail").blur(function() {
             var email = $("#inputEmail").val();
+            var format = /[ <>]/;
+            if (format.test(email)) {
+                document.getElementById('inputEmail').setCustomValidity('Carattere non valido');
+                return;
+            }
             $.ajax({
                 type: 'post',
                 url: 'index.php',
