@@ -93,7 +93,7 @@ body {
 
 @media screen and (min-width: 768px) {
     .page-wrapper.toggled .page-content {
-        padding-left: 300px;
+        padding-left: 260px;
     }
 }
 
@@ -479,7 +479,14 @@ body {
 
 .pre-scrollable {
     overflow-y: scroll;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    min-height: 100px;
+}
+
+.search-scrollable {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    max-height: 150px;
 }
 
 .chat-img{

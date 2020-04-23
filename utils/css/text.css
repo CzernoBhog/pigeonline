@@ -1,0 +1,38 @@
+.post-header {
+    margin-bottom: 30px;
+    position: relative;
+}
+
+h1 {
+    color: #292929;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 46px;
+    font-weight: 100;
+    line-height: 50px;
+    letter-spacing: 1px;
+    padding: 0 0 40px;
+    border-bottom: double #555;
+}
+
+p {
+    color: #292929;
+    font-family: 'Verdana', sans-serif;
+    font-size: 16px;
+    line-height: 26px;
+    text-indent: 30px;
+    margin: 0;
+}
+
+.date {
+    color: #bbc3c8;
+    background: #292929;
+    display: inline-block;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 22px;
+    margin: 0 0 20px 18px;
+    padding: 10px 12px 8px;
+    position: absolute;
+    bottom: -36px;
+}

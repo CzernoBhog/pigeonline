@@ -12,7 +12,7 @@
     <div class="sidebar-search">
         <div>
             <div class="input-group">
-                <input type="text" class="form-control search-menu" placeholder="Search...">
+                <input id="searchBar" type="text" class="form-control search-menu" placeholder="Search...">
                 <div class="input-group-append">
                     <span class="input-group-text">
                         <i class="fa fa-search" aria-hidden="true"></i>
@@ -28,7 +28,7 @@
                 <span>GENERAL</span>
             </li>
             <li>
-                <a href="#">
+                <a href="index.php?action=viewFriendsPage">
                     <i class="fa fa-user-friends fa-pull-left"></i>
                     <span class="fa-pull-left" style="margin-top: 3px">Friends</span>
                 </a>
@@ -36,7 +36,7 @@
             <li>
                 <a href="#">
                     <i class="fa fa-cloud fa-pull-left"></i>
-                    <span class="fa-pull-left" style="margin-top: 3px">Messages Cloud</span>
+                    <span class="fa-pull-left" style="margin-top: 3px">Messages Cloud (D)</span>
                 </a>
             </li>
         </ul>
@@ -49,86 +49,86 @@
             </div>
             <div class="pre-scrollable" >
                 <li>
-                    <a href="#" style="padding-top: 0">
+                    <a href="index.php?action=viewChatPage&id=0" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Vego</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Online</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">vian</span>
                         <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Vego</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Online</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
                         <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Vego</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Online</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
                         <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Vego</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Online</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
                         <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
+                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
                         <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
                     </a>
                 </li>

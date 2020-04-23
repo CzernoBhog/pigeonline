@@ -79,15 +79,44 @@ class utentiController
      */
     public function viewHomePage()
     {
-        // Riporta l'utente alla FirstPage nel caso non fosse autenticato
-        if (empty($_SESSION)) {
-            $this->viewFirstPage();
-            exit;
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        include('views/homePage.php');
+    }
+
+    /**
+     * Visualizza la chat selezionata
+     */
+    public function viewChatPage()
+    {
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        include('views/chatPage.php');
+    }
+
+    /**
+     * Visualizza la pagina di gestione amici
+     */
+    public function viewFriendsPage()
+    {
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        //recupero gli amici dell'utente
+        $detailsFriends = \models\DAOFriends::getFriendsDetails($user->getUserId());
+
+        include('views/friendsPage.php');
+    }
+
+    /**
+     * restituisce una lista di utenti (solo id e username per sicurezza) filtrati con like in base a username = $_POST['filter];
+     */
+    public function searchUser()
+    {
+        if($_POST['filter'] === ""){
+            echo 'null';
+            return;
         }
 
-        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        $users = \models\DAOUser::getUser(array('username' =>  $_POST['filter'] . '%', 'activated' => '1'), FALSE, TRUE, 'username', 'userId, username', TRUE);
 
-        include('views/homePage.php');
+        echo json_encode($users);
     }
 
     /**
@@ -99,7 +128,7 @@ class utentiController
             session_destroy();
         }
 
-        include('views/firstPage.php');
+        include('views/firstPage.php'); 
     }
 
     /**
@@ -170,7 +199,7 @@ class utentiController
             \models\DAOUserDetails::insertUserDetails($newUserDetails);
 
             $host  = $_SERVER['HTTP_HOST'];
-            $linkAttivazione = "http://$host:8080/index.php?controller=utentiController&action=confermaRegistrazione&id=$id&token=$token";
+            $linkAttivazione = "http://$host/esercizi/pigeonline/index.php?controller=utentiController&action=confermaRegistrazione&id=$id&token=$token";
 
             //invio mail autenticazione
             $mail = new \utils\Mail();

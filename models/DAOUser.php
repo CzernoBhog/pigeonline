@@ -5,10 +5,10 @@ namespace models;
 class DAOUser
 {
 
-    public static function getUser(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*')
+    public static function getUser(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
-        $query = \utils\Utility::createWhere($params, 'user', $orClause, $replaceWithLIKE, $orderBy, $select);
+        $query = \utils\Utility::createWhere($params, 'user', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
         $stmt = $conn->prepare($query);
 
         foreach ($params as $key => $value) {
@@ -23,10 +23,16 @@ class DAOUser
             throw new \Exception($e->getMessage());
         }
 
-        $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOUser');
-
-        if (count($resultSet) != 0) {
-            return count($resultSet) > 1 ? $resultSet : $resultSet[0];
+        if($isArray){
+            $resultSet = $stmt->fetchAll();
+            if (count($resultSet) != 0) {
+                return $resultSet;
+            }
+        }else{
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOUser');
+            if (count($resultSet) != 0) {
+                return count($resultSet) > 1 ? $resultSet : $resultSet[0];
+            }
         }
 
         return NULL;

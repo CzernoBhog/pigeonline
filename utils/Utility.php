@@ -47,10 +47,18 @@
         }
         
         
-        public static function createWhere(Array $params, String $table, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*') {
+        public static function createWhere(Array $params, String $table, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, Array $joinTablesWithOnColumns = null, String $tableJoinColumn = null, String $select = '*') {
 			$counter = 0;
-			$query = "SELECT $select FROM $table";
-			
+            $query = "SELECT $select FROM $table";
+
+            if(!is_null($joinTablesWithOnColumns)){
+                foreach($joinTablesWithOnColumns as $tableToJoin => $column){
+                    if(!is_null($column)){
+                        $query .= " JOIN $tableToJoin ON($table.$tableJoinColumn = $tableToJoin.$column)";
+                    }
+                }
+            }
+                        
 			if( !is_null($params) )  {
 				foreach($params as $key => $value) {
 					if( !is_null($value) ) {        // Da vedere meglio, empty non andava bene
