@@ -28,9 +28,16 @@
                 <span>GENERAL</span>
             </li>
             <li>
-                <a href="index.php?action=viewFriendsPage">
+                <a href="index.php?controller=friendsController&action=viewFriendsPage">
                     <i class="fa fa-user-friends fa-pull-left"></i>
                     <span class="fa-pull-left" style="margin-top: 3px">Friends</span>
+                    <?php
+                        if ($friendPendingrequests !== null) {
+                            ?>
+                            <span class="badge badge-pill badge-warning notification"><?= count($friendPendingrequests) ?></span>
+                    <?php
+                        }
+                    ?>
                 </a>
             </li>
             <li>

@@ -1,0 +1,37 @@
+section {
+    padding: 60px 0;
+}
+
+section .section-title {
+    text-align: center;
+    color: #7c7e83;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+}
+
+#tabs{
+	background: #7c7e83;
+    color: black;
+    padding: 40px 40px;
+}
+
+#tabs h6.section-title{
+    color: black;
+}
+
+#tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    color: black;
+    background-color: transparent;
+    border-color: transparent transparent #f3f3f3;
+    border-bottom: 4px solid !important;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#tabs .nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+    color: black;
+    font-size: 20px;
+}

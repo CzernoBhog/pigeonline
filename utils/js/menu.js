@@ -1,14 +1,14 @@
-$(document).ready(function () {
+$(document).ready(function() {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
-    $("#sidebar").load("./index.php?controller=menuController&action=caricaMenu", function (responseTxt, statusTxt, xhr) {
+    $("#sidebar").load("./index.php?controller=menuController&action=caricaMenu", function(responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
 
-            $(".sidebar-dropdown > a").click(function () {
+            $(".sidebar-dropdown > a").click(function() {
                 $(".sidebar-submenu").slideUp(200);
                 if (
                     $(this)
-                        .parent()
-                        .hasClass("active")
+                    .parent()
+                    .hasClass("active")
                 ) {
                     $(".sidebar-dropdown").removeClass("active");
                     $(this)
@@ -25,13 +25,13 @@ $(document).ready(function () {
                 }
             });
 
-            $("#close-sidebar").click(function () {
+            $("#close-sidebar").click(function() {
                 $(".page-wrapper").removeClass("toggled");
                 $('.messaging').css('left', '0');
                 $('.messaging').css('right', '0');
             });
-            
-            $("#show-sidebar").click(function () {
+
+            $("#show-sidebar").click(function() {
                 $(".page-wrapper").addClass("toggled");
                 if ($(window).width() > 550) {
                     $('.messaging').css('left', '260px');
@@ -43,18 +43,18 @@ $(document).ready(function () {
             $('.sidebar-content').css('height', height - 45);
             $('.pre-scrollable').css('max-height', height - 341);
 
-            $(window).on('resize', function () {
+            $(window).on('resize', function() {
                 var height = $(window).height();
                 $('.sidebar-content').css('height', height - 45);
                 $('.pre-scrollable').css('max-height', height - 341);
             });
 
-            $('#searchBar').on('keyup', function(){
+            $('#searchBar').on('keyup', function() {
                 var value = $(this).val().toLowerCase();
                 var chats = $('.pre-scrollable li');
-                for(i = 0; i < chats.length; i ++) {
-                    let chatName = $('.usernameChat')[i].innerText.toLowerCase();
-                    if(chatName.includes(value)){
+                for (i = 0; i < chats.length; i++) {
+                    var chatName = $('.usernameChat')[i].innerText.toLowerCase();
+                    if (chatName.includes(value)) {
                         $(chats[i]).show();
                     } else {
                         $(chats[i]).hide();

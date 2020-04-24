@@ -13,6 +13,8 @@ class menuController
     public function caricaMenu()
     {
         $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        //nuove richieste inviate all'utente
+        $friendPendingrequests = \models\DAOFriends::getApplicantsUsers($user->getUserId());
         include('./views/menu.php');
     }
 }

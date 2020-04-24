@@ -2,9 +2,9 @@
 
 // use controllers\utentiController;    // Decomentare se da errori per namespace
 
-require_once('utils/autoload.php');
+require_once('./utils/autoload.php');
 
-$waf = new utils\WAF();     // Fa partire il Web Application Firewall
+$waf = new utils\WAF();    // Fa partire il Web Application Firewall
 
 if (isset($_REQUEST['controller'])) {
     $controller = 'controllers\\' . $_REQUEST['controller'];
@@ -37,5 +37,3 @@ if (empty($_SESSION)) {
 (new $controller)->$action();
 
 // $controllerObj = new $controller($action);
-
-?>

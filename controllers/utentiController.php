@@ -48,7 +48,8 @@ class utentiController
                             $message  = "<p style='font-size:25px;'>È stato eseguito un nuovo accesso al tuo account da:</p>
                             <ul style='font-size:20px;'><li>Stato: <b>$country</b></li><li>Regione: <b>$region</b></li><li>Città: <b>$city</b></li></ul><br>
                             <p>Se non sei stato tu ad effettuare l'accesso ti consigliamo di cambiare password al più presto.<br>Cordiali saluti, lo staff :)</p>";
-                            
+
+                            //uno è per altervista e usa mail(), l'altro usa PHPMailer, quando copio su altervista inverto i commenti
                             //$success = \utils\MailPHP::sendMail($user->getEmail(), $user->getUsername(), "Nuovo accesso a PigeOnLine", $message);
                             /*if (!$success) {
                                 var_dump(error_get_last()['message']);
@@ -93,33 +94,6 @@ class utentiController
     }
 
     /**
-     * Visualizza la pagina di gestione amici
-     */
-    public function viewFriendsPage()
-    {
-        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
-        //recupero gli amici dell'utente
-        $detailsFriends = \models\DAOFriends::getFriendsDetails($user->getUserId());
-
-        include('views/friendsPage.php');
-    }
-
-    /**
-     * restituisce una lista di utenti (solo id e username per sicurezza) filtrati con like in base a username = $_POST['filter];
-     */
-    public function searchUser()
-    {
-        if($_POST['filter'] === ""){
-            echo 'null';
-            return;
-        }
-
-        $users = \models\DAOUser::getUser(array('username' =>  $_POST['filter'] . '%', 'activated' => '1'), FALSE, TRUE, 'username', 'userId, username', TRUE);
-
-        echo json_encode($users);
-    }
-
-    /**
      * Visualizza la prima pagina e distrugge la sessione se esiste
      */
     public function viewFirstPage()
@@ -128,7 +102,7 @@ class utentiController
             session_destroy();
         }
 
-        include('views/firstPage.php'); 
+        include('views/firstPage.php');
     }
 
     /**
@@ -178,7 +152,7 @@ class utentiController
 
     /**
      * Registra l'utente iniziando un processo di transazione e manda un'email necessaria per l'attivazione dell'account
-     * 
+     *
      * @throws Exception $e Nel caso la registrazione sia fallita, fa anche il rollback della transazione
      */
     public function registraUtente()
@@ -249,7 +223,7 @@ class utentiController
 
     /**
      * Conferma la registrazione dell'utente abilitandolo all'uso del sito
-     * 
+     *
      * @throws Exception $e In caso di errore imprevisto
      */
     public function confermaRegistrazione()

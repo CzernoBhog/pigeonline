@@ -39,14 +39,15 @@ class DAOFriends
         return NULL;
     }
 
-    public static function insertUserDetails($friends)
+    public static function insertFriend($friends)
     {
         $conn = \utils\Database::connect();
-        $query = 'INSERT INTO firends (userId, friendId) VALUES(:ui, :fi)';
+        $query = 'INSERT INTO friends (userId, friendId, authorizated) VALUES(:ui, :fi, :a)';
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":ui", $friends->getUserId());
             $stmt->bindValue(":fi", $friends->getFriendId());
+            $stmt->bindValue(":a", $friends->getAuthorizated());
             $result = $stmt->execute();
             return $result;
         } catch (\Exception | \PDOException $e) {
@@ -54,11 +55,79 @@ class DAOFriends
         }
     }
 
-    public static function getFriendsDetails($id)
+    public static function updateFriend($friends)
+    {
+        $conn = \utils\Database::connect();
+        $query = 'UPDATE friends SET userId = :ui, friendId = :fi, authorizated = :a WHERE userId = :uid AND friendId = :fid';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":ui", $friends->getUserId());
+            $stmt->bindValue(":fi", $friends->getFriendId());
+            $stmt->bindValue(":a", $friends->getAuthorizated());
+            $stmt->bindValue(":uid", $friends->getUserId());
+            $stmt->bindValue(":fid", $friends->getFriendId());
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public static function deleteFriend($friends)
+    {
+        $conn = \utils\Database::connect();
+        $query = 'DELETE FROM friends WHERE userId = :uid AND friendId = :fid';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":uid", $friends->getUserId());
+            $stmt->bindValue(":fid", $friends->getFriendId());
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public static function getFriendsDetails($id, $authorizated = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere(
-            array('userDetailsId' => $id),
+            array('friends.userId' => $id, 'authorizated' => $authorizated),
+            'friends',
+            FALSE,
+            FALSE,
+            'username',
+            array('user' => 'userId', 'userDetails' => 'userId'),
+            'friendId',
+            'username, isOnline, lastActivity, privacyLevel, user.userId'
+        );
+
+        $stmt = $conn->prepare($query);
+        $stmt->bindValue(':friendsuserId', $id);
+        if(!is_null($authorizated)){
+            $stmt->bindValue(':authorizated', $authorizated);
+        }
+
+        try {
+            $stmt->execute();
+        } catch (\Exception | \PDOException $e) {
+            throw new Exception($e->getMessage());
+        }
+
+        $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (count($resultSet) != 0) {
+            return $resultSet;
+        }
+
+        return NULL;
+    }
+
+    public static function getApplicantsUsers($id)
+    {
+        $conn = \utils\Database::connect();
+        $query = \utils\Utility::createWhere(
+            array('friends.friendId' => $id, 'authorizated' => 0),
             'friends',
             FALSE,
             FALSE,
@@ -69,7 +138,8 @@ class DAOFriends
         );
 
         $stmt = $conn->prepare($query);
-        $stmt->bindValue(':userDetailsId', $id);
+        $stmt->bindValue(':friendsfriendId', $id);
+        $stmt->bindValue(':authorizated', 0);
 
         try {
             $stmt->execute();
@@ -77,7 +147,7 @@ class DAOFriends
             throw new Exception($e->getMessage());
         }
 
-        $resultSet = $stmt->fetchAll();
+        $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (count($resultSet) != 0) {
             return $resultSet;

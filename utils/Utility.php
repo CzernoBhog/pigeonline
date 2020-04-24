@@ -63,12 +63,12 @@
 				foreach($params as $key => $value) {
 					if( !is_null($value) ) {        // Da vedere meglio, empty non andava bene
 						if($counter == 0) {
-							$query .= " WHERE $key = :$key";
+							$query .= " WHERE $key = :" . str_replace('.', '', $key);
 						} else {
                             if($orClause) {
-                                $query .= " OR $key = :$key";
+                                $query .= " OR $key = :" . str_replace('.', '', $key);
                             } else {
-                                $query .= " AND $key = :$key";
+                                $query .= " AND $key = :" . str_replace('.', '', $key);
                             }
 						}
 

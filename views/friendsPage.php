@@ -7,7 +7,7 @@
 
     <link href="utils/css/menu.css" rel="stylesheet">
     <link href="utils/css/text.css" rel="stylesheet">
-
+    <link href="utils/css/friendTab.css" rel="stylesheet">
 
 </head>
 
@@ -32,39 +32,28 @@
                             </span>
                         </a>
                     </div>
-                    <ul id="results" class="list-group">
-
-                    </ul>
+                    <ul id="results" class="list-group"></ul>
                 </div>
             </div>
 
-            <?php
-
-            if ($detailsFriends === null) {
-                echo '<div style="padding-top: 10%"><p>Non hai ancora amici?<br>Cercali dalla barra di ricerca e inizia a chattare!</p>
-                <br><img style="width: 100px" src="./utils/imgs/dino.png"></div>';
-            } else {
-                foreach ($detailsFriends as $detailsFriend) {
-                    // Stampa della lista amici dell'utente
-                    echo $detailsFriend['username'];
-
-                    // Da sistemare graficamente
-                    switch ($detailsFriend['privacyLevel']) {
-                        case 'Normal':
-                            echo ($detailsFriend['isOnline']) ? ': Online' : ': Offline - Last Activity: ' . $detailsFriend["lastActivity"];
-                            break;
-
-                        case 'Restricted':
-                            echo ($detailsFriend['isOnline']) ? ': Online' : ': Offline';
-                            break;
-
-                        case 'Hidden':
-                            break;
-                    }
-                }
-            }
-
-            ?>
+            <section id="tabs">
+                <div class="container">
+                    <div style="display: block" class="row">
+                        <div class="col-xs-12 ">
+                            <nav>
+                                <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                    <a class="nav-item nav-link active" id="nav-all-friends-tab" data-toggle="tab" href="#nav-all-friends" role="tab" aria-controls="nav-all-friends" aria-selected="true">All Friends</a>
+                                    <a class="nav-item nav-link" id="nav-online-tab" data-toggle="tab" href="#nav-online" role="tab" aria-controls="nav-online" aria-selected="false">Online</a>
+                                    <a class="nav-item nav-link" id="nav-offline-tab" data-toggle="tab" href="#nav-offline" role="tab" aria-controls="nav-offline" aria-selected="false">Offline</a>
+                                    <a class="nav-item nav-link" id="nav-friend-requests-tab" data-toggle="tab" href="#nav-friend-requests" role="tab" aria-controls="nav-friend-requests" aria-selected="false">Requests</a>
+                                    <a class="nav-item nav-link" id="nav-blocked-tab" data-toggle="tab" href="#nav-blocked" role="tab" aria-controls="nav-blocked" aria-selected="false">Blocked</a>
+                                </div>
+                            </nav>
+                            <div class="tab-content py-3 px-3 px-sm-0" id="nav-tabContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
         </main>
 
@@ -77,49 +66,7 @@
 
     <?php require_once('./utils/includeBody.php'); ?>
     <script src="./utils/js/menu.js"></script>
-
-    <script>
-        // Filtro per la ricerca di utenti online, offline o tutti
-
-        //cerca utenti
-        $('#search').on('click', function() {
-
-            let filter = $('#searchFriend').val();
-            let format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-            if (format.test(filter)) {
-                document.getElementById('searchFriend').setCustomValidity('Carattere non valido');
-                return;
-            } else {
-                document.getElementById('searchFriend').setCustomValidity('');
-            }
-
-            $.ajax({
-                url: 'index.php',
-                type: 'POST',
-                data: {
-                    'filter': filter,
-                    'action': 'searchUser'
-                },
-                success: function(result) {
-                    var obj = JSON.parse(result);
-                    var stringOpt = '<div style="" class=search-scrollable>';
-                    if (obj == null) {
-                        stringOpt += "<li class='list-group-item d-flex justify-content-between align-items-center'><i>Nessun utente trovato :(</i></li>";
-                    } else {
-                        for (var i = 0; i < obj.length; i++) { //costruisco la stringa con le opzioni per la select
-                            stringOpt += '<li class="list-group-item d-flex justify-content-between align-items-center"><b>' + obj[i].username + '</b><a href="#"><span style="font-family: none; font-size: unset" class="badge badge-success badge-pill">send request</span></a></li>'
-                        }
-                    }
-                    stringOpt += '</div><a style="color: black" id="closeSearchW" href="#"><i class="fa fa-window-close fa-pull-left; width: 30px; height: 30px" style="padding-left: 3px;"></i></a>';
-                    $("#results").html(stringOpt);
-                    $('#closeSearchW').on('click', function() {
-                        $("#results").html('');
-                        $('#searchFriend').val('');
-                    });
-                }
-            });
-        });
-    </script>
+    <script src="./utils/js/friend.js"></script>
 
     <!-- JS -->
 </body>
