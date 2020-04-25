@@ -35,3 +35,11 @@ section .section-title {
     color: black;
     font-size: 20px;
 }
+
+.dot {
+  height: 5px;
+  width: 5px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}

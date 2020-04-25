@@ -6,7 +6,7 @@ use Exception;
 
 class DAOFriends
 {
-    public static function getFriends(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
+    public static function getFriends(array $params, BOOL $orClause = false, BOOL $replaceWithLIKE = false, String $orderBy = null, String $select = '*', bool $isArray = false, array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'friends', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
@@ -24,19 +24,19 @@ class DAOFriends
             throw new Exception($e->getMessage());
         }
 
-        if($isArray){
+        if ($isArray) {
             $resultSet = $stmt->fetchAll();
             if (count($resultSet) != 0) {
                 return $resultSet;
             }
-        }else{
+        } else {
             $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOFriends');
             if (count($resultSet) != 0) {
                 return count($resultSet) > 1 ? $resultSet : $resultSet[0];
             }
         }
 
-        return NULL;
+        return null;
     }
 
     public static function insertFriend($friends)
@@ -94,17 +94,17 @@ class DAOFriends
         $query = \utils\Utility::createWhere(
             array('friends.userId' => $id, 'authorizated' => $authorizated),
             'friends',
-            FALSE,
-            FALSE,
+            false,
+            false,
             'username',
             array('user' => 'userId', 'userDetails' => 'userId'),
             'friendId',
-            'username, isOnline, lastActivity, privacyLevel, user.userId'
+            'username, isOnline, mood, pathProfilePicture, lastActivity, privacyLevel, user.userId'
         );
 
         $stmt = $conn->prepare($query);
         $stmt->bindValue(':friendsuserId', $id);
-        if(!is_null($authorizated)){
+        if (!is_null($authorizated)) {
             $stmt->bindValue(':authorizated', $authorizated);
         }
 
@@ -114,13 +114,13 @@ class DAOFriends
             throw new Exception($e->getMessage());
         }
 
-        $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOExternalUserDetails');
 
         if (count($resultSet) != 0) {
             return $resultSet;
         }
 
-        return NULL;
+        return null;
     }
 
     public static function getApplicantsUsers($id)
@@ -129,12 +129,12 @@ class DAOFriends
         $query = \utils\Utility::createWhere(
             array('friends.friendId' => $id, 'authorizated' => 0),
             'friends',
-            FALSE,
-            FALSE,
+            false,
+            false,
             'username',
             array('user' => 'userId', 'userDetails' => 'userId'),
             'userId',
-            'username, isOnline, lastActivity, privacyLevel, user.userId'
+            'username, isOnline, mood, pathProfilePicture, lastActivity, privacyLevel, user.userId'
         );
 
         $stmt = $conn->prepare($query);
@@ -147,12 +147,12 @@ class DAOFriends
             throw new Exception($e->getMessage());
         }
 
-        $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOExternalUserDetails');
 
         if (count($resultSet) != 0) {
             return $resultSet;
         }
 
-        return NULL;
+        return null;
     }
 }

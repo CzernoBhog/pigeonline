@@ -139,6 +139,10 @@
                 document.getElementById('inputUsername').setCustomValidity('Carattere non valido');
                 return;
             }
+            if (username == '') {
+                document.getElementById('inputUsername').setCustomValidity('Username necessario');
+                return;
+            }
             $.ajax({
                 type: 'post',
                 url: 'index.php',

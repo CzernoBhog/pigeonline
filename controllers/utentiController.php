@@ -46,8 +46,8 @@ class utentiController
                             $region   = $json['region'];
                             $city     = $json['city'];
                             $message  = "<p style='font-size:25px;'>È stato eseguito un nuovo accesso al tuo account da:</p>
-                            <ul style='font-size:20px;'><li>Stato: <b>$country</b></li><li>Regione: <b>$region</b></li><li>Città: <b>$city</b></li></ul><br>
-                            <p>Se non sei stato tu ad effettuare l'accesso ti consigliamo di cambiare password al più presto.<br>Cordiali saluti, lo staff :)</p>";
+                                <ul style='font-size:20px;'><li>Stato: <b>$country</b></li><li>Regione: <b>$region</b></li><li>Città: <b>$city</b></li></ul><br>
+                                <p>Se non sei stato tu ad effettuare l'accesso ti consigliamo di cambiare password al più presto.<br>Cordiali saluti, lo staff :)</p>";
 
                             //uno è per altervista e usa mail(), l'altro usa PHPMailer, quando copio su altervista inverto i commenti
                             //$success = \utils\MailPHP::sendMail($user->getEmail(), $user->getUsername(), "Nuovo accesso a PigeOnLine", $message);

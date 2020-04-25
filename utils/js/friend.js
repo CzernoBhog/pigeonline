@@ -1,10 +1,10 @@
 // Filtro per la ricerca di utenti online, offline o tutti
 
 //cerca utenti
-$('#search').on('click', function () {
+$('#search').on('click', function() {
 
-    let filter = $('#searchFriend').val();
-    let format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    var filter = $('#searchFriend').val();
+    var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
     if (format.test(filter)) {
         document.getElementById('searchFriend').setCustomValidity('Carattere non valido');
         return;
@@ -20,7 +20,7 @@ $('#search').on('click', function () {
             'action': 'searchUser',
             'controller': 'friendsController'
         },
-        success: function (result) {
+        success: function(result) {
             var obj = JSON.parse(result);
             var stringOpt = '<div class=search-scrollable>';
             if (obj == null || obj.length == 0) {
@@ -38,12 +38,12 @@ $('#search').on('click', function () {
             stringOpt += '</div><a style="color: black" id="closeSearchW" href="#"><i class="fa fa-window-close fa-pull-left; width: 30px; height: 30px" style="padding-left: 3px;"></i></a>';
             $("#results").html(stringOpt);
 
-            $('#closeSearchW').on('click', function () {
+            $('#closeSearchW').on('click', function() {
                 $("#results").html('');
                 $('#searchFriend').val('');
             });
 
-            $('.friendRequest').on('click', function () {
+            $('.friendRequest').on('click', function() {
                 var friendId = this.id;
                 $('#' + friendId).html('<span style="font-family: none; font-size: unset" class="badge badge-warning badge-pill">sending</span>');
                 $.ajax({
@@ -54,7 +54,7 @@ $('#search').on('click', function () {
                         'action': 'friendRequest',
                         'controller': 'friendsController'
                     },
-                    success: function (result) {
+                    success: function(result) {
                         if (result == 'success') {
                             $('#' + friendId).html('<span style="font-family: none; font-size: unset" class="badge badge-success badge-pill">sent</span>');
                             $('#' + friendId).css("pointer-events", "none"); // disabilita gli eventi del mouse
@@ -62,7 +62,7 @@ $('#search').on('click', function () {
                             $('#' + friendId).html('<span style="font-family: none; font-size: unset" class="badge badge-danger badge-pill">resend request</span>');
                         }
                     },
-                    error: function (result) {
+                    error: function(result) {
                         $('#' + friendId).html('<span style="font-family: none; font-size: unset" class="badge badge-danger badge-pill">resend request</span>');
                     }
                 });
@@ -72,67 +72,73 @@ $('#search').on('click', function () {
 });
 
 //accetta/rifiuta richieste
-eventAcceptDeclineButtons();
-
-function eventAcceptDeclineButtons() {
+function eventAcceptDeclineCancelButtons() {
     var dataArray;
 
-    $('.acceptRequest').on('click', function () {
+    $('.acceptRequest').on('click', function() {
         dataArray = {
             'controller': 'friendsController',
             'action': 'acceptDeclineRequest',
             'accepted': true,
             'friendId': this.id
-        }
-        ajaxAcceptdeclineRequest(dataArray);
+        };
+        ajaxAcceptdeclineCancelRequest(dataArray);
     });
 
-    $('.declineRequest').on('click', function () {
+    $('.declineRequest').on('click', function() {
         dataArray = {
             'controller': 'friendsController',
             'action': 'acceptDeclineRequest',
             'accepted': false,
             'friendId': this.id
-        }
-        ajaxAcceptdeclineRequest(dataArray);
+        };
+        ajaxAcceptdeclineCancelRequest(dataArray);
+    });
+
+    $('.cancelRequest').on('click', function () {
+        dataArray = {
+            'controller': 'friendsController',
+            'action': 'cancelRequest',
+            'friendId': this.id
+        };
+        ajaxAcceptdeclineCancelRequest(dataArray);
     });
 }
 
-function ajaxAcceptdeclineRequest(dataArray) {
-    var div = $('#buttonForAcceptDecline').clone();
+function ajaxAcceptdeclineCancelRequest(dataArray) {
     $('#buttonForAcceptDecline').html('<span style="font-family: none; font-size: unset" class="badge badge-warning badge-pill">Sending...</span>');
     $.ajax({
         url: 'index.php',
         type: 'POST',
         data: dataArray,
-        success: function (result) {
+        success: function(result) {
             if (result == 'success') {
-                $('#buttonForAcceptDecline').html('<span style="font-family: none; font-size: unset" class="badge badge-success badge-pill">Done</span>');
+                $('#' + dataArray.action).html('<span style="font-family: none; font-size: unset" class="badge badge-success badge-pill">Done</span>');
             } else {
-                $('#buttonForAcceptDecline').html(div.children());
-                eventAcceptDeclineButtons();
+                $('#' + dataArray.action).html('<span style="font-family: none; font-size: unset" class="badge badge-danger badge-pill">Error</span>');
             }
         },
-        error: function (result) {
-            $('#buttonForAcceptDecline').html(div.children());
-            eventAcceptDeclineButtons();
+        error: function(result) {
+            $('#' + dataArray.action).html('<span style="font-family: none; font-size: unset" class="badge badge-danger badge-pill">Error</span>');
         }
     });
 }
 
-$(document).ready(function () {
-    $('#nav-tabContent').load("index.php?controller=friendsController&action=viewFriendsPage", function (responseTxt, statusTxt, xhr) {
+$(document).ready(function() {
+    $('#nav-tabContent').load("index.php?controller=friendsController&action=viewFriendsPage", function(responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
-            let idActiveElement = $('.nav-item.nav-link.active').attr('href');
+            var idActiveElement = $('.nav-item.nav-link.active').attr('href');
             $(idActiveElement).addClass('show active');
+            eventAcceptDeclineCancelButtons();
         }
     });
 
-    setInterval(function () {
-        $('#nav-tabContent').load("index.php?controller=friendsController&action=viewFriendsPage", function (responseTxt, statusTxt, xhr) {
+    setInterval(function() {
+        $('#nav-tabContent').load("index.php?controller=friendsController&action=viewFriendsPage", function(responseTxt, statusTxt, xhr) {
             if (statusTxt == "success") {
-                let idActiveElement = $('.nav-item.nav-link.active').attr('href');
+                var idActiveElement = $('.nav-item.nav-link.active').attr('href');
                 $(idActiveElement).addClass('show active');
+                eventAcceptDeclineCancelButtons();
             }
         });
 

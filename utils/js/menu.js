@@ -1,5 +1,13 @@
 $(document).ready(function() {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
+    loadMenu();
+
+    setInterval(function() {
+        loadMenu();
+    }, 5000);
+});
+
+function loadMenu() {
     $("#sidebar").load("./index.php?controller=menuController&action=caricaMenu", function(responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
 
@@ -67,4 +75,4 @@ $(document).ready(function() {
             alert("Error: " + xhr.responseText);
         }
     });
-});
+}

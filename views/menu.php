@@ -27,14 +27,14 @@
             <li class="header-menu">
                 <span>GENERAL</span>
             </li>
-            <li>
+            <li id="friends">
                 <a href="index.php?controller=friendsController&action=viewFriendsPage">
                     <i class="fa fa-user-friends fa-pull-left"></i>
                     <span class="fa-pull-left" style="margin-top: 3px">Friends</span>
                     <?php
                         if ($friendPendingrequests !== null) {
                             ?>
-                            <span class="badge badge-pill badge-warning notification"><?= count($friendPendingrequests) ?></span>
+                    <span class="badge badge-pill badge-warning notification"><?= count($friendPendingrequests) ?></span>
                     <?php
                         }
                     ?>
@@ -54,7 +54,7 @@
                     <i style="padding-right: 15px" class="fa fa-plus"></i>
                 </a>
             </div>
-            <div class="pre-scrollable" >
+            <div class="pre-scrollable">
                 <li>
                     <a href="index.php?action=viewChatPage&id=0" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">

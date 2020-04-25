@@ -20,10 +20,15 @@ if (isset($_REQUEST['action'])) {
 
 // Viene controllato se l'utente è autenticato o meno
 if (empty($_SESSION)) {
-    switch($action){        // Queste 3 pagine non necessitano di autenticazione, quindi posso essere aperte
+    switch($action){        // Queste pagine non necessitano di autenticazione, quindi posso essere aperte
         case "viewRegistration":
         case "viewLogin":
         case "viewFirstPage":
+        case 'controlloEmail':
+        case 'controlloUsername':
+        case 'viewMessagePage':
+        case 'registraUtente':
+        case 'confermaRegistrazione':
             (new controllers\utentiController)->$action();
             exit;
 
