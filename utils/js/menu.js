@@ -1,22 +1,22 @@
-$(document).ready(function() {
+$(document).ready(function () {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
     loadMenu();
 
-    setInterval(function() {
+    setInterval(function () {
         loadMenu();
     }, 5000);
 });
 
 function loadMenu() {
-    $("#sidebar").load("./index.php?controller=menuController&action=caricaMenu", function(responseTxt, statusTxt, xhr) {
+    $("#sidebar").load("./index.php?controller=menuController&action=caricaMenu", function (responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
 
-            $(".sidebar-dropdown > a").click(function() {
+            $(".sidebar-dropdown > a").click(function () {
                 $(".sidebar-submenu").slideUp(200);
                 if (
                     $(this)
-                    .parent()
-                    .hasClass("active")
+                        .parent()
+                        .hasClass("active")
                 ) {
                     $(".sidebar-dropdown").removeClass("active");
                     $(this)
@@ -33,13 +33,13 @@ function loadMenu() {
                 }
             });
 
-            $("#close-sidebar").click(function() {
+            $("#close-sidebar").click(function () {
                 $(".page-wrapper").removeClass("toggled");
                 $('.messaging').css('left', '0');
                 $('.messaging').css('right', '0');
             });
 
-            $("#show-sidebar").click(function() {
+            $("#show-sidebar").click(function () {
                 $(".page-wrapper").addClass("toggled");
                 if ($(window).width() > 550) {
                     $('.messaging').css('left', '260px');
@@ -51,13 +51,13 @@ function loadMenu() {
             $('.sidebar-content').css('height', height - 45);
             $('.pre-scrollable').css('max-height', height - 341);
 
-            $(window).on('resize', function() {
+            $(window).on('resize', function () {
                 var height = $(window).height();
                 $('.sidebar-content').css('height', height - 45);
                 $('.pre-scrollable').css('max-height', height - 341);
             });
 
-            $('#searchBar').on('keyup', function() {
+            $('#searchBar').on('keyup', function () {
                 var value = $(this).val().toLowerCase();
                 var chats = $('.pre-scrollable li');
                 for (i = 0; i < chats.length; i++) {
@@ -72,7 +72,16 @@ function loadMenu() {
         }
         if (statusTxt == "error") {
             alert("Error: " + xhr.status + ": " + xhr.statusText);
-            alert("Error: " + xhr.responseText);
         }
     });
 }
+
+setInterval(function(){
+    $.ajax({
+        url: 'index.php',
+        type: 'POST',
+        data: {
+            'action': 'updateActivity'
+        }
+    });
+}, 5000)

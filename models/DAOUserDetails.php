@@ -54,4 +54,19 @@ class DAOUserDetails {
             throw new Exception($e->getMessage());
         }
     }
+
+    public static function updateUserDetails($userDetails){
+        $conn = \utils\Database::connect();
+        $query = 'UPDATE userDetails SET isOnline = :io, lastActivity = :la WHERE userDetailsId = :udi';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":io", $userDetails->getIsOnline());
+            $stmt->bindValue(":la", $userDetails->getLastActivity());
+            $stmt->bindValue(":udi", $userDetails->getUserDetailsId());
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }

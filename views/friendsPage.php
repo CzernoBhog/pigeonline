@@ -55,6 +55,13 @@
                 </div>
             </section>
 
+            <!-- right click menu -->
+            <div style="padding: 0" class="dropdown-menu dropdown-menu-sm" id="context-menu">
+                <a class="dropdown-item" href="#">See friend</a>
+                <a class="dropdown-item" href="#">Write message</a>
+                <a class="dropdown-item blockUser" href="#">Block user</a>
+            </div>
+
         </main>
 
     </div>

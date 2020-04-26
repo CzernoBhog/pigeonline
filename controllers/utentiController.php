@@ -34,6 +34,8 @@ class utentiController
                     if (password_verify($_POST['password'], $hashedPws)) {
                         $_SESSION['id'] = $user->getUserId();
                         $_SESSION['sessionTTL'] = time();
+                        $newUserDetails = new \models\DOUserDetails($user->getUserId(), 1, date('Y-m-d H:i:s'));
+                        \models\DAOUserDetails::updateUserDetails($newUserDetails);
                         $this->viewHomePage();
 
                         //se l'ip del client che accede è diverso da quello salvato alla regitraione invio una mail per segnalare il nuovo accesso
@@ -99,7 +101,9 @@ class utentiController
     public function viewFirstPage()
     {   //default action
         if (session_status() == 2) {
-            session_destroy();
+            $newUserDetails = new \models\DOUserDetails($_SESSION['id'], 0, date('Y-m-d H:i:s'));
+            \models\DAOUserDetails::updateUserDetails($newUserDetails);
+            session_destroy();      
         }
 
         include('views/firstPage.php');
@@ -244,5 +248,15 @@ class utentiController
         }
         $message = "link non valido";
         $this->viewMessagePage($message);
+    }
+
+    /**
+     * Aggiorna l'ultima attività dell'utente
+     */
+    public function updateActivity()
+    {
+        $currentTime = date('Y-m-d H:i:s');
+        $userDetails = new \models\DOUserDetails($_SESSION['id'], 1, $currentTime);
+        \models\DAOUserDetails::updateUserDetails($userDetails);
     }
 }
