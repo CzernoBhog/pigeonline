@@ -10,7 +10,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
             $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
             switch ($type) {
 
-                    // All Friends
+                // All Friends
                 case 'all':
                     $cont++;
                     echo '<li id=' . $friend->getUserId() . ' class="list-group-item d-flex justify-content-between align-items-center jumbotron">
@@ -20,22 +20,22 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                     </div>';
 
                     switch ($friend->getPrivacyLevel()) {
-                        case 'NORMAL':
+                        case 1:
                             echo ($friend->getLastActivity() > $current_timestamp) ? '<p style="color: green">Online</p>' : '<p style="color: red">Offline - ' . $friend->getLastActivity() . '</p>';
                             break;
 
-                        case 'RESTRICTED':
+                        case 2:
                             echo ($friend->getLastActivity() > $current_timestamp) ? '<p style="color: green">Online</p>' : '<p style="color: red">Offline</p>';
                             break;
 
-                        case 'HIDDEN':
+                        case 3:
                             break;
                     }
 
                     echo '</li>';
                     break;
 
-                    // Online Friends
+                // Online Friends
                 case 'online':
 
                     if ($friend->getPrivacyLevel() !== 'HIDDEN' && $friend->getLastActivity() > $current_timestamp) {
@@ -50,7 +50,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     break;
 
-                    // Offline Friends
+                // Offline Friends
                 case 'offline':
                     if ($friend->getPrivacyLevel() !== 'HIDDEN' && $friend->getLastActivity() < $current_timestamp) {
                         echo '<li id=' . $friend->getUserId() . ' class="list-group-item d-flex justify-content-between align-items-center jumbotron">
@@ -60,11 +60,11 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                                 </div><p style="color: red">Offline';
 
                         switch ($friend->getPrivacyLevel()) {
-                            case 'NORMAL':
+                            case 1:
                                 echo ' - ' . $friend->getLastActivity();
                                 break;
 
-                            case 'RESTRICTED':
+                            case 2:
                                 break;
                         }
 
@@ -74,7 +74,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     break;
 
-                    // Sent Friend Requests
+                // Sent Friend Requests
                 case 'sentRequests':
                     $cont++;
                     echo '<li class="list-group-item d-flex justify-content-between align-items-center">
@@ -91,7 +91,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     break;
 
-                    // Received Friend Requests
+                // Received Friend Requests
                 case 'receivedRequests':
                     $cont++;
                     echo '<li class="list-group-item d-flex justify-content-between align-items-center">
@@ -117,7 +117,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                             </li>';
                     break;
 
-                    // Blocked Users
+                // Blocked Users
                 case 'blocked':
                     $cont++;
                     echo '<li class="list-group-item d-flex justify-content-between align-items-center">

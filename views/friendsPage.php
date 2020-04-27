@@ -11,7 +11,7 @@
 
 </head>
 
-<body style="background-color: #7c7e83" class="text-center">
+<body style="background-color: #7c7e83">
     <!-- #bfbfbf  -  #b3b3b3  -  #a6a6a6 -->
 
     <div class="page-wrapper chiller-theme toggled">
@@ -66,6 +66,7 @@
 
     </div>
 
+    <div id="modal-chat"></div>
 
     <!-- CONTENUTO DELLA PAGINA  -->
 

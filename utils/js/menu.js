@@ -69,14 +69,26 @@ function loadMenu() {
                     }
                 }
             });
+
+            $('.addChat').on('click', function () {
+                $("#modal-chat").load("./index.php?controller=chatController&action=mostraModaleAddChat", function (responseTxt, statusTxt, xhr) {
+                    if (statusTxt == "success") {
+                        $('#addChatModal').modal('show');
+            
+                        $(function () {
+                            window.fs_test = $('#selectChat').fSelect();
+                        });
+                    }
+                });
+            });
         }
         if (statusTxt == "error") {
-            alert("Error: " + xhr.status + ": " + xhr.statusText);
+            //alert("Error: " + xhr.status + ": " + xhr.statusText);
         }
     });
 }
 
-setInterval(function(){
+setInterval(function () {
     $.ajax({
         url: 'index.php',
         type: 'POST',

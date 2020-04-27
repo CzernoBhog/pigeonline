@@ -7,14 +7,16 @@ class DOChat{
     private $chatId;
     private $chatType;
     private $title;
-    private $description;
+	private $description;
+	private $pathToChatPhoto;
 
-    public function __construct($chatId = NULL, $chatType = NULL, $title = NULL, $description = NULL){
+    public function __construct($chatId = NULL, $chatType = NULL, $title = NULL, $description = NULL, $pathToChatPhoto = NULL){
         if(func_get_args() != null) {
             $this->chatId = $chatId;
             $this->chatType = $chatType;
             $this->title = $title;
-            $this->description = $description;
+			$this->description = $description;
+			$this->pathToChatPhoto = $pathToChatPhoto;
         }
     }
 
@@ -48,6 +50,14 @@ class DOChat{
 
 	public function setDescription($description){
 		$this->description = $description;
+	}
+
+	public function getPathToChatPhoto(){
+		return $this->pathToChatPhoto;
+	}
+
+	public function setPathToChatPhoto($pathToChatPhoto){
+		$this->pathToChatPhoto = $pathToChatPhoto;
 	}
 
 }

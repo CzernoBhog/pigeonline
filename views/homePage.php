@@ -23,6 +23,7 @@
 
     </div>
 
+    <div id="modal-chat"></div>
 
     <!-- CONTENUTO DELLA PAGINA  -->
 

@@ -32,11 +32,11 @@
                     <i class="fa fa-user-friends fa-pull-left"></i>
                     <span class="fa-pull-left" style="margin-top: 3px">Friends</span>
                     <?php
-                        if ($friendPendingrequests !== null) {
-                            ?>
-                    <span class="badge badge-pill badge-warning notification"><?= count($friendPendingrequests) ?></span>
+                    if ($friendPendingrequests !== null) {
+                    ?>
+                        <span class="badge badge-pill badge-warning notification"><?= count($friendPendingrequests) ?></span>
                     <?php
-                        }
+                    }
                     ?>
                 </a>
             </li>
@@ -49,47 +49,27 @@
         </ul>
         <ul>
             <div class="sidebar-brand">
-                <a href="#">Chat</a>
-                <a style="display: contents" href="#">
+                <a href="#" class="addChat">Chat</a>
+                <a style="display: contents" href="#" class="addChat">
                     <i style="padding-right: 15px" class="fa fa-plus"></i>
                 </a>
             </div>
             <div class="pre-scrollable">
-                <li>
-                    <a href="index.php?action=viewChatPage&id=0" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Online</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">vian</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Online</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
-                    </a>
-                </li>
+                <?php
+                if (!is_null($chats)) {
+                    foreach ($chats as $chat) {
+                        echo '<li>
+                                <a href="index.php?action=viewChatPage&id=' . $chat->getChatId() . '" style="padding-top: 0">
+                                    <img class="chat-img fa-pull-left" src="' . $chat->getPathToChatPhoto() . '" alt="Avatar">
+                                    <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $chat->getTitle() . '</span>
+                                </a>
+                            </li>';
+                    }
+                } else {
+                    echo '<li><a style="color: #b8bfce"><i>Apri la chat... ah no, non ce ne sono :)</i></a></li>';
+                }
+                ?>
+                <!--
                 <li>
                     <a href="#" style="padding-top: 0">
                         <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
@@ -97,48 +77,7 @@
                         <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
                     </a>
                 </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Online</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Vego</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Online</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Demterca</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">20/04</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" style="padding-top: 0">
-                        <img class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">Tonetto</span>
-                        <br><span style="padding-left: 10px; font-size: smaller">Offline</span>
-                    </a>
-                </li>
+                -->
             </div>
         </ul>
     </div>
@@ -157,3 +96,6 @@
         </ul>
     </div>
 </div>
+
+
+

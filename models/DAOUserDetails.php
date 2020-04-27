@@ -13,7 +13,7 @@ class DAOUserDetails {
         
         foreach($params as $key => $value){
             if($value != ""){
-                $stmt->bindValue($key, $value);
+                $stmt->bindValue(str_replace('.', '', $key), $value);
             }
         }
 

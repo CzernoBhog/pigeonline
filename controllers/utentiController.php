@@ -101,9 +101,11 @@ class utentiController
     public function viewFirstPage()
     {   //default action
         if (session_status() == 2) {
-            $newUserDetails = new \models\DOUserDetails($_SESSION['id'], 0, date('Y-m-d H:i:s'));
-            \models\DAOUserDetails::updateUserDetails($newUserDetails);
-            session_destroy();      
+            if (isset($_SESSION['id'])) {
+                $newUserDetails = new \models\DOUserDetails($_SESSION['id'], 0, date('Y-m-d H:i:s'));
+                \models\DAOUserDetails::updateUserDetails($newUserDetails);
+            }
+            session_destroy();
         }
 
         include('views/firstPage.php');
