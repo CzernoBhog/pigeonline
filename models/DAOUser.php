@@ -85,4 +85,22 @@ class DAOUser
         $conn = \utils\Database::connect();
         return $conn->lastInsertId();
     }
+
+    public static function updateSettings($user)
+    {
+        $conn = \utils\Database::connect();
+        $query = 'UPDATE user SET username=:un, password=:pw, mood=:m, pathProfilePicture=:ppp WHERE userId = :id';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":id", $user->getUserId());
+            $stmt->bindValue(":un", $user->getUsername());
+            $stmt->bindValue(":pw", $user->getPassword());
+            $stmt->bindValue(":m", $user->getMood());
+            $stmt->bindValue(":ppp", $user->getPathProfilePicture());
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new \Exception('Errore aggiornamento utente');
+        }
+    }
 }

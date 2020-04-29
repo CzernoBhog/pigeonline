@@ -2,6 +2,8 @@
 
 namespace controllers;
 
+use utils\Transaction;
+
 require_once('utils/autoload.php');
 
 class utentiController
@@ -87,15 +89,6 @@ class utentiController
     }
 
     /**
-     * Visualizza la chat selezionata
-     */
-    public function viewChatPage()
-    {
-        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
-        include('views/chatPage.php');
-    }
-
-    /**
      * Visualizza la prima pagina e distrugge la sessione se esiste
      */
     public function viewFirstPage()
@@ -153,6 +146,13 @@ class utentiController
      */
     public function controlloUsername()
     {    //richiamato da ajax controlla che in fase di registrazione l'username non sia già stato utilizzato
+        if (isset($_SESSION['id'])) {
+            $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+            if ($_POST['username'] == $user->getUsername()) {
+                echo 'true';
+                return;
+            }
+        }
         echo \models\DAOUser::getUser(array('username' => $_POST['username'])) != null ? 'Username già in uso' : 'true';
     }
 
@@ -260,5 +260,75 @@ class utentiController
         $currentTime = date('Y-m-d H:i:s');
         $userDetails = new \models\DOUserDetails($_SESSION['id'], 1, $currentTime);
         \models\DAOUserDetails::updateUserDetails($userDetails);
+    }
+
+    /**
+     * Genera div modale per le impostazioni del profilo utente
+     */
+    public function mostraUserSettings()
+    {
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        $userPrivacy = \models\DAOUserDetails::getUserDetails(array('userId' => $_SESSION['id']));
+        include('./views/modalUserSettings.php');
+    }
+
+    /**
+     * aggiorna le impostazioni del profilo dell'utente
+     */
+    public function aggiornaProfilo()
+    {
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        $mood = $_POST['mood'] != '' ? $_POST['mood'] : null;
+        $username = $_POST['username'] != '' ? $_POST['username'] : $user->getUsername();
+        $passwordHash = $_POST['password'] != '' ? password_hash(trim($_POST['password']), PASSWORD_DEFAULT) : $user->getPassword();
+        $pl = $_POST['pl'] != '0' ? $_POST['pl'] : null;
+
+        $targetFilePath = $user->getPathProfilePicture();
+
+        if (!empty($_FILES["picture"]["name"])) {
+            // File upload path
+            $targetDir = "./utils/imgs/usersPhoto/";
+            $fileName = basename($_FILES["picture"]["name"]);
+            $targetFilePath = $targetDir . $fileName;
+            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+            // Allow certain file formats
+            $allowTypes = array('jpg', 'png', 'jpeg');
+            if (in_array($fileType, $allowTypes)) {
+                // Upload file to server
+                if (move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath)) {
+                    if (!is_null($user->getPathProfilePicture()))
+                        unlink($user->getPathProfilePicture());
+                    $statusMsg = '1';
+                } else {
+                    $statusMsg = "Sorry, there was an error uploading your file.";
+                    $targetFilePath = null;
+                }
+            } else {
+                $statusMsg = 'Sorry, only JPG, JPEG & PNG files are allowed to upload.';
+                $targetFilePath = null;
+            }
+        } else {
+            $statusMsg = '1';
+        }
+
+        if ($statusMsg != '1') {
+            echo $statusMsg;
+            return;
+        }
+
+        try {
+            Transaction::beginTransaction();
+            if (!is_null($pl)) {
+                $newDetails = new \models\DOUserDetails(null, null, null, $pl, $user->getUserId());
+                \models\DAOUserDetails::updatePrivacyLevel($newDetails);
+            }
+            $newUser = new \models\DOUser($user->getUserId(), null, null, null, $mood, $username, $passwordHash, $targetFilePath);
+            \models\DAOUser::updateSettings($newUser);
+            Transaction::commitTransaction();
+            echo '1';
+        } catch (\Exception $e) {
+            Transaction::rollBackTransaction();
+            echo 'error';
+        }
     }
 }

@@ -170,7 +170,7 @@ $(document).ready(function () {
         }
     });
 
-    setInterval(function () {
+    /* setInterval(function () {
         $('#nav-tabContent').load("index.php?controller=friendsController&action=viewFriendsPage", function (responseTxt, statusTxt, xhr) {
             if (statusTxt == "success") {
                 var idActiveElement = $('.nav-item.nav-link.active').attr('href');
@@ -179,5 +179,5 @@ $(document).ready(function () {
             }
         });
 
-    }, 3000);
+    }, 3000); */
 });

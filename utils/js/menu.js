@@ -2,9 +2,9 @@ $(document).ready(function () {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
     loadMenu();
 
-    setInterval(function () {
+    /* setInterval(function () {
         loadMenu();
-    }, 5000);
+    }, 5000); */
 });
 
 function loadMenu() {
@@ -71,13 +71,109 @@ function loadMenu() {
             });
 
             $('.addChat').on('click', function () {
-                $("#modal-chat").load("./index.php?controller=chatController&action=mostraModaleAddChat", function (responseTxt, statusTxt, xhr) {
+                $("#modal").load("./index.php?controller=chatController&action=mostraModaleAddChat", function (responseTxt, statusTxt, xhr) {
                     if (statusTxt == "success") {
                         $('#addChatModal').modal('show');
-            
+
+                        $(".custom-file-input").on("change", function () {
+                            var fileName = $(this).val().split("\\").pop();
+                            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                            readURL(this);
+                        });
+
                         $(function () {
                             window.fs_test = $('#selectChat').fSelect();
+                            window.fs_test = $('#selectChats').fSelect();
                         });
+
+                        $('#chatTypeSelection').on('click', function () {
+                            var chatType = $('input[name=chatType]:checked', this).val();
+
+                            switch (chatType) {
+                                case 'privateChat':
+                                    $('#selectFriend').removeAttr('hidden');
+                                    $('#selectFriends').attr('hidden', true);
+                                    break;
+
+                                case 'group':
+                                case 'channel':
+                                    $('#selectFriends').removeAttr('hidden');
+                                    $('#selectFriend').attr('hidden', true);
+                                    break;
+
+                                default:
+                                    alert('Not a valid type of chat');
+                                    break;
+                            }
+
+                        });
+                    }
+                    if (statusTxt == "error") {
+                        alert("Errore imprevisto, riprovare")
+                    }
+                });
+            });
+
+            $('#usrSettings').on('click', function () {
+                $("#modal").load("./index.php?action=mostraUserSettings", function (responseTxt, statusTxt, xhr) {
+                    if (statusTxt == "success") {
+                        $('#modalUsrSettings').modal('show');
+                        $(".custom-file-input").on("change", function () {
+                            var fileName = $(this).val().split("\\").pop();
+                            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                            readURL(this);
+                        });
+                        captureFormUserSettings();
+                        $(".reveal").on('click', function () {
+                            var $eye = $('#eye');
+                            var $pwd = $(".pwd");
+                            if ($pwd.attr('type') === 'password') {
+                                $pwd.attr('type', 'text');
+                                $eye.attr('class', 'fas fa-eye-slash');
+                            } else {
+                                $pwd.attr('type', 'password');
+                                $eye.attr('class', 'fas fa-eye');
+                            }
+                        });
+
+                        $("#inputUsername").blur(function() {
+                            var username = $("#inputUsername").val();
+                            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+                            if (format.test(username)) {
+                                document.getElementById('inputUsername').setCustomValidity('Carattere non valido');
+                                return;
+                            }
+                            $.ajax({
+                                type: 'post',
+                                url: 'index.php',
+                                data: {
+                                    'action': 'controlloUsername',
+                                    'username': username
+                                },
+                                success: function(response) {
+                                    if (response == 'true') {
+                                        document.getElementById('inputUsername').setCustomValidity('');
+                                    } else {
+                                        document.getElementById('inputUsername').setCustomValidity(response);
+                                    }
+                                },
+                
+                                error: function(response) {
+                                    document.getElementById('inputUsername').setCustomValidity('Username non valido');
+                                }
+                            });
+                        });
+
+                        $("#inputMood").blur(function() {
+                            controlInputStringFormat('inputMood', $("#inputMood").val());
+                        });
+                
+                        $("#inputPassword").blur(function() {
+                            controlInputPasswordFormat('inputPassword', $("#inputPassword").val());
+                        });
+                    }
+                    if (statusTxt == "error") {
+                        alert("Errore imprevisto, riprovare")
                     }
                 });
             });
@@ -88,7 +184,7 @@ function loadMenu() {
     });
 }
 
-setInterval(function () {
+/* setInterval(function () {
     $.ajax({
         url: 'index.php',
         type: 'POST',
@@ -96,4 +192,125 @@ setInterval(function () {
             'action': 'updateActivity'
         }
     });
-}, 5000)
+}, 5000) */
+
+function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#imgPicture').attr('src', e.target.result);
+            $('#imgPictureGroup').attr('src', e.target.result);
+        }
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function resetFileInput(id, src) {
+    $('#' + id).attr('src', src);
+    $('#labelInput').html('Choose photo');
+}
+
+//catturo il form user settings
+function captureFormUserSettings() {
+    var form = document.getElementById('formProfilo');
+    var fileSelect = document.getElementById('pictureInput');
+    var uploadButton = document.getElementById('saveProfilo');
+
+    form.onsubmit = function (event) {
+        event.preventDefault();
+
+        uploadButton.innerHTML = 'Uploading...';
+
+        var files = fileSelect.files;
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+
+            if (!file.type.match('image.*')) {
+                continue;
+            }
+
+            formData.append('picture', file, file.name);
+        }
+
+        formData.append('username', $('#inputUsername').val());
+        formData.append('password', $('#inputPassword').val());
+        formData.append('mood', $('#inputMood').val());
+        formData.append('pl', $('#inputPL').val());
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'index.php?action=aggiornaProfilo', true);
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                uploadButton.innerHTML = 'Upload';
+            } else {
+                $('#errorType').text("Immagine non supportata");
+                $.notify("Error: Image not supported!", {
+                    animate: {
+                        enter: 'animated flipInY',
+                        exit: 'animated flipOutX'
+                    },
+                    type: 'danger',
+                    z_index: 2000
+                });
+                setTimeout(function () {
+                    $.notifyClose();
+                }, 2000);
+            }
+        };
+
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                if (this.responseText == '1') {
+                    $.notify("Succes: Settings saved!", {
+                        animate: {
+                            enter: 'animated flipInY',
+                            exit: 'animated flipOutX'
+                        },
+                        type: 'success',
+                        z_index: 2000
+                    });
+                    setTimeout(function () {
+                        $.notifyClose();
+                    }, 2000);
+                    $('#modalUsrSettings').modal('hide');
+                } else {
+                    $.notify("Error: Operation failed!", {
+                        animate: {
+                            enter: 'animated flipInY',
+                            exit: 'animated flipOutX'
+                        },
+                        type: 'danger',
+                        z_index: 2000
+                    });
+                    setTimeout(function () {
+                        $.notifyClose();
+                    }, 2000);
+                }
+            }
+        };
+
+        xhr.send(formData);
+    }
+}
+
+function controlInputStringFormat(field, string) {
+    var format = /[`<>]/;
+    if (format.test(string)) {
+        document.getElementById(field).setCustomValidity('Carattere non valido');
+    } else {
+        document.getElementById(field).setCustomValidity('');
+    }
+}
+
+function controlInputPasswordFormat(field, string) {
+    var format = /[ `*()+\-=\[\]{};':"\\|,<>\/~]/;
+    if (format.test(string)) {
+        document.getElementById(field).setCustomValidity('Carattere non valido');
+    } else {
+        document.getElementById(field).setCustomValidity('');
+    }
+}

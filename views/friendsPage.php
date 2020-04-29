@@ -66,7 +66,7 @@
 
     </div>
 
-    <div id="modal-chat"></div>
+    <div id="modal"></div>
 
     <!-- CONTENUTO DELLA PAGINA  -->
 

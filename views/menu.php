@@ -88,7 +88,7 @@
     <div style="padding: 0" class="sidebar-menu">
         <ul>
             <li class="header-menu">
-                <a style="padding-bottom: 0; padding-top: 5" href="#">
+                <a style="padding-bottom: 0; padding-top: 5" href="#" id="usrSettings">
                     <i class="fa fa-cog fa-pull-left"></i>
                     <span style="padding: 0; margin-top: 3px" class="fa-pull-left"><?= $user->getUsername() ?> - settings</span>
                 </a>

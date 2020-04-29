@@ -8,14 +8,20 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
         foreach ($array as $friend) {
             $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
             $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
+            $src = '';
+            if (is_null($friend->getPathProfilePicture())) {
+                $src = "./utils/imgs/img_avatar.png";
+            } else {
+                $src = $friend->getPathProfilePicture();
+            }
             switch ($type) {
 
-                // All Friends
+                    // All Friends
                 case 'all':
                     $cont++;
                     echo '<li id=' . $friend->getUserId() . ' class="list-group-item d-flex justify-content-between align-items-center jumbotron">
                     <div>
-                        <img class="chat-img" src="./utils/imgs/img_avatar.png" alt="" />
+                        <img class="chat-img" src="' . $src . '" alt="" />
                         <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
                     </div>';
 
@@ -35,13 +41,13 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                     echo '</li>';
                     break;
 
-                // Online Friends
+                    // Online Friends
                 case 'online':
 
                     if ($friend->getPrivacyLevel() !== 'HIDDEN' && $friend->getLastActivity() > $current_timestamp) {
                         echo '<li id=' . $friend->getUserId() . ' class="list-group-item d-flex justify-content-between align-items-center jumbotron">
                                 <div>
-                                    <img class="chat-img" src="./utils/imgs/img_avatar.png" alt="" />
+                                    <img class="chat-img" src="' . $src . '" alt="" />
                                     <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
                                 </div><p style="color: green">Online</p>
                               </li>';
@@ -50,12 +56,12 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     break;
 
-                // Offline Friends
+                    // Offline Friends
                 case 'offline':
                     if ($friend->getPrivacyLevel() !== 'HIDDEN' && $friend->getLastActivity() < $current_timestamp) {
                         echo '<li id=' . $friend->getUserId() . ' class="list-group-item d-flex justify-content-between align-items-center jumbotron">
                                 <div>
-                                    <img class="chat-img" src="./utils/imgs/img_avatar.png" alt="" />
+                                    <img class="chat-img" src="' . $src . '" alt="" />
                                     <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
                                 </div><p style="color: red">Offline';
 
@@ -74,12 +80,12 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     break;
 
-                // Sent Friend Requests
+                    // Sent Friend Requests
                 case 'sentRequests':
                     $cont++;
                     echo '<li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                <img class="chat-img" src="./utils/imgs/img_avatar.png" alt="" />
+                                <img class="chat-img" src="' . $src . '" alt="" />
                                 <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
                             </div>
                             <div id="cancelRequest">
@@ -91,12 +97,12 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     break;
 
-                // Received Friend Requests
+                    // Received Friend Requests
                 case 'receivedRequests':
                     $cont++;
                     echo '<li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <img class="chat-img" src="./utils/imgs/img_avatar.png" alt="" />
+                                    <img class="chat-img" src="' . $src . '" alt="" />
                                     <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
                                 </div>
                                 <div style="display: flex">
@@ -117,12 +123,12 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                             </li>';
                     break;
 
-                // Blocked Users
+                    // Blocked Users
                 case 'blocked':
                     $cont++;
                     echo '<li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <img class="chat-img" src="./utils/imgs/img_avatar.png" alt="" />
+                                    <img class="chat-img" src="' . $src . '" alt="" />
                                     <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
                                 </div>
                                 <div id="unblockUser">

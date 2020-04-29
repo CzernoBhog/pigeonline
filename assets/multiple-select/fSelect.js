@@ -29,7 +29,7 @@
         }
         else {
             var settings = $.extend({
-                placeholder: 'Seleziona uno o più amici..',
+                placeholder: 'Select..',
                 numDisplayed: 3,
                 overflowText: '{n} selected',
                 searchText: 'Search',
@@ -119,7 +119,7 @@
                             var disabled = $el.is(':disabled') ? ' disabled' : '';
                             var selected = -1 < $.inArray(val, $this.selected) ? ' selected' : '';
                             var group = ' g' + $this.optgroup;
-                            var row = '<div class="fs-option' + selected + disabled + group + classes + '" data-value="' + val + '" data-index="' + $this.idx + '"><div style="display: flex;"><img class="chat-img" src="./utils/imgs/img_avatar.png"><span class="fs-checkbox"><i></i></span><div style="heigth: max-content; padding: 10px" class="fs-option-label">' + $el.html() + '</div></div></div>';
+                            var row = '<div class="fs-option' + selected + disabled + group + classes + '" data-value="' + val + '" data-index="' + $this.idx + '"><div style="display: flex;"><img class="chat-img" src="' + $el.attr('src') + '"><span class="fs-checkbox"><i></i></span><div style="heigth: max-content; padding: 10px" class="fs-option-label">' + $el.html() + '</div></div></div>';
 
                             if ('function' === typeof $this.settings.optionFormatter) {
                                 row = $this.settings.optionFormatter(row);

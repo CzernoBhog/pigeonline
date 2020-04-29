@@ -69,4 +69,19 @@ class DAOUserDetails {
             throw new Exception($e->getMessage());
         }
     }
+
+    public static function updatePrivacyLevel($userDetails)
+    {
+        $conn = \utils\Database::connect();
+        $query = 'UPDATE userDetails SET privacyLevel=:pl WHERE userId = :ui';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":pl", $userDetails->getPrivacyLevel());
+            $stmt->bindValue(":ui", $userDetails->getUserId());
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }
