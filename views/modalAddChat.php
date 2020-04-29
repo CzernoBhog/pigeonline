@@ -8,19 +8,19 @@
                 <h4 class="modal-title">Add a New Chat</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
-            <form action="index.php?controller=chatController&action=createChat" method="POST" enctype="multipart/form-data">
+            <form action="" method="POST" enctype="multipart/form-data" id="formChat">
                 <div class="modal-body">
                     <!-- Tipo di Chat -->
                     <div class="d-flex justify-content-center">
                         <div class="row" id="chatTypeSelection">
                             <label style="padding-right: 5px" class="radio-inline">
-                                <input type="radio" name="chatType" value="privateChat" checked> Private chat
+                                <input type="radio" name="chatType" value="1" checked> Private chat
                             </label>
                             <label style="padding-right: 5px" class="radio-inline">
-                                <input type="radio" name="chatType" value="group"> Group
+                                <input type="radio" name="chatType" value="2"> Group
                             </label>
                             <label class="radio-inline">
-                                <input type="radio" name="chatType" value="channel"> Channel
+                                <input type="radio" name="chatType" value="3"> Channel
                             </label>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
                             <label class="custom-control-label" for="secret">Secret chat</label>
                         </div>
 
-                        <select id="selectChat" name='users[]'>
+                        <select id="selectChat" name='users'>
                             <?php
                             foreach ($detailsFriends as $friend) {
                                 $src = '';
@@ -100,7 +100,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Add</button>
+                    <button id="btnAdd" type="submit" class="btn btn-success">Add</button>
                 </div>
             </form>
         </div>

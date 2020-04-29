@@ -31,7 +31,7 @@ class DAOChat
         }else{
             $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOChat');
             if (count($resultSet) != 0) {
-                return count($resultSet) > 1 ? $resultSet : $resultSet[0];
+                return $resultSet;
             }
         }
 

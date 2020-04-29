@@ -2,25 +2,19 @@
 
 namespace controllers;
 
+use utils\Transaction;
+
 require_once('utils/autoload.php');
 
 class chatController
 {
 
     /**
-     * Recupera tutte le chat relative all'utente loggato
-     */
-    public function getChats()
-    {
-
-    }
-
-    /**
      * Elimina la chat selezionata
      */
     public function deleteChat()
     {
-
+        // TODO
     }
 
     /**
@@ -28,28 +22,90 @@ class chatController
      */
     public function createChat()
     {
-        die(var_dump($_POST));
-        $userIds = explode(", ", $_POST['users']);
-        if($_POST['chatType'] === 'privateChat' && count($userIds) > 1) {
-            die("NO");
+        $userIds = $_POST['users'];     // un solo ID se private, altrimenti array di IDs
+
+        if (count($userIds) === 0) {
+            die("Nessun utente selezionato");
         }
 
-        switch($_POST['chatType']) {
-            case 'privateChat':
-                break;
+        if ($_POST['chatType'] === 'privateChat' && count($userIds) > 1) {
+            die("Errore creazione chat");
+        }
 
-            case 'group':
-                foreach ($userIds as $id) {
-                    $user = \models\DAOUser::getUser(array("userId" => $id));
+        $creatorUser = \models\DAOUser::getUser(array("userId" => $_SESSION['id']));
+        $chatTitle = trim($_POST['name']) == '' ? null : $_POST['name'];
+        $chatDescription = trim($_POST['description']) == '' ? null : $_POST['description'];
+
+        $targetFilePath = null;
+
+        if (!empty($_FILES["photo"]["name"])) {
+            // File upload path
+            $targetDir = "./utils/imgs/groupsPhoto/";
+            $fileName = basename($_FILES["photo"]["name"]);
+            $targetFilePath = $targetDir . rand(0, 100) . $fileName;
+            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+            // Allow certain file formats
+            $allowTypes = array('jpg', 'png', 'jpeg');
+            if (in_array($fileType, $allowTypes)) {
+                // Upload file to server
+                if (!move_uploaded_file($_FILES["photo"]["tmp_name"], $targetFilePath)) {
+                    die("Sorry, there was an error uploading your file.");
                 }
-                break;
+            } else {
+                die('Sorry, only JPG, JPEG & PNG files are allowed to upload.');
+            }
+        } 
 
-            case 'channel':
-                break;
+        try {
+            Transaction::beginTransaction();
+            switch ($_POST['chatType']) {
+                case '1':
+                    $chatType = ($_POST['isSecret'] === "true") ? 4 : $_POST['chatType'];
+                    $chat = new \models\DOChat(NULL, $chatType);
+                    \models\DAOChat::insertChat($chat);
+                    $chatId = \models\DAOChat::getLastInsertId();
+                    //inserisce l'amico come membro della chat
+                    $chatMember = new \models\DOChatMembers($_POST['users'], $chatId, null, 2);
+                    \models\DAOChatMembers::insertChatMember($chatMember);
+                    //inserisce l'utente che crea la chat come membro
+                    $chatMember = new \models\DOChatMembers($_SESSION['id'], $chatId, null, 2);
+                    \models\DAOChatMembers::insertChatMember($chatMember);
+                    break;
 
-            default:
-                die("NO");
-                break;
+                case '2':
+                    $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
+                    \models\DAOChat::insertChat($chat);
+                    $chatId = \models\DAOChat::getLastInsertId();
+                    foreach ($userIds as $id) {
+                        $chatMember = new \models\DOChatMembers($id, $chatId, null, 2);
+                        \models\DAOChatMembers::insertChatMember($chatMember);
+                    }
+                    $chatMember = new \models\DOChatMembers($_SESSION['id'], $chatId, null, 3);
+                    \models\DAOChatMembers::insertChatMember($chatMember);
+                    break;
+
+                case '3':
+                    $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
+                    \models\DAOChat::insertChat($chat);
+                    $chatId = \models\DAOChat::getLastInsertId();
+                    foreach ($userIds as $id) {
+                        $chatMember = new \models\DOChatMembers($id, $chatId, null, 1);
+                        \models\DAOChatMembers::insertChatMember($chatMember);
+                    }
+                    $chatMember = new \models\DOChatMembers($_SESSION['id'], $chatId, null, 3);
+                    \models\DAOChatMembers::insertChatMember($chatMember);
+                    break;
+
+                default:
+                    die("Tipo di chat non supportato :/");
+                    break;
+            }
+            Transaction::commitTransaction();
+            echo 'true';
+        } catch (\Exception $e) {
+            Transaction::rollBackTransaction();
+            // die($e->getMessage());
+            die("Errore imprevisto");
         }
     }
 
@@ -68,9 +124,17 @@ class chatController
     public function viewChatPage()
     {
         $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        $chat = \models\DAOChat::getChat(array("chatId" => $_GET['chatId']));
+        //recupera il ChatMember dell'utente per verificare che sia all'interno della chat
+        $chatMemeber = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId'], "userId" => $_SERVER['id']));
+
+        if (is_null($chatMemeber) || is_null($chat)) {
+            die("Sei proprio un utente burlone ;D");
+        }
+
+        //recupero dei membri della chat
+        $chatMember = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId']), FALSE, FALSE, 'username', '*', FALSE, array('user' => 'userId'), 'userId');
+
         include('views/chatPage.php');
     }
-
 }
-
-?>

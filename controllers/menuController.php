@@ -2,26 +2,47 @@
 
 namespace controllers;
 
-    require_once('utils/autoload.php');
+require_once('utils/autoload.php');
 
-    class menuController
+class menuController
+{
+
+    /**
+     * Carica il menu relativo all'utente
+     */
+    public function caricaMenu()
     {
-
-        /**
-         * Carica il menu relativo all'utente
-         */
-        public function caricaMenu()
-        {
-            $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
-            //nuove richieste inviate all'utente
-            $friendPendingrequests = \models\DAOFriends::getApplicantsUsers($user->getUserId());
-            //ottiene le chat di cui è membro l'utente
-            $chatsMember = \models\DAOChatMembers::getChatMembers( array('chatMembers.userId' => $_SESSION['id']), FALSE, FALSE, 'chatId', '*', FALSE, array('user' => 'userId'), 'userId' );
-            $chats = null;
-            if(!is_null($chatsMember)){
-                $chats = \models\DAOChat::getChat( array('chatId' => $chatsMember->getChatId()), FALSE, FALSE, 'title', '*', FALSE, array('chat' => 'chatId'), 'chatId' );
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        //nuove richieste inviate all'utente
+        $friendPendingrequests = \models\DAOFriends::getApplicantsUsers($user->getUserId());
+        //ottiene le chat di cui è membro l'utente
+        $chatsMember = \models\DAOChatMembers::getChatMembers(array('chatMembers.userId' => $_SESSION['id']), FALSE, FALSE, 'chatId', '*', FALSE, array('user' => 'userId'), 'userId');
+        $chats = array();
+        if (!is_null($chatsMember)) {
+            foreach ($chatsMember as $chat) {
+                array_push($chats, \models\DAOChat::getChat(array('chat.chatId' => $chat->getChatId()))[0]);
             }
-
-            include('./views/menu.php');
         }
+
+        //controlla se è una chat privata e imposta il titolo della chat con l'username dell'amico
+        for ($i=0; $i < count($chats); $i++) { 
+            if ($chats[$i]->getChatType() === "1") {
+                $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chats[$i]->getChatId()));
+                $friendId = ($chatMembers[0]->getUserId() !== $_SESSION['id']) ? $chatMembers[0]->getUserId() : $chatMembers[1]->getUserId();
+                $user = \models\DAOUser::getUser(array('userId' => $friendId));
+                $chats[$i] = \models\DAOChatMembers::getChatMembers(
+                    array('chatMembers.chatId' => $chats[$i]->getChatId(), 'user.userId' => $friendId), 
+                    FALSE, 
+                    FALSE, 
+                    NULL, 
+                    '*',
+                    TRUE, 
+                    array('user' => 'userId', 'userDetails' => 'userId'),
+                    'userId'
+                )[0];
+            }
+        }
+
+        include('./views/menu.php');
     }
+}

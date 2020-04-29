@@ -90,13 +90,13 @@ function loadMenu() {
                             var chatType = $('input[name=chatType]:checked', this).val();
 
                             switch (chatType) {
-                                case 'privateChat':
+                                case '1':
                                     $('#selectFriend').removeAttr('hidden');
                                     $('#selectFriends').attr('hidden', true);
                                     break;
 
-                                case 'group':
-                                case 'channel':
+                                case '2':
+                                case '3':
                                     $('#selectFriends').removeAttr('hidden');
                                     $('#selectFriend').attr('hidden', true);
                                     break;
@@ -107,6 +107,8 @@ function loadMenu() {
                             }
 
                         });
+
+                        captureFormNewChat();
                     }
                     if (statusTxt == "error") {
                         alert("Errore imprevisto, riprovare")
@@ -279,6 +281,98 @@ function captureFormUserSettings() {
                     $('#modalUsrSettings').modal('hide');
                 } else {
                     $.notify("Error: Operation failed!", {
+                        animate: {
+                            enter: 'animated flipInY',
+                            exit: 'animated flipOutX'
+                        },
+                        type: 'danger',
+                        z_index: 2000
+                    });
+                    setTimeout(function () {
+                        $.notifyClose();
+                    }, 2000);
+                }
+            }
+        };
+
+        xhr.send(formData);
+    }
+}
+
+function captureFormNewChat() {
+    var form = document.getElementById('formChat');
+    var fileSelect = document.getElementById('pictureInput');
+    var uploadButton = document.getElementById('btnAdd');
+
+    form.onsubmit = function (event) {
+        event.preventDefault();
+
+        uploadButton.innerHTML = 'Uploading...';
+
+        var files = fileSelect.files;
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+
+            if (!file.type.match('image.*')) {
+                continue;
+            }
+
+            formData.append('photo', file, file.name);
+        }
+
+        formData.append('chatType', $('input[name=chatType]:checked').val());
+        formData.append('isSecret', $("#secret").is(':checked'));
+        formData.append('name', $('#inputName').val());
+        formData.append('description', $('#inputDescription').val());
+        if($('input[name=chatType]:checked').val() === '1'){
+            formData.append('users', $('#selectChat').val());
+        } else {
+            for (let i = 0; i < $('#selectChats').val().length; i++) {
+                formData.append('users[]', $('#selectChats').val()[i]);
+            } 
+            //formData.append('users[]', $('#selectChats').val());
+        }
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'index.php?controller=chatController&action=createChat', true);
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                uploadButton.innerHTML = 'Upload';
+            } else {
+                $('#errorType').text("Immagine non supportata");
+                $.notify("Error: Image not supported!", {
+                    animate: {
+                        enter: 'animated flipInY',
+                        exit: 'animated flipOutX'
+                    },
+                    type: 'danger',
+                    z_index: 2000
+                });
+                setTimeout(function () {
+                    $.notifyClose();
+                }, 2000);
+            }
+        };
+
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                if (this.responseText == 'true') {
+                    $.notify("Succes: Chat created!", {
+                        animate: {
+                            enter: 'animated flipInY',
+                            exit: 'animated flipOutX'
+                        },
+                        type: 'success',
+                        z_index: 2000
+                    });
+                    setTimeout(function () {
+                        $.notifyClose();
+                    }, 2000);
+                    $('#addChatModal').modal('hide');
+                } else {
+                    $.notify("Error: "+ this.responseText +"!", {
                         animate: {
                             enter: 'animated flipInY',
                             exit: 'animated flipOutX'

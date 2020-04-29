@@ -289,7 +289,7 @@ class utentiController
             // File upload path
             $targetDir = "./utils/imgs/usersPhoto/";
             $fileName = basename($_FILES["picture"]["name"]);
-            $targetFilePath = $targetDir . $fileName;
+            $targetFilePath = $targetDir . $user->getUserId() . $fileName;
             $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
             // Allow certain file formats
             $allowTypes = array('jpg', 'png', 'jpeg');
@@ -298,23 +298,13 @@ class utentiController
                 if (move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath)) {
                     if (!is_null($user->getPathProfilePicture()))
                         unlink($user->getPathProfilePicture());
-                    $statusMsg = '1';
                 } else {
-                    $statusMsg = "Sorry, there was an error uploading your file.";
-                    $targetFilePath = null;
+                    die("Sorry, there was an error uploading your file.");
                 }
             } else {
-                $statusMsg = 'Sorry, only JPG, JPEG & PNG files are allowed to upload.';
-                $targetFilePath = null;
+                die('Sorry, only JPG, JPEG & PNG files are allowed to upload.');
             }
-        } else {
-            $statusMsg = '1';
-        }
-
-        if ($statusMsg != '1') {
-            echo $statusMsg;
-            return;
-        }
+        } 
 
         try {
             Transaction::beginTransaction();
@@ -328,6 +318,8 @@ class utentiController
             echo '1';
         } catch (\Exception $e) {
             Transaction::rollBackTransaction();
+            if (!is_null($targetFilePath))
+                unlink($targetFilePath);
             echo 'error';
         }
     }

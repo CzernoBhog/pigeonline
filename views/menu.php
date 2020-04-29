@@ -56,14 +56,25 @@
             </div>
             <div class="pre-scrollable">
                 <?php
-                if (!is_null($chats)) {
+                if (!empty($chats)) {
                     foreach ($chats as $chat) {
-                        echo '<li>
-                                <a href="index.php?action=viewChatPage&id=' . $chat->getChatId() . '" style="padding-top: 0">
+                        if (is_array($chat)) {
+                            echo '<li>
+                                <a href="index.php?action=viewChatPage&chatId=' . $chat['chatId'] . '" style="padding-top: 0">
+                                    <img class="chat-img fa-pull-left" src="' . $chat['pathProfilePicture'] . '" alt="Avatar">
+                                    <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $chat['username'] . '</span>';
+                            $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
+                            $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
+                            echo '<br><span style="padding-left: 10px; font-size: smaller">';
+                            echo ($chat['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
+                            echo '</a></li>';
+                        } else {
+                            echo '<li>
+                                <a href="index.php?action=viewChatPage&chatId=' . $chat->getChatId() . '" style="padding-top: 0">
                                     <img class="chat-img fa-pull-left" src="' . $chat->getPathToChatPhoto() . '" alt="Avatar">
                                     <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $chat->getTitle() . '</span>
-                                </a>
-                            </li>';
+                                </a></li>';
+                        }
                     }
                 } else {
                     echo '<li><a style="color: #b8bfce"><i>Apri la chat... ah no, non ce ne sono :)</i></a></li>';
@@ -96,6 +107,3 @@
         </ul>
     </div>
 </div>
-
-
-

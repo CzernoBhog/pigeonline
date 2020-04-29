@@ -31,7 +31,7 @@ class DAOChatMembers
         }else{
             $resultSet = $stmt->fetchAll(\PDO::FETCH_CLASS, '\models\DOChatMembers');
             if (count($resultSet) != 0) {
-                return count($resultSet) > 1 ? $resultSet : $resultSet[0];
+                return $resultSet;
             }
         }
 
@@ -41,14 +41,13 @@ class DAOChatMembers
     public static function insertChatMember($chatMembers)
     {
         $conn = \utils\Database::connect();
-        $query = 'INSERT INTO chatMembers (userId, chatId, draft, userType, isTyping) VALUES(:ui, :ci, :d, :ut, :it)';
+        $query = 'INSERT INTO chatMembers (userId, chatId, draft, userType) VALUES(:ui, :ci, :d, :ut)';
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":ui", $chatMembers->getUserId());
             $stmt->bindValue(":ci", $chatMembers->getChatId());
             $stmt->bindValue(":d", $chatMembers->getDraft());
             $stmt->bindValue(":ut", $chatMembers->getUserType());
-            $stmt->bindValue(":it", $chatMembers->getIsTyping());
             return $stmt->execute();
         } catch (\Exception | \PDOException $e) {
             throw new \Exception('Errore inserimento chatMembers');

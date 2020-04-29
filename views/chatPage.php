@@ -53,7 +53,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="outgoing_msg">
+                    <!-- <div class="outgoing_msg">
                         <div class="sent_msg">
                             <p>We work directly with our designers and suppliers,
                                 and sell direct to you, which means quality, exclusive
@@ -148,7 +148,7 @@
                                 <span class="time_date"> 11:01 AM | Today</span>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="type_msg">
                     <div class="input_msg_write">
