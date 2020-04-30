@@ -312,6 +312,7 @@ class utentiController
                 $newDetails = new \models\DOUserDetails(null, null, null, $pl, $user->getUserId());
                 \models\DAOUserDetails::updatePrivacyLevel($newDetails);
             }
+            $targetFilePath = is_null($targetFilePath) ? './utils/imgs/img_avatar.png' : $targetFilePath;
             $newUser = new \models\DOUser($user->getUserId(), null, null, null, $mood, $username, $passwordHash, $targetFilePath);
             \models\DAOUser::updateSettings($newUser);
             Transaction::commitTransaction();

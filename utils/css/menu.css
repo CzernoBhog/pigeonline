@@ -489,8 +489,16 @@ body {
     max-height: 150px;
 }
 
-.chat-img{
+.chat-img {
     border-radius: 50%;
     width: 42px;
     height: 42px;
+}
+
+.usernameChat {
+    width: 60%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

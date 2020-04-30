@@ -59,21 +59,27 @@
                 if (!empty($chats)) {
                     foreach ($chats as $chat) {
                         if (is_array($chat)) {
+                            $src = $chat['pathProfilePicture'];
                             echo '<li>
-                                <a href="index.php?action=viewChatPage&chatId=' . $chat['chatId'] . '" style="padding-top: 0">
-                                    <img class="chat-img fa-pull-left" src="' . $chat['pathProfilePicture'] . '" alt="Avatar">
+                                <a href="index.php?controller=chatController&action=viewChatPage&chatId=' . $chat['chatId'] . '" style="padding-top: 0">
+                                    <img class="chat-img fa-pull-left" src="' . $src . '" alt="Avatar">
                                     <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $chat['username'] . '</span>';
+                            if ($chat['chatType'] == '4')
+                                echo '<i style="margin: 0;" class="fa fa-lock fa-pull-right"></i>';
                             $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
                             $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
                             echo '<br><span style="padding-left: 10px; font-size: smaller">';
                             echo ($chat['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
                             echo '</a></li>';
                         } else {
+                            $src = $chat->getPathToChatPhoto();
                             echo '<li>
-                                <a href="index.php?action=viewChatPage&chatId=' . $chat->getChatId() . '" style="padding-top: 0">
-                                    <img class="chat-img fa-pull-left" src="' . $chat->getPathToChatPhoto() . '" alt="Avatar">
-                                    <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $chat->getTitle() . '</span>
-                                </a></li>';
+                                <a href="index.php?controller=chatController&action=viewChatPage&chatId=' . $chat->getChatId() . '" style="padding-top: 0">
+                                    <img class="chat-img fa-pull-left" src="' . $src . '" alt="Avatar">
+                                    <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $chat->getTitle() . '</span>';
+                            echo '<br><span style="padding-left: 10px; font-size: smaller">';
+                            echo $chat->getChatType() == 2 ? 'Group' : 'Channel';
+                            echo '</a></li>';
                         }
                     }
                 } else {

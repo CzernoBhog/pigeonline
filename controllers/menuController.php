@@ -26,10 +26,10 @@ class menuController
 
         //controlla se è una chat privata e imposta il titolo della chat con l'username dell'amico
         for ($i=0; $i < count($chats); $i++) { 
-            if ($chats[$i]->getChatType() === "1") {
+            $chatType = $chats[$i]->getChatType();
+            if ($chatType === "1" || $chatType === "4") {
                 $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chats[$i]->getChatId()));
                 $friendId = ($chatMembers[0]->getUserId() !== $_SESSION['id']) ? $chatMembers[0]->getUserId() : $chatMembers[1]->getUserId();
-                $user = \models\DAOUser::getUser(array('userId' => $friendId));
                 $chats[$i] = \models\DAOChatMembers::getChatMembers(
                     array('chatMembers.chatId' => $chats[$i]->getChatId(), 'user.userId' => $friendId), 
                     FALSE, 
@@ -40,6 +40,7 @@ class menuController
                     array('user' => 'userId', 'userDetails' => 'userId'),
                     'userId'
                 )[0];
+                $chats[$i] += ['chatType' => $chatType];
             }
         }
 

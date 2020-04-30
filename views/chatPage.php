@@ -23,36 +23,77 @@
 
             <div class="messaging" style="padding: 0;">
 
-                <div class="outgoing_usr" style="height: 52px; background-color: #dddddd">
-                    <div style="height: 50px; padding: 2px 2px 2px 2px;">
-                        <img style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="./utils/imgs/img_avatar.png" alt="Avatar">
-                        <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">Tonetto</span>
-                        <br><span style="padding-left: 10px; font-size: small; color: black">Offline</span>
-                    </div>
-                    <button style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
-                </div>
+                <?php
+                if ($chat->getChatType() == '1' || $chat->getChatType() == '4') {
+                    $otherUser = ($chatMembers[0]['userId'] !== $_SESSION['id']) ? $chatMembers[0] : $chatMembers[1];
+                    echo '<div class="outgoing_usr" style="height: 52px; background-color: #dddddd">
+                                <div style="height: 50px; padding: 2px 2px 2px 2px;">
+                                    <img style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $otherUser['pathProfilePicture'] . '" alt="Avatar">
+                                    <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $otherUser['username'] . '</span>';
+                    $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
+                    $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
+                    echo '<br><span style="padding-left: 10px; font-size: smaller">';
+                    echo ($otherUser['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
+                    echo        '</div>
+                                <button style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
+                            </div>';
+                } else {
+                    $groupMembers = '';
+                    for ($i = 0; $i < count($chatMembers); $i++) {
+                        $groupMembers .= $chatMembers[$i]['username'];
+                        if ($i < count($chatMembers) - 1)
+                            $groupMembers .= ', ';
+                    }
+                    echo '<div class="outgoing_usr" style="height: 52px; background-color: #dddddd">
+                                <div style="height: 50px; padding: 2px 2px 2px 2px;">
+                                    <img style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $chat->getPathToChatPhoto() . '" alt="Avatar">
+                                    <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $chat->getTitle() . '</span>
+                                    <br><span class="span-goup-members">' . $groupMembers . '</span>
+                                </div>
+                                <button style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
+                            </div>';
+                }
+                ?>
 
                 <div class="msg_history" id="messaggi">
-                    <div class="outgoing_msg">
-                        <div class="sent_msg">
-                            <p>We work directly with our designers and suppliers,
-                                and sell direct to you, which means quality, exclusive
-                                products, at a price anyone can afford.</p>
-                            <span style="float: right; text-align: right" class="time_date"> 11:01 AM | Today <i class="fa fa-check-double check-out"></i></span>
-                        </div>
-                    </div>
-                    <div class="incoming_msg">
-                        <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
-                        <div class="received_msg">
-                            <div class="received_withd_msg">
-                                <p>We work directly with our designers and suppliers,
-                                    and sell direct to you, which means quality, exclusive
-                                    products, at a price anyone can afford.</p>
-                                <i class="fa fa-check-double check-in"></i>
-                                <span class="time_date"> 11:01 AM | Today</span>
-                            </div>
-                        </div>
-                    </div>
+                    <?php
+                    if (!is_null($messages)) {
+                        foreach ($messages as $msg) {
+                            if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime("04/30/2020"))) {
+                                $day = "Yesterday";
+                            } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime("04/30/2020"))) {
+                                $day = "Today";
+                            } else {
+                                $day = date("D M Y", strtotime("04/29/2020"));
+                            }
+
+                            if ($msg['sentBy'] == $_SESSION['id']) {
+                                echo '<div class="outgoing_msg">
+                                            <div class="sent_msg">
+                                                <p>' . $msg["text"] . '</p>
+                                                <span style="float: right; text-align: right" class="time_date">' . date("H:i", strtotime($msg["timeStamp"])) . ' | ' . $day . '<i class="fa fa-check-double check-out"></i></span>
+                                            </div>
+                                        </div>';
+                            } else {
+                                echo '<div class="incoming_msg">
+                                            <div class="incoming_msg_img"> <img style="border-radius: 50%;" src="' . $msg["pathProfilePicture"] . '" alt="sunil"> </div>
+                                            <div class="received_msg">
+                                                <div class="received_withd_msg">
+                                                    <p>' . $msg["text"] . '</p>
+                                                    <i class="fa fa-check-double check-in"></i>
+                                                    <span class="time_date">' . date("H:i", strtotime($msg["timeStamp"])) . ' | ' . $day . '</span>
+                                                </div>
+                                            </div>
+                                        </div>';
+                            }
+                        }
+                    } else {
+                        echo '<div style="width: 100%" class="received_withd_msg">
+                                    <p style="margin-left: 45%; color: white; background: #31353d none repeat scroll 0 0">Chat vuota :(</p>
+                                </div>';
+                    }
+
+                    ?>
                     <!-- <div class="outgoing_msg">
                         <div class="sent_msg">
                             <p>We work directly with our designers and suppliers,
@@ -72,87 +113,11 @@
                                 <span class="time_date"> 11:01 AM | Today</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="outgoing_msg">
-                        <div class="sent_msg">
-                            <p>We work directly with our designers and suppliers,
-                                and sell direct to you, which means quality, exclusive
-                                products, at a price anyone can afford.</p>
-                            <span style="float: right; text-align: right" class="time_date"> 11:01 AM | Today <i class="fa fa-check-double check-out"></i></span>
-                        </div>
-                    </div>
-                    <div class="incoming_msg">
-                        <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
-                        <div class="received_msg">
-                            <div class="received_withd_msg">
-                                <p>We work directly with our designers and suppliers,
-                                    and sell direct to you, which means quality, exclusive
-                                    products, at a price anyone can afford.</p>
-                                <i class="fa fa-check-double check-in"></i>
-                                <span class="time_date"> 11:01 AM | Today</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="outgoing_msg">
-                        <div class="sent_msg">
-                            <p>We work directly with our designers and suppliers,
-                                and sell direct to you, which means quality, exclusive
-                                products, at a price anyone can afford.</p>
-                            <span style="float: right; text-align: right" class="time_date"> 11:01 AM | Today <i class="fa fa-check-double check-out"></i></span>
-                        </div>
-                    </div>
-                    <div class="incoming_msg">
-                        <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
-                        <div class="received_msg">
-                            <div class="received_withd_msg">
-                                <p>We work directly with our designers and suppliers,
-                                    and sell direct to you, which means quality, exclusive
-                                    products, at a price anyone can afford.</p>
-                                <i class="fa fa-check-double check-in"></i>
-                                <span class="time_date"> 11:01 AM | Today</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="outgoing_msg">
-                        <div class="sent_msg">
-                            <p>We work directly with our designers and suppliers,
-                                and sell direct to you, which means quality, exclusive
-                                products, at a price anyone can afford.</p>
-                            <span style="float: right; text-align: right" class="time_date"> 11:01 AM | Today <i class="fa fa-check-double check-out"></i></span>
-                        </div>
-                    </div>
-                    <div class="incoming_msg">
-                        <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
-                        <div class="received_msg">
-                            <div class="received_withd_msg">
-                                <p>We work directly with our designers and suppliers,
-                                    and sell direct to you, which means quality, exclusive
-                                    products, at a price anyone can afford.</p>
-                                <i class="fa fa-check-double check-in"></i>
-                                <span class="time_date"> 11:01 AM | Today</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="outgoing_msg">
-                        <div class="sent_msg">
-                            <p>hi</p>
-                            <span style="float: right; text-align: right" class="time_date"> 11:01 AM | Today <i class="fa fa-check-double check-out"></i></span>
-                        </div>
-                    </div>
-                    <div class="incoming_msg">
-                        <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
-                        <div class="received_msg">
-                            <div class="received_withd_msg">
-                                <p>ok</p>
-                                <i class="fa fa-check-double check-in"></i>
-                                <span class="time_date"> 11:01 AM | Today</span>
-                            </div>
-                        </div>
                     </div> -->
                 </div>
                 <div class="type_msg">
-                    <div class="input_msg_write">
-                        <input style="padding-left: 5px;" type="text" class="write_msg" placeholder="Type a message" />
+                    <div class="input_msg_write" style="background: #ddd;">
+                        <input style="padding-left: 15px;" type="text" class="write_msg" placeholder="Type a message" />
                         <!-- <button class="msg_send_btn" style="right: 90px;" type="button"><i class="fa fa-microphone-alt" aria-hidden="true"></i></button> -->
                         <button class="msg_send_btn" style="right: 55px;" type="button"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
                         <button class="msg_send_btn" style="right: 20px;" type="button"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>

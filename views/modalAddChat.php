@@ -50,7 +50,7 @@
                         <div class="form-group" style="display: flex; align-items: end;">
                             <div class="input-group input-file" style="display: flex; align-items: end;" id="picture">
                                 <img id="imgPictureGroup" style="height: 70px; width: 70px; margin-right: 20px" src="./utils/imgs/img_avatar.png" />
-                                <div class="custom-file mb-3">
+                                <div class="custom-file mb-3" style="margin-top: 1rem !important;">
                                     <input type="file" class="custom-file-input" name="photo" style="margin-bottom: auto; margin-top: auto" id="pictureInput" placeholder="choose a picture..." accept="img/jpeg, img/png">
                                     <label id="labelInput" class="custom-file-label" for="customFile">Choose photo</label>
                                 </div>
@@ -65,12 +65,7 @@
                         <select id="selectChats" multiple="multiple" name='users[]'>
                             <?php
                             foreach ($detailsFriends as $friend) {
-                                $src = '';
-                                if (is_null($friend->getPathProfilePicture())) {
-                                    $src = "./utils/imgs/img_avatar.png";
-                                } else {
-                                    $src = $friend->getPathProfilePicture();
-                                }
+                                $src = $friend->getPathProfilePicture();
                                 echo "<option src='" . $src . "' value='" . $friend->getUserId() . "'>" . $friend->getUsername() . "</option>";
                             }
                             ?>
@@ -86,12 +81,7 @@
                         <select id="selectChat" name='users'>
                             <?php
                             foreach ($detailsFriends as $friend) {
-                                $src = '';
-                                if (is_null($friend->getPathProfilePicture())) {
-                                    $src = "./utils/imgs/img_avatar.png";
-                                } else {
-                                    $src = $friend->getPathProfilePicture();
-                                }
+                                $src = $friend->getPathProfilePicture();
                                 echo "<option src='" . $src . "' value='" . $friend->getUserId() . "'>" . $friend->getUsername() . "</option>";
                             }
                             ?>

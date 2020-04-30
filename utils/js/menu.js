@@ -4,7 +4,7 @@ $(document).ready(function () {
 
     /* setInterval(function () {
         loadMenu();
-    }, 5000); */
+    }, 5000);  */
 });
 
 function loadMenu() {
@@ -194,7 +194,7 @@ function loadMenu() {
             'action': 'updateActivity'
         }
     });
-}, 5000) */
+}, 5000)  */
 
 function readURL(input) {
     if (input.files && input.files[0]) {
@@ -279,6 +279,7 @@ function captureFormUserSettings() {
                         $.notifyClose();
                     }, 2000);
                     $('#modalUsrSettings').modal('hide');
+                    loadMenu();
                 } else {
                     $.notify("Error: Operation failed!", {
                         animate: {
@@ -371,6 +372,7 @@ function captureFormNewChat() {
                         $.notifyClose();
                     }, 2000);
                     $('#addChatModal').modal('hide');
+                    loadMenu();
                 } else {
                     $.notify("Error: "+ this.responseText +"!", {
                         animate: {

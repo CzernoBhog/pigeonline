@@ -8,12 +8,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
         foreach ($array as $friend) {
             $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
             $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
-            $src = '';
-            if (is_null($friend->getPathProfilePicture())) {
-                $src = "./utils/imgs/img_avatar.png";
-            } else {
-                $src = $friend->getPathProfilePicture();
-            }
+            $src = $friend->getPathProfilePicture();
             switch ($type) {
 
                     // All Friends
