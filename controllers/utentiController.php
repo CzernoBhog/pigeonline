@@ -296,7 +296,7 @@ class utentiController
             if (in_array($fileType, $allowTypes)) {
                 // Upload file to server
                 if (move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath)) {
-                    if (!is_null($user->getPathProfilePicture()))
+                    if ($user->getPathProfilePicture() != './utils/imgs/img_avatar.png')
                         unlink($user->getPathProfilePicture());
                 } else {
                     die("Sorry, there was an error uploading your file.");

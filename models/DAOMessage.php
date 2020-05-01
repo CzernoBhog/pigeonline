@@ -5,7 +5,7 @@ namespace models;
 class DAOMessage
 {
 
-    public static function getMessage(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
+    public static function getMessage(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'message', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
@@ -24,7 +24,7 @@ class DAOMessage
         }
 
         if ($isArray) {
-            $resultSet = $stmt->fetchAll();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (count($resultSet) != 0) {
                 return $resultSet;
             }
@@ -41,21 +41,20 @@ class DAOMessage
     public static function insertMessage($message)
     {
         $conn = \utils\Database::connect();
-        $query = 'INSERT INTO message (ttl, seen, filePath, text, timeStamp, messageType, edited, pinned, sentBy, quotedMessage, chatId, inoltred) VALUES(:ttl, :s, :fp, :t, :ts, :mt, :e, :p, :sb, :qm, :ci, :i)';
+        $query = 'INSERT INTO message (ttl, seen, filePath, text, messageType, edited, pinned, sentBy, quotedMessage, chatId, inoltred) VALUES(:ttl, :s, :fp, :t, :mt, :e, :p, :sb, :qm, :ci, :i)';
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":ttl", $message->getTtl());
             $stmt->bindValue(":s", $message->getSeen());
             $stmt->bindValue(":fp", $message->getFilePath());
             $stmt->bindValue(":t", $message->getText());
-            $stmt->bindValue(":ts", $message->getTimeStamp());
             $stmt->bindValue(":mt", $message->getMessageType());
-            $stmt->bindValue(":e", $message->getEdited());
-            $stmt->bindValue(":p", $message->getPinned());
+            $stmt->bindValue(":e", $message->getEdited(), \PDO::PARAM_BOOL);
+            $stmt->bindValue(":p", $message->getPinned(), \PDO::PARAM_BOOL);
             $stmt->bindValue(":sb", $message->getSentBy());
             $stmt->bindValue(":qm", $message->getQuotedMessage());
             $stmt->bindValue(":ci", $message->getChatId());
-            $stmt->bindValue(":i", $message->getInoltred());
+            $stmt->bindValue(":i", $message->getInoltred(), \PDO::PARAM_BOOL);
             return $stmt->execute();
         } catch (\Exception | \PDOException $e) {
             throw new \Exception('Errore inserimento message');
@@ -88,6 +87,20 @@ class DAOMessage
         }
     }
 
+    public static function updateSeenToTrue($messageId)
+    {
+        $conn = \utils\Database::connect();
+        $query = 'UPDATE message SET seen=1 WHERE messageId = :mi';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":mi", $messageId);
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new \Exception('Errore aggiornamento message');
+        }
+    }
+
     public static function deleteMessage($message)
     {
         $conn = \utils\Database::connect();
@@ -106,5 +119,37 @@ class DAOMessage
     {
         $conn = \utils\Database::connect();
         return $conn->lastInsertId();
+    }
+
+    /* select * from message
+    INNER JOIN user ON(message.sentBy = user.userId)
+    where timeStamp > 
+    (SELECT timeStamp FROM message 
+    INNER JOIN user ON(message.sentBy = user.userId) 
+    INNER JOIN seenBy ON(message.messageId = seenBy.messageId) 
+    WHERE chatId = 14 AND seenBy.userId = 1 ORDER BY timeStamp DESC limit 1) */
+    public static function getNewMessages($chatId, $userId)
+    {
+        $conn = \utils\Database::connect();
+        $query =    'SELECT * FROM message
+                    INNER JOIN user ON(message.sentBy = user.userId)
+                    WHERE timeStamp > 
+                    (SELECT timeStamp FROM message 
+                    INNER JOIN user ON(message.sentBy = user.userId) 
+                    INNER JOIN seenBy ON(message.messageId = seenBy.messageId) 
+                    WHERE chatId = :ci AND seenBy.userId = :ui ORDER BY timeStamp DESC LIMIT 1)';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":ci", $chatId);
+            $stmt->bindValue(":ui", $userId);
+            $result = $stmt->execute();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            if (count($resultSet) != 0) {
+                return $resultSet;
+            }
+            return null;
+        } catch (\Exception | \PDOException $e) {
+            throw new \Exception('Errore eliminazione message');
+        }
     }
 }

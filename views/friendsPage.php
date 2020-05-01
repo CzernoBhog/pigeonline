@@ -18,7 +18,9 @@
         <a id="show-sidebar" class="btn btn-sm btn-dark" href="#" style="z-index: 10">
             <i class="fas fa-bars"></i>
         </a>
-        <nav id="sidebar" class="sidebar-wrapper"></nav>
+        <?php
+        require_once('./views/menu.php')
+        ?>
 
         <main class="page-content">
 

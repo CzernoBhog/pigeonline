@@ -17,7 +17,9 @@
         <a id="show-sidebar" class="btn btn-sm btn-dark" href="#" style="z-index: 10">
             <i class="fas fa-bars"></i>
         </a>
-        <nav id="sidebar" class="sidebar-wrapper"></nav>
+        <?php
+        require_once('./views/menu.php')
+        ?>
 
         <main class="page-content">
 
@@ -30,10 +32,12 @@
                                 <div style="height: 50px; padding: 2px 2px 2px 2px;">
                                     <img style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $otherUser['pathProfilePicture'] . '" alt="Avatar">
                                     <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $otherUser['username'] . '</span>';
-                    $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
-                    $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
-                    echo '<br><span style="padding-left: 10px; font-size: smaller">';
-                    echo ($otherUser['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
+                    if ($otherUser['privacyLevel'] != '3') {
+                        $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
+                        $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
+                        echo '<br><span style="padding-left: 10px; font-size: smaller">';
+                        echo ($otherUser['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
+                    }
                     echo        '</div>
                                 <button style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                             </div>';
@@ -88,12 +92,14 @@
                             }
                         }
                     } else {
-                        echo '<div style="width: 100%" class="received_withd_msg">
-                                    <p style="margin-left: 45%; color: white; background: #31353d none repeat scroll 0 0">Chat vuota :(</p>
-                                </div>';
+                        /*echo '<div style="width: 100%" class="received_withd_msg">
+                                    <p style="margin: auto; color: white; background: #31353d none repeat scroll 0 0">Chat vuota :(</p>
+                                </div>';*/
                     }
 
                     ?>
+                       
+                    <div id="newMessages"></div>
                     <!-- <div class="outgoing_msg">
                         <div class="sent_msg">
                             <p>We work directly with our designers and suppliers,
@@ -117,10 +123,11 @@
                 </div>
                 <div class="type_msg">
                     <div class="input_msg_write" style="background: #ddd;">
-                        <input style="padding-left: 15px;" type="text" class="write_msg" placeholder="Type a message" />
-                        <!-- <button class="msg_send_btn" style="right: 90px;" type="button"><i class="fa fa-microphone-alt" aria-hidden="true"></i></button> -->
-                        <button class="msg_send_btn" style="right: 55px;" type="button"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
-                        <button class="msg_send_btn" style="right: 20px;" type="button"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                        <form action="" method="POST" enctype="multipart/form-data" id="formSendMessage">
+                            <input autocomplete="off" style="padding-left: 15px;" type="text" class="write_msg" name="messageText" id="messageText" placeholder="Type a message" />
+                            <button class="msg_send_btn" style="right: 55px;" type="button"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
+                            <button id="BTNSendMessage" type="submit" class="msg_send_btn" style="right: 20px;" type="button"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                        </form>
                     </div>
                 </div>
 
@@ -137,14 +144,8 @@
 
     <?php require_once('./utils/includeBody.php'); ?>
     <script src="./utils/js/menu.js"></script>
+    <script src="./utils/js/chat.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            $("#messaggi").animate({
-                scrollTop: $('#messaggi').prop("scrollHeight")
-            }, 1000);
-        });
-    </script>
     <!-- JS -->
 </body>
 

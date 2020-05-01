@@ -164,22 +164,24 @@ class chatController
         
 
         if (is_null($chatMember) || is_null($chat)) {
-            die("Sei proprio un utente burlone ;D");
+            (new \utils\WAF)->showBlockPage('98', 'access to other people\'s chats');
         }
 
+        //salva l'id della chat nella sessione per il refresh dei messaggi
+        $_SESSION['chatId'] = $chat->getChatId();
+
         //recupero dati dei membri della chat
-        $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId']), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
+        $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $chat->getChatId()), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
         $messages = \models\DAOMessage::getMessage(
-            array("chatId" => $chat->getChatId()), 
+            array("chatId" => $chat->getChatId(), 'seenBy.userId' => $user->getUserId()), 
             FALSE, 
             FALSE, 
             'timeStamp',
             '*',
             TRUE,
-            array('user' => 'userId'),
-            'sentBy'
-        );   // recupero messaggi della chat con dati dell'utente che l'ha inviato
-
+            array('user' => 'userId', 'seenBy' => 'messageId'),
+            array('sentBy', 'messageId')
+        );   // recupero messaggi della chat con dati dell'utente che l'ha inviato 
         include('views/chatPage.php');
     }
 }

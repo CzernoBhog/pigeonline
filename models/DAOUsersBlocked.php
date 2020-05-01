@@ -7,7 +7,7 @@ use Exception;
 class DAOUsersBlocked
 {
 
-    public static function getUsersBlocked(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
+    public static function getUsersBlocked(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'usersBlocked', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
@@ -26,7 +26,7 @@ class DAOUsersBlocked
         }
 
         if ($isArray) {
-            $resultSet = $stmt->fetchAll();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (count($resultSet) != 0) {
                 return $resultSet;
             }

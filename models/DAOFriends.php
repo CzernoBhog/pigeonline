@@ -6,7 +6,7 @@ use Exception;
 
 class DAOFriends
 {
-    public static function getFriends(array $params, BOOL $orClause = false, BOOL $replaceWithLIKE = false, String $orderBy = null, String $select = '*', bool $isArray = false, array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
+    public static function getFriends(array $params, BOOL $orClause = false, BOOL $replaceWithLIKE = false, String $orderBy = null, String $select = '*', bool $isArray = false, array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'friends', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
@@ -25,7 +25,7 @@ class DAOFriends
         }
 
         if ($isArray) {
-            $resultSet = $stmt->fetchAll();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (count($resultSet) != 0) {
                 return $resultSet;
             }

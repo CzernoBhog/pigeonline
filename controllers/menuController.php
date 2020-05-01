@@ -44,6 +44,6 @@ class menuController
             }
         }
 
-        include('./views/menu.php');
+        include('./views/menuContent.php');
     }
 }

@@ -44,12 +44,36 @@ class WAF
     }
 
     /**
+     * Genera una chiave pubblica e una privata per l'utente
+     * 
+     * @todo
+     */
+    static function generateEncryptionKeys() {
+        // Genera una chiave privatae e una chiave pubblica, restituendo un ID della risorsa
+        $resource = openssl_pkey_new(array(
+            "digest_alg" => "sha512",
+            "private_key_bits" => 4096,
+            "private_key_type" => OPENSSL_KEYTYPE_RSA,
+        ));
+
+        // Estrae la chiave privata dalla risorsa, sottoforma di stringa
+        openssl_pkey_export($resource, $privatekey);
+
+        // Estrae la chiave pubblica dalla risorsa, sottoforma di stringa   (la funzione restituisce un array di dettagli)
+        $publickey = openssl_pkey_get_details($resource)["key"];
+
+        /* 
+            TODO: Trovare un posto per la chiave pubblica e uno sicuro per la chiave privata
+        */
+    }
+
+    /**
      * Mostra la View di blocco
      * 
      * @param String $inj_ID ID che identifica che BadWord è stata usata
      * @param String $TypeVuln Stringa che identifica il tipo di vulnerabilità identificata
      */
-    private function showBlockPage($inj_ID, $TypeVuln)
+    function showBlockPage($inj_ID, $TypeVuln)
     {
         header('HTTP/1.1 403 Forbidden');
         //TODO blocco dell'indirizzo ip e, se presente, del profilo per un'ora
@@ -99,7 +123,8 @@ class WAF
     }
 
     /**
-     * Ottiene un array di valori usati per le iniezioni di SQL o XSS
+     * Ottiene un array di valori usati per le iniezioni di SQL o XSS;
+     * gli indici alle relative BadWords servono per identificarle tramite il Block ID
      * 
      * @param String $Type Il tipo di iniezione da cui ricavare i valori
      * 
@@ -111,60 +136,60 @@ class WAF
         switch ($type) {
             case 'SQL':                 // Iniezioni SQL
                 return array(
-                    '´',
-                    'SELECT FROM',
-                    'SELECT * FROM',
-                    'ONION',
-                    'union',
-                    'UNION',
-                    'UDPATE users SET',
-                    'WHERE username',
-                    'DROP TABLE',
-                    '0x50',
-                    'mid((select',
-                    'union(((((((',
-                    'concat(0x',
-                    'concat(',
-                    'OR boolean',
-                    'or HAVING',
-                    "OR '1",
-                    '0x3c62723e3c62723e3c62723e',
-                    '0x3c696d67207372633d22',
-                    '+#1q%0AuNiOn all#qa%0A#%0AsEleCt',
-                    'unhex(hex(Concat(',
-                    'Table_schema,0x3e,',
-                    '0x00', // \0
-                    '0x08', // \b
-                    '0x09', // \t
-                    '0x0a', // \n
-                    '0x0d', // \r
-                    '0x1a', // \Z
-                    '0x22', // \"
-                    '0x25', // \%
-                    '0x27', // \'
-                    '0x5c', // \\
-                    '0x5f'  // \_
+                    1 => '´',
+                    2 => 'SELECT FROM',
+                    3 => 'SELECT * FROM',
+                    4 => 'ONION',
+                    5 => 'union',
+                    6 => 'UNION',
+                    7 => 'UDPATE users SET',
+                    8 => 'WHERE username',
+                    9 => 'DROP TABLE',
+                    10 => '0x50',
+                    11 => 'mid((select',
+                    12 => 'union(((((((',
+                    13 => 'concat(0x',
+                    14 => 'concat(',
+                    15 => 'OR boolean',
+                    16 => 'or HAVING',
+                    17 => "OR '1",
+                    18 => '0x3c62723e3c62723e3c62723e',
+                    19 => '0x3c696d67207372633d22',
+                    20 => '+#1q%0AuNiOn all#qa%0A#%0AsEleCt',
+                    21 => 'unhex(hex(Concat(',
+                    22 => 'Table_schema,0x3e,',
+                    23 => '0x00', // \0
+                    24 => '0x08', // \b
+                    25 => '0x09', // \t
+                    26 => '0x0a', // \n
+                    27 => '0x0d', // \r
+                    28 => '0x1a', // \Z
+                    29 => '0x22', // \"
+                    30 => '0x25', // \%
+                    31 => '0x27', // \'
+                    32 => '0x5c', // \\
+                    33 => '0x5f'  // \_
                 );
 
                 break;
 
             case 'XSS':                 // Iniezioni XSS
                 return array(
-                    '<img',
-                    'img>',
-                    '<image',
-                    'document.cookie',
-                    'onerror()',
-                    'script>',
-                    '<script',
-                    'alert(',
-                    'window.',
-                    'String.fromCharCode(',
-                    'javascript:',
-                    'onmouseover="',
-                    '<BODY onload',
-                    '<style',
-                    'svg onload'
+                    34 => '<img',
+                    35 => 'img>',
+                    36 => '<image',
+                    37 => 'document.cookie',
+                    38 => 'onerror()',
+                    39 => 'script>',
+                    40 => '<script',
+                    41 => 'alert(',
+                    42 => 'window.',
+                    43 => 'String.fromCharCode(',
+                    44 => 'javascript:',
+                    45 => 'onmouseover="',
+                    46 => '<BODY onload',
+                    47 => '<style',
+                    48 => 'svg onload'
                 );
 
                 break;

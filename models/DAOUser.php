@@ -5,7 +5,7 @@ namespace models;
 class DAOUser
 {
 
-    public static function getUser(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
+    public static function getUser(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'user', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
@@ -24,7 +24,7 @@ class DAOUser
         }
 
         if($isArray){
-            $resultSet = $stmt->fetchAll();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (count($resultSet) != 0) {
                 return $resultSet;
             }

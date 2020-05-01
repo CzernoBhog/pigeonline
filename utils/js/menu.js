@@ -4,12 +4,31 @@ $(document).ready(function () {
 
     /* setInterval(function () {
         loadMenu();
-    }, 5000);  */
+    }, 5000); */
 });
 
+$('#searchBar').on('keyup', function () {
+    filterChat();
+});
+
+function filterChat(){
+    var value = $('#searchBar').val().toLowerCase();
+    var chats = $('.pre-scrollable li');
+    for (i = 0; i < chats.length; i++) {
+        var chatName = $('.usernameChat')[i].innerText.toLowerCase();
+        if (chatName.includes(value)) {
+            $(chats[i]).show();
+        } else {
+            $(chats[i]).hide();
+        }
+    }
+}
+
 function loadMenu() {
-    $("#sidebar").load("./index.php?controller=menuController&action=caricaMenu", function (responseTxt, statusTxt, xhr) {
+    $("#menu-content").load("./index.php?controller=menuController&action=caricaMenu", function (responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
+
+            filterChat();
 
             $(".sidebar-dropdown > a").click(function () {
                 $(".sidebar-submenu").slideUp(200);
@@ -55,19 +74,6 @@ function loadMenu() {
                 var height = $(window).height();
                 $('.sidebar-content').css('height', height - 45);
                 $('.pre-scrollable').css('max-height', height - 341);
-            });
-
-            $('#searchBar').on('keyup', function () {
-                var value = $(this).val().toLowerCase();
-                var chats = $('.pre-scrollable li');
-                for (i = 0; i < chats.length; i++) {
-                    var chatName = $('.usernameChat')[i].innerText.toLowerCase();
-                    if (chatName.includes(value)) {
-                        $(chats[i]).show();
-                    } else {
-                        $(chats[i]).hide();
-                    }
-                }
             });
 
             $('.addChat').on('click', function () {
@@ -138,7 +144,7 @@ function loadMenu() {
                             }
                         });
 
-                        $("#inputUsername").blur(function() {
+                        $("#inputUsername").blur(function () {
                             var username = $("#inputUsername").val();
                             var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
                             if (format.test(username)) {
@@ -152,25 +158,25 @@ function loadMenu() {
                                     'action': 'controlloUsername',
                                     'username': username
                                 },
-                                success: function(response) {
+                                success: function (response) {
                                     if (response == 'true') {
                                         document.getElementById('inputUsername').setCustomValidity('');
                                     } else {
                                         document.getElementById('inputUsername').setCustomValidity(response);
                                     }
                                 },
-                
-                                error: function(response) {
+
+                                error: function (response) {
                                     document.getElementById('inputUsername').setCustomValidity('Username non valido');
                                 }
                             });
                         });
 
-                        $("#inputMood").blur(function() {
+                        $("#inputMood").blur(function () {
                             controlInputStringFormat('inputMood', $("#inputMood").val());
                         });
-                
-                        $("#inputPassword").blur(function() {
+
+                        $("#inputPassword").blur(function () {
                             controlInputPasswordFormat('inputPassword', $("#inputPassword").val());
                         });
                     }
@@ -326,15 +332,15 @@ function captureFormNewChat() {
         formData.append('isSecret', $("#secret").is(':checked'));
         formData.append('name', $('#inputName').val());
         formData.append('description', $('#inputDescription').val());
-        if($('input[name=chatType]:checked').val() === '1'){
+        if ($('input[name=chatType]:checked').val() === '1') {
             formData.append('users', $('#selectChat').val());
         } else {
             for (let i = 0; i < $('#selectChats').val().length; i++) {
                 formData.append('users[]', $('#selectChats').val()[i]);
-            } 
+            }
             //formData.append('users[]', $('#selectChats').val());
         }
-        
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'index.php?controller=chatController&action=createChat', true);
 
@@ -374,7 +380,7 @@ function captureFormNewChat() {
                     $('#addChatModal').modal('hide');
                     loadMenu();
                 } else {
-                    $.notify("Error: "+ this.responseText +"!", {
+                    $.notify("Error: " + this.responseText + "!", {
                         animate: {
                             enter: 'animated flipInY',
                             exit: 'animated flipOutX'

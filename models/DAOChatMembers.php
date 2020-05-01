@@ -5,7 +5,7 @@ namespace models;
 class DAOChatMembers
 {
 
-    public static function getChatMembers(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, String $tableJoinColumn = null)
+    public static function getChatMembers(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
     {
         $conn = \utils\Database::connect();
         $query = \utils\Utility::createWhere($params, 'chatMembers', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
@@ -24,7 +24,7 @@ class DAOChatMembers
         }
 
         if($isArray){
-            $resultSet = $stmt->fetchAll();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (count($resultSet) != 0) {
                 return $resultSet;
             }
