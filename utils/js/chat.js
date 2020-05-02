@@ -22,6 +22,7 @@ $("#formSendMessage").on('submit', function (event) {
         formData.append('picture', file, file.name);
     } */
 
+    formData.append('ajax', 'true');
     formData.append('messageText', $('#messageText').val());
 
     var xhr = new XMLHttpRequest();
@@ -47,6 +48,10 @@ $("#formSendMessage").on('submit', function (event) {
     }; */
 
     xhr.onreadystatechange = function () {
+        if (this.readyState == 2 && this.status == 403) {
+            //blocked
+            $.redirect('index.php');
+        }
         if (this.readyState == 4 && this.status == 200) {
             if (this.responseText == '1') {
                 loadNewMessages();
@@ -71,10 +76,13 @@ $("#formSendMessage").on('submit', function (event) {
     xhr.send(formData);
 });
 
+$(document).ready(function(){
+    loadNewMessages();
+});
 
 setInterval(function () {
     loadNewMessages();
-}, 2000);
+}, 2000); 
 
 function loadNewMessages() {
     $.ajax({
@@ -85,10 +93,15 @@ function loadNewMessages() {
             'action': 'caricaMessaggi'
         },
         success: function (text) {
-            $('#messaggi').append(text);
-            $("#messaggi").animate({
-                scrollTop: $('#messaggi').prop("scrollHeight")
-            }, 0);
+            /* if(text == 'blocked'){
+                $.redirect('index.php');
+            } */
+            if(text != ''){
+                $('#messaggi').append(text);
+                $("#messaggi").animate({
+                    scrollTop: $('#messaggi').prop("scrollHeight")
+                }, 0);
+            }
         }
     });
 }

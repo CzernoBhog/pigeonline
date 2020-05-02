@@ -22,7 +22,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     switch ($friend->getPrivacyLevel()) {
                         case 1:
-                            echo ($friend->getLastActivity() > $current_timestamp) ? '<p style="color: green">Online</p>' : '<p style="color: red">Offline - ' . $friend->getLastActivity() . '</p>';
+                            echo ($friend->getLastActivity() > $current_timestamp) ? '<p><i style="color: green">Online</i>' : '<p><i style="color: red">Offline</i> - ' . $friend->getLastActivity() . '</p>';
                             break;
 
                         case 2:
@@ -44,7 +44,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                                 <div>
                                     <img class="chat-img" src="' . $src . '" alt="" />
                                     <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
-                                </div><p style="color: green">Online</p>
+                                </div><i style="color: green">Online</i>
                               </li>';
                         $cont++;
                     }
@@ -58,18 +58,18 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                                 <div>
                                     <img class="chat-img" src="' . $src . '" alt="" />
                                     <b style="padding-left: 5px">' . $friend->getUsername() . '</b>
-                                </div><p style="color: red">Offline';
+                                </div><p><i style="color: red">Offline</i>';
 
                         switch ($friend->getPrivacyLevel()) {
                             case 1:
-                                echo ' - ' . $friend->getLastActivity();
+                                echo ' - ' . $friend->getLastActivity() . '</p>';
                                 break;
 
                             case 2:
                                 break;
                         }
 
-                        echo '</p></li>';
+                        echo '</li>';
                         $cont++;
                     }
 

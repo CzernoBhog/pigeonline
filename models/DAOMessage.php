@@ -5,10 +5,10 @@ namespace models;
 class DAOMessage
 {
 
-    public static function getMessage(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
+    public static function getMessage(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, array $joinTablesWithOnColumns = null, $tableJoinColumn = null, $joinType = 'inner', $limit = null)
     {
         $conn = \utils\Database::connect();
-        $query = \utils\Utility::createWhere($params, 'message', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
+        $query = \utils\Utility::createWhere($params, 'message', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select, $joinType, $limit);
         $stmt = $conn->prepare($query);
 
         foreach ($params as $key => $value) {
@@ -121,23 +121,46 @@ class DAOMessage
         return $conn->lastInsertId();
     }
 
-    /* select * from message
-    INNER JOIN user ON(message.sentBy = user.userId)
-    where timeStamp > 
-    (SELECT timeStamp FROM message 
-    INNER JOIN user ON(message.sentBy = user.userId) 
-    INNER JOIN seenBy ON(message.messageId = seenBy.messageId) 
-    WHERE chatId = 14 AND seenBy.userId = 1 ORDER BY timeStamp DESC limit 1) */
     public static function getNewMessages($chatId, $userId)
     {
         $conn = \utils\Database::connect();
-        $query =    'SELECT * FROM message
+        $query =   'SELECT * FROM message
                     INNER JOIN user ON(message.sentBy = user.userId)
-                    WHERE timeStamp > 
+                    WHERE chatId = :cid AND timeStamp > 
                     (SELECT timeStamp FROM message 
-                    INNER JOIN user ON(message.sentBy = user.userId) 
-                    INNER JOIN seenBy ON(message.messageId = seenBy.messageId) 
-                    WHERE chatId = :ci AND seenBy.userId = :ui ORDER BY timeStamp DESC LIMIT 1)';
+                    INNER JOIN user ON(message.sentBy = user.userId)
+                    LEFT JOIN seenBy ON(message.messageId = seenBy.messageId)
+                    WHERE (chatId = :ci) AND (seenBy.userId = :ui OR message.seen = 1)
+                    ORDER BY timeStamp DESC LIMIT 1)';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":ci", $chatId);
+            $stmt->bindValue(":cid", $chatId);
+            
+            $stmt->bindValue(":ui", $userId);
+            $result = $stmt->execute();
+            $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            if (count($resultSet) != 0) {
+                return $resultSet;
+            }
+            return null;
+        } catch (\Exception | \PDOException $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public static function getOldMessages($chatId, $userId, $limit = '100')
+    {
+        $conn = \utils\Database::connect();
+        $query =  "SELECT * FROM
+                    (
+                        SELECT message.*,user.pathProfilePicture FROM message
+                        INNER JOIN user ON(message.sentBy = user.userId)
+                        LEFT JOIN seenBy ON(message.messageId = seenBy.messageId)
+                        WHERE (chatId = :ci) AND (seenBy.userId = :ui OR message.seen = 1)
+                        ORDER BY timeStamp DESC
+                        LIMIT $limit
+                    ) oldMessages ORDER BY timeStamp";
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":ci", $chatId);
@@ -149,7 +172,7 @@ class DAOMessage
             }
             return null;
         } catch (\Exception | \PDOException $e) {
-            throw new \Exception('Errore eliminazione message');
+            throw new \Exception($e->getMessage());
         }
     }
 }

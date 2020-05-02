@@ -172,16 +172,8 @@ class chatController
 
         //recupero dati dei membri della chat
         $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $chat->getChatId()), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
-        $messages = \models\DAOMessage::getMessage(
-            array("chatId" => $chat->getChatId(), 'seenBy.userId' => $user->getUserId()), 
-            FALSE, 
-            FALSE, 
-            'timeStamp',
-            '*',
-            TRUE,
-            array('user' => 'userId', 'seenBy' => 'messageId'),
-            array('sentBy', 'messageId')
-        );   // recupero messaggi della chat con dati dell'utente che l'ha inviato 
+
+        $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $user->getUserId());
         include('views/chatPage.php');
     }
 }

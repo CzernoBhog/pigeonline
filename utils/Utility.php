@@ -51,7 +51,7 @@ class Utility implements \JsonSerializable
     }
 
 
-    public static function createWhere(array $params, String $table, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, array $joinTablesWithOnColumns = null, $tableJoinColumn = null, String $select = '*', $joinType = "INNER")
+    public static function createWhere(array $params, String $table, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, array $joinTablesWithOnColumns = null, $tableJoinColumn = null, String $select = '*', $joinType = "INNER", $limit = null)
     {
         $counter = 0;
         $query = "SELECT $select FROM $table";
@@ -96,6 +96,10 @@ class Utility implements \JsonSerializable
 
         if ($replaceWithLIKE) {
             $query = str_replace("=", "LIKE", $query);
+        }
+
+        if(!is_null($limit)){
+            $query .= " $limit";
         }
 
         return $query;

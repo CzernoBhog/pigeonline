@@ -2,16 +2,16 @@ $(document).ready(function () {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
     loadMenu();
 
-    /* setInterval(function () {
+    setInterval(function () {
         loadMenu();
-    }, 5000); */
+    }, 5000);
 });
 
 $('#searchBar').on('keyup', function () {
     filterChat();
 });
 
-function filterChat(){
+function filterChat() {
     var value = $('#searchBar').val().toLowerCase();
     var chats = $('.pre-scrollable li');
     for (i = 0; i < chats.length; i++) {
@@ -192,7 +192,7 @@ function loadMenu() {
     });
 }
 
-/* setInterval(function () {
+setInterval(function () {
     $.ajax({
         url: 'index.php',
         type: 'POST',
@@ -200,7 +200,7 @@ function loadMenu() {
             'action': 'updateActivity'
         }
     });
-}, 5000)  */
+}, 5000)
 
 function readURL(input) {
     if (input.files && input.files[0]) {
@@ -247,6 +247,7 @@ function captureFormUserSettings() {
         formData.append('password', $('#inputPassword').val());
         formData.append('mood', $('#inputMood').val());
         formData.append('pl', $('#inputPL').val());
+        formData.append('ajax', 'true');
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'index.php?action=aggiornaProfilo', true);
@@ -271,6 +272,10 @@ function captureFormUserSettings() {
         };
 
         xhr.onreadystatechange = function () {
+            if (this.readyState == 2 && this.status == 403) {
+                //blocked
+                $.redirect('index.php');
+            }
             if (this.readyState == 4 && this.status == 200) {
                 if (this.responseText == '1') {
                     $.notify("Succes: Settings saved!", {
@@ -332,6 +337,8 @@ function captureFormNewChat() {
         formData.append('isSecret', $("#secret").is(':checked'));
         formData.append('name', $('#inputName').val());
         formData.append('description', $('#inputDescription').val());
+        formData.append('ajax', 'true');
+
         if ($('input[name=chatType]:checked').val() === '1') {
             formData.append('users', $('#selectChat').val());
         } else {
@@ -364,6 +371,10 @@ function captureFormNewChat() {
         };
 
         xhr.onreadystatechange = function () {
+            if (this.readyState == 2 && this.status == 403) {
+                //blocked
+                $.redirect('index.php');
+            }
             if (this.readyState == 4 && this.status == 200) {
                 if (this.responseText == 'true') {
                     $.notify("Succes: Chat created!", {

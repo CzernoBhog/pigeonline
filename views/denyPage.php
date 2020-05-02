@@ -39,6 +39,10 @@
 <body class="text-center">
 
     <?php
+    $currentTimeBlock = $_SESSION['currentTimeBlock'];
+    $inj_ID = $_SESSION['inj_ID'];
+    $ip = $_SESSION['ip'];
+    $TypeVuln = $_SESSION['typeVuln'];
     $timeRemaining = $currentTimeBlock === 3600 ? 3600 - $currentTimeBlock : 0 - $currentTimeBlock;
     $futureDate = date('Y-m-d H:i:s', 3600 + strtotime(date('Y-m-d H:i:s')) + $timeRemaining);
     ?>

@@ -26,6 +26,12 @@ class WAF
         $this->checkCOOKIE();
     }
 
+    function textMsgFilter($text) {
+        htmlentities($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        //https://www.php.net/manual/en/function.htmlentities
+    }
+
     /**
      * Inizializza la sessione oppure ricrea un nuovo ID di sessione per quelle più vecchie di 10 minuti
      */
@@ -80,14 +86,30 @@ class WAF
         $ip = empty($_SERVER['REMOTE_ADDR']) ? null : $_SERVER['REMOTE_ADDR']; //prendo l'ip del client
         try {
             $userId = isset($_SESSION['id']) ? $_SESSION['id'] : null;
-            $inj_ID = md5($inj_ID);     // Creazione Block ID
+            
+            session_unset();        // unsetta le variabili di sessione per inserire quelle di blocco per la redirection
+            $_SESSION['ip'] = $ip;
+            $_SESSION['inj_ID'] = md5($inj_ID);     // Creazione Block ID
+            $_SESSION['typeVuln'] = $TypeVuln;
+            $_SESSION['currentTimeBlock'] = 3600;
+
             $blockedIp = new \models\DOBlockedIp($ip, $userId, $inj_ID, $TypeVuln);
             \models\DAOBlockedIp::insertBlockedIp($blockedIp);
-            $currentTimeBlock = 3600;
         } catch (\Exception $e) {
+            if ((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') || isset($_POST['ajax'])) {
+                echo "blocked";
+                die();
+            } else {
+                die(include('./views/denyPage.php'));
+            }
+        }
+
+        if ((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') || isset($_POST['ajax'])) {
+            echo "blocked";
+            die();
+        } else {
             die(include('./views/denyPage.php'));
         }
-        die(include('./views/denyPage.php'));          // Blocca la richiesta e mostra la View
     }
 
     /**
@@ -113,7 +135,12 @@ class WAF
                 if ($currentTimeBlock >= 3600) {
                     \models\DAOBlockedIp::removeBlockedIp($ip);
                 } else {
-                    die(include('./views/denyPage.php'));
+                    if ((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') || isset($_POST['ajax'])) {
+                        echo "blocked";
+                        die();
+                    } else {
+                        die(include('./views/denyPage.php'));
+                    }
                 }
             }
         } catch (\Exception $e) {

@@ -31,25 +31,18 @@ class messageController
      */
     public function caricaMessaggi()
     {
+        //var_dump($_SESSION);
         $chat = \models\DAOChat::getChat(array("chatId" => $_SESSION['chatId']))[0];
         $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chat->getChatId()));
 
         //reperire i messaggi non ancora visualizzati dall'utente per la chat passata e includere
-        $messages = $messages = \models\DAOMessage::getMessage(
-            array("chatId" => $chat->getChatId(), 'seenBy.userId' => $_SESSION['id']),
-            FALSE,
-            FALSE,
-            'timeStamp',
-            '*',
-            TRUE,
-            array('user' => 'userId', 'seenBy' => 'messageId'),
-            array('sentBy', 'messageId')
-        );
+        $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $_SESSION['id'], '1');
 
         try {
             \utils\Transaction::beginTransaction();
 
             if (is_null($messages)) {
+                //TODO sistemare limit 100 o forse no
                 $messages = \models\DAOMessage::getMessage(
                     array('chatId' => $_SESSION['chatId']),
                     false,
@@ -71,14 +64,17 @@ class messageController
                     $views = \models\DAOSeenBy::getSeenBy(array('messageId' => $message['messageId']));
                     if(count($views) == 2 && ($chat->getChatType() == 1 || $chat->getChatType() == 4)){
                         \models\DAOMessage::updateSeenToTrue($message['messageId']);
+                        \models\DAOSeenBy::deleteSeenBy($message['messageId']);
                     }else if(count($views) == count($chatMembers) && ($chat->getChatType() == 2 || $chat->getChatType() == 3)){
                         \models\DAOMessage::updateSeenToTrue($message['messageId']);
+                        \models\DAOSeenBy::deleteSeenBy($message['messageId']);
                     }
                 }
             }
             \utils\Transaction::commitTransaction();
         } catch (\Exception $e) {
             \utils\Transaction::rollBackTransaction();
+            echo $e->getMessage();
             $messages = null;
         }
 

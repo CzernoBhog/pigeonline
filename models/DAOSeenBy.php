@@ -52,4 +52,17 @@ class DAOSeenBy
         }
     }
 
+    public static function deleteSeenBy($messageId){
+        $conn = \utils\Database::connect();
+        $query = 'DELETE FROM seenBy WHERE messageId = :mi';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":mi", $messageId);
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
 }
