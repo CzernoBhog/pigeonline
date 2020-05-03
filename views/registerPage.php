@@ -106,7 +106,7 @@
 
         $("#inputEmail").blur(function() {
             var email = $("#inputEmail").val();
-            var format = /[ <>]/;
+            var format = /[ <>èéòóàáùìíùú]/;
             if (format.test(email)) {
                 document.getElementById('inputEmail').setCustomValidity('Carattere non valido');
                 return;
@@ -134,7 +134,7 @@
 
         $("#inputUsername").blur(function() {
             var username = $("#inputUsername").val();
-            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~èéòóàáùìíùú]/;
             if (format.test(username)) {
                 document.getElementById('inputUsername').setCustomValidity('Carattere non valido');
                 return;
@@ -177,7 +177,7 @@
         });
 
         function controlInputStringFormat(field, string) {
-            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/;
+            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~èéòóàáùìíùú]/;
             if (format.test(string)) {
                 document.getElementById(field).setCustomValidity('Carattere non valido');
             } else {
@@ -186,7 +186,7 @@
         }
 
         function controlInputPasswordFormat(field, string) {
-            var format = /[ `*()+\-=\[\]{};':"\\|,<>\/~]/;
+            var format = /[ `*()+\-=\[\]{};':"\\|,<>\/~èéòóàáùìíùú]/;
             if (format.test(string)) {
                 document.getElementById(field).setCustomValidity('Carattere non valido');
             } else {

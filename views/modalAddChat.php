@@ -61,7 +61,7 @@
                         </div>
 
                         <br>
-
+                        <p id="groupLimit" hidden>Massimo 50 membri</p>
                         <select id="selectChats" multiple="multiple" name='users[]'>
                             <?php
                             foreach ($detailsFriends as $friend) {

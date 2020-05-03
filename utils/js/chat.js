@@ -1,11 +1,11 @@
 //var fileSelect = document.getElementById('pictureInput');
 
 $("#formSendMessage").on('submit', function (event) {
+    event.preventDefault();
+    
     if ($('#messageText').val() == '') {
         return;
     }
-
-    event.preventDefault();
 
     $('#BTNSendMessage').html('<i class="fa fa-spinner" aria-hidden="true"></i>');
 
@@ -80,9 +80,9 @@ $(document).ready(function(){
     loadNewMessages();
 });
 
-setInterval(function () {
+/* setInterval(function () {
     loadNewMessages();
-}, 2000); 
+}, 2000); */ 
 
 function loadNewMessages() {
     $.ajax({

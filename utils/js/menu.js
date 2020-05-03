@@ -2,9 +2,9 @@ $(document).ready(function () {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
     loadMenu();
 
-    setInterval(function () {
+    /* setInterval(function () {
         loadMenu();
-    }, 5000);
+    }, 5000); */
 });
 
 $('#searchBar').on('keyup', function () {
@@ -12,9 +12,15 @@ $('#searchBar').on('keyup', function () {
 });
 
 function filterChat() {
+    if ($('#searchBar').val() == '') {
+        return;
+    }
     var value = $('#searchBar').val().toLowerCase();
     var chats = $('.pre-scrollable li');
     for (i = 0; i < chats.length; i++) {
+        if($('.usernameChat')[i] == null){
+            return;
+        }
         var chatName = $('.usernameChat')[i].innerText.toLowerCase();
         if (chatName.includes(value)) {
             $(chats[i]).show();
@@ -99,11 +105,17 @@ function loadMenu() {
                                 case '1':
                                     $('#selectFriend').removeAttr('hidden');
                                     $('#selectFriends').attr('hidden', true);
+                                    $('#groupLimit').attr('hidden', true);
                                     break;
 
                                 case '2':
+                                    $('#groupLimit').removeAttr('hidden');
+                                    $('#selectFriends').removeAttr('hidden');
+                                    $('#selectFriend').attr('hidden', true);
+                                    break;
                                 case '3':
                                     $('#selectFriends').removeAttr('hidden');
+                                    $('#groupLimit').attr('hidden', true);
                                     $('#selectFriend').attr('hidden', true);
                                     break;
 
@@ -121,70 +133,6 @@ function loadMenu() {
                     }
                 });
             });
-
-            $('#usrSettings').on('click', function () {
-                $("#modal").load("./index.php?action=mostraUserSettings", function (responseTxt, statusTxt, xhr) {
-                    if (statusTxt == "success") {
-                        $('#modalUsrSettings').modal('show');
-                        $(".custom-file-input").on("change", function () {
-                            var fileName = $(this).val().split("\\").pop();
-                            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-                            readURL(this);
-                        });
-                        captureFormUserSettings();
-                        $(".reveal").on('click', function () {
-                            var $eye = $('#eye');
-                            var $pwd = $(".pwd");
-                            if ($pwd.attr('type') === 'password') {
-                                $pwd.attr('type', 'text');
-                                $eye.attr('class', 'fas fa-eye-slash');
-                            } else {
-                                $pwd.attr('type', 'password');
-                                $eye.attr('class', 'fas fa-eye');
-                            }
-                        });
-
-                        $("#inputUsername").blur(function () {
-                            var username = $("#inputUsername").val();
-                            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-                            if (format.test(username)) {
-                                document.getElementById('inputUsername').setCustomValidity('Carattere non valido');
-                                return;
-                            }
-                            $.ajax({
-                                type: 'post',
-                                url: 'index.php',
-                                data: {
-                                    'action': 'controlloUsername',
-                                    'username': username
-                                },
-                                success: function (response) {
-                                    if (response == 'true') {
-                                        document.getElementById('inputUsername').setCustomValidity('');
-                                    } else {
-                                        document.getElementById('inputUsername').setCustomValidity(response);
-                                    }
-                                },
-
-                                error: function (response) {
-                                    document.getElementById('inputUsername').setCustomValidity('Username non valido');
-                                }
-                            });
-                        });
-
-                        $("#inputMood").blur(function () {
-                            controlInputStringFormat('inputMood', $("#inputMood").val());
-                        });
-
-                        $("#inputPassword").blur(function () {
-                            controlInputPasswordFormat('inputPassword', $("#inputPassword").val());
-                        });
-                    }
-                    if (statusTxt == "error") {
-                        alert("Errore imprevisto, riprovare")
-                    }
-                });
-            });
         }
         if (statusTxt == "error") {
             //alert("Error: " + xhr.status + ": " + xhr.statusText);
@@ -192,7 +140,7 @@ function loadMenu() {
     });
 }
 
-setInterval(function () {
+/* setInterval(function () {
     $.ajax({
         url: 'index.php',
         type: 'POST',
@@ -200,7 +148,7 @@ setInterval(function () {
             'action': 'updateActivity'
         }
     });
-}, 5000)
+}, 5000) */
 
 function readURL(input) {
     if (input.files && input.files[0]) {
@@ -411,7 +359,7 @@ function captureFormNewChat() {
 }
 
 function controlInputStringFormat(field, string) {
-    var format = /[`<>]/;
+    var format = /[`<èéòóàáùìíùú>]/;
     if (format.test(string)) {
         document.getElementById(field).setCustomValidity('Carattere non valido');
     } else {
@@ -420,10 +368,74 @@ function controlInputStringFormat(field, string) {
 }
 
 function controlInputPasswordFormat(field, string) {
-    var format = /[ `*()+\-=\[\]{};':"\\|,<>\/~]/;
+    var format = /[ `*()+\-=\[\]{};':"\\|,<>\/~èéòóàáùìíùú]/;
     if (format.test(string)) {
         document.getElementById(field).setCustomValidity('Carattere non valido');
     } else {
         document.getElementById(field).setCustomValidity('');
     }
 }
+
+$('#usrSettings').on('click', function () {
+    $("#modal").load("./index.php?action=mostraUserSettings", function (responseTxt, statusTxt, xhr) {
+        if (statusTxt == "success") {
+            $('#modalUsrSettings').modal('show');
+            $(".custom-file-input").on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                readURL(this);
+            });
+            captureFormUserSettings();
+            $(".reveal").on('click', function () {
+                var $eye = $('#eye');
+                var $pwd = $(".pwd");
+                if ($pwd.attr('type') === 'password') {
+                    $pwd.attr('type', 'text');
+                    $eye.attr('class', 'fas fa-eye-slash');
+                } else {
+                    $pwd.attr('type', 'password');
+                    $eye.attr('class', 'fas fa-eye');
+                }
+            });
+
+            $("#inputUsername").blur(function () {
+                var username = $("#inputUsername").val();
+                var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+                if (format.test(username)) {
+                    document.getElementById('inputUsername').setCustomValidity('Carattere non valido');
+                    return;
+                }
+                $.ajax({
+                    type: 'post',
+                    url: 'index.php',
+                    data: {
+                        'action': 'controlloUsername',
+                        'username': username
+                    },
+                    success: function (response) {
+                        if (response == 'true') {
+                            document.getElementById('inputUsername').setCustomValidity('');
+                        } else {
+                            document.getElementById('inputUsername').setCustomValidity(response);
+                        }
+                    },
+
+                    error: function (response) {
+                        document.getElementById('inputUsername').setCustomValidity('Username non valido');
+                    }
+                });
+            });
+
+            $("#inputMood").blur(function () {
+                controlInputStringFormat('inputMood', $("#inputMood").val());
+            });
+
+            $("#inputPassword").blur(function () {
+                controlInputPasswordFormat('inputPassword', $("#inputPassword").val());
+            });
+        }
+        if (statusTxt == "error") {
+            alert("Errore imprevisto, riprovare")
+        }
+    });
+});

@@ -68,6 +68,9 @@ class messageController
                     }else if(count($views) == count($chatMembers) && ($chat->getChatType() == 2 || $chat->getChatType() == 3)){
                         \models\DAOMessage::updateSeenToTrue($message['messageId']);
                         \models\DAOSeenBy::deleteSeenBy($message['messageId']);
+                    }else if(count($views) == 1 && $chat->getChatType() == 5){
+                        \models\DAOMessage::updateSeenToTrue($message['messageId']);
+                        \models\DAOSeenBy::deleteSeenBy($message['messageId']);
                     }
                 }
             }

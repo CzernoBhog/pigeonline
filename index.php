@@ -40,5 +40,3 @@ if (empty($_SESSION)) {
 
 // Viene richiamata l'azione dell'oggetto (l'oggetto dura solo per la durata dell'espressione)
 (new $controller)->$action();
-
-// $controllerObj = new $controller($action);

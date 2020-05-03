@@ -121,7 +121,7 @@ class DAOMessage
         return $conn->lastInsertId();
     }
 
-    public static function getNewMessages($chatId, $userId)
+    public static function getNewMessages($chatId, $userId, $limit = null)
     {
         $conn = \utils\Database::connect();
         $query =   'SELECT * FROM message
@@ -132,11 +132,16 @@ class DAOMessage
                     LEFT JOIN seenBy ON(message.messageId = seenBy.messageId)
                     WHERE (chatId = :ci) AND (seenBy.userId = :ui OR message.seen = 1)
                     ORDER BY timeStamp DESC LIMIT 1)';
+                    
+        if (!is_null($limit)) {
+            $query .= " LIMIT $limit";
+        }
+        
         try {
             $stmt = $conn->prepare($query);
             $stmt->bindValue(":ci", $chatId);
             $stmt->bindValue(":cid", $chatId);
-            
+
             $stmt->bindValue(":ui", $userId);
             $result = $stmt->execute();
             $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);

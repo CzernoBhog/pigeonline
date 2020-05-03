@@ -2,6 +2,7 @@
 
 namespace controllers;
 
+use Exception;
 use utils\Transaction;
 
 require_once('utils/autoload.php');
@@ -96,22 +97,33 @@ class chatController
                     $chat = new \models\DOChat(NULL, $chatType);
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
-                    //inserisce l'amico come membro della chat
-                    $chatMember = new \models\DOChatMembers($_POST['users'], $chatId, null, 2);
-                    \models\DAOChatMembers::insertChatMember($chatMember);
-                    //inserisce l'utente che crea la chat come membro
-                    $chatMember = new \models\DOChatMembers($creatorUser->getUserId(), $chatId, null, 2);
-                    \models\DAOChatMembers::insertChatMember($chatMember);
+                    $isFriend = \models\DAOFriends::getFriends(array('friendId' => $_POST['users']));
+                    if (!is_null($isFriend)) {
+                        //inserisce l'amico come membro della chat
+                        $chatMember = new \models\DOChatMembers($_POST['users'], $chatId, null, 2);
+                        \models\DAOChatMembers::insertChatMember($chatMember);
+                        //inserisce l'utente che crea la chat come membro
+                        $chatMember = new \models\DOChatMembers($creatorUser->getUserId(), $chatId, null, 2);
+                        \models\DAOChatMembers::insertChatMember($chatMember);
+                    }else{
+                        throw new Exception('Errore creazione chat.');
+                    }             
                     break;
 
                 case '2':
+                    if(count($userIds) > 50) {
+                        throw new Exception('Troppi utenti selezionati: massimo 50 persone!');
+                    }
                     $targetFilePath = is_null($targetFilePath) ? './utils/imgs/groupDefault.png' : $targetFilePath;
                     $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
                     foreach ($userIds as $id) {
-                        $chatMember = new \models\DOChatMembers($id, $chatId, null, 2);
-                        \models\DAOChatMembers::insertChatMember($chatMember);
+                        $isFriend = \models\DAOFriends::getFriends(array('friendId' => $id));
+                        if (!is_null($isFriend)) {
+                            $chatMember = new \models\DOChatMembers($id, $chatId, null, 2);
+                            \models\DAOChatMembers::insertChatMember($chatMember);
+                        }
                     }
                     $chatMember = new \models\DOChatMembers($creatorUser->getUserId(), $chatId, null, 3);
                     \models\DAOChatMembers::insertChatMember($chatMember);
@@ -123,23 +135,26 @@ class chatController
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
                     foreach ($userIds as $id) {
-                        $chatMember = new \models\DOChatMembers($id, $chatId, null, 1);
-                        \models\DAOChatMembers::insertChatMember($chatMember);
+                        $isFriend = \models\DAOFriends::getFriends(array('friendId' => $id));
+                        if (!is_null($isFriend)) {
+                            $chatMember = new \models\DOChatMembers($id, $chatId, null, 1);
+                            \models\DAOChatMembers::insertChatMember($chatMember);
+                        }
                     }
                     $chatMember = new \models\DOChatMembers($creatorUser->getUserId(), $chatId, null, 3);
                     \models\DAOChatMembers::insertChatMember($chatMember);
                     break;
 
                 default:
-                    die("Tipo di chat non supportato :/");
+                    throw new Exception("Tipo di chat non supportato :/");
                     break;
             }
             Transaction::commitTransaction();
             echo 'true';
         } catch (\Exception $e) {
             Transaction::rollBackTransaction();
-            // die($e->getMessage());
-            die("Errore imprevisto");
+            die($e->getMessage());
+            //die("Errore imprevisto");
         }
     }
 
@@ -159,20 +174,42 @@ class chatController
     {
         $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
         $chat = \models\DAOChat::getChat(array("chatId" => $_GET['chatId']))[0];
-        //recupera il ChatMember dell'utente per verificare che sia all'interno della chat
-        $chatMember = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId'], "userId" => $_SESSION['id']));
         
-
-        if (is_null($chatMember) || is_null($chat)) {
+        //recupera il ChatMember dell'utente per verificare che sia all'interno della chat
+        $chatMember = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId'], "userId" => $_SESSION['id']))[0];
+        if (is_null($chatMember) || is_null($chat)) {       //blocca l'utente nel caso cercasse di entrare nelle chat altrui
             (new \utils\WAF)->showBlockPage('98', 'access to other people\'s chats');
         }
 
         //salva l'id della chat nella sessione per il refresh dei messaggi
         $_SESSION['chatId'] = $chat->getChatId();
 
-        //recupero dati dei membri della chat
+        //recupero dati dei membri della chat e i messaggi
         $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $chat->getChatId()), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
+        $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $user->getUserId());
+        include('views/chatPage.php');
+    }
 
+    /**
+     * Visualizza la cloud chat dell'utente
+     */
+    public function viewCloudChat()
+    {
+        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        $chat = \models\DAOChat::getChat(
+            array("userId" => $_SESSION['id'], 'chatType' => 5), 
+            FALSE, 
+            FALSE, 
+            NULL, 
+            'chat.*', 
+            FALSE, 
+            array('chatMembers' => 'chatId'),
+            'chatId'
+        )[0];
+
+        //salva l'id della chat nella sessione per il refresh dei messaggi
+        $_SESSION['chatId'] = $chat->getChatId();
+        //recupera i messaggi
         $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $user->getUserId());
         include('views/chatPage.php');
     }

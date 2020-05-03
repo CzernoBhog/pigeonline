@@ -26,7 +26,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
                             break;
 
                         case 2:
-                            echo ($friend->getLastActivity() > $current_timestamp) ? '<p style="color: green">Online</p>' : '<p style="color: red">Offline</p>';
+                            echo ($friend->getLastActivity() > $current_timestamp) ? '<p><i style="color: green">Online</i></p>' : '<p><i style="color: red">Offline</i></p>';
                             break;
 
                         case 3:

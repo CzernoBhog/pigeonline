@@ -101,7 +101,7 @@
         });
 
         function controlInputStringFormat(field, string) {
-            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/;
+            var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\èéòóàáùìíùú/?~]/;
             if (format.test(string)) {
                 document.getElementById(field).setCustomValidity('Carattere non valido');
             } else {
@@ -110,7 +110,7 @@
         }
 
         function controlInputPasswordFormat(field, string) {
-            var format = /[ `&*()+\-=\[\]{};':"\\|,<>\/~]/;
+            var format = /[ `&*()+\-=\[\]{};':"\\|,<>èéòóàáùìíùú\/~]/;
             if (format.test(string)) {
                 document.getElementById(field).setCustomValidity('Carattere non valido');
             } else {

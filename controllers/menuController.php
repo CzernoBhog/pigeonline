@@ -20,18 +20,18 @@ class menuController
         $chats = array();
         if (!is_null($chatsMember)) {
             foreach ($chatsMember as $chat) {
-                array_push($chats, \models\DAOChat::getChat(array('chat.chatId' => $chat->getChatId()))[0]);
+                array_push($chats, \models\DAOChat::getChat(array('chat.chatId' => $chat->getChatId()), FALSE, FALSE, NULL, '*', TRUE)[0]);
             }
         }
 
         //controlla se è una chat privata e imposta il titolo della chat con l'username dell'amico
         for ($i=0; $i < count($chats); $i++) { 
-            $chatType = $chats[$i]->getChatType();
+            $chatType = $chats[$i]['chatType'];
             if ($chatType === "1" || $chatType === "4") {
-                $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chats[$i]->getChatId()));
+                $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chats[$i]['chatId']));
                 $friendId = ($chatMembers[0]->getUserId() !== $_SESSION['id']) ? $chatMembers[0]->getUserId() : $chatMembers[1]->getUserId();
                 $chats[$i] = \models\DAOChatMembers::getChatMembers(
-                    array('chatMembers.chatId' => $chats[$i]->getChatId(), 'user.userId' => $friendId), 
+                    array('chatMembers.chatId' => $chats[$i]['chatId'], 'user.userId' => $friendId), 
                     FALSE, 
                     FALSE, 
                     NULL, 
@@ -41,6 +41,10 @@ class menuController
                     'userId'
                 )[0];
                 $chats[$i] += ['chatType' => $chatType];
+            }
+            $newMessages = \models\DAOMessage::getNewMessages($chats[$i]['chatId'], $_SESSION['id'], '1');
+            if(!is_null($newMessages)) {
+                $chats[$i] += ['newMessages' => 'true'];
             }
         }
 

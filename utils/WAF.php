@@ -4,7 +4,6 @@ namespace utils;
 
 class WAF
 {
-
     /**
      * Costruttore dell'oggetto WAF  (Web Application Firewall): Avvia il WAF inizializzando la sessione,
      * controllando se l'IP è bloccato o meno e controllando i dati ricevuti
@@ -13,7 +12,12 @@ class WAF
     {
         $this->startSession();
         $this->isBlockedIP();
-        $this->filter();
+
+        if(isset($_POST['messageText']) && $_REQUEST['action'] === 'sendMessage') {
+            $this->textMsgFilter($_POST['messageText']);
+        } else {
+            $this->filter();
+        }
     }
 
     /**
@@ -26,10 +30,13 @@ class WAF
         $this->checkCOOKIE();
     }
 
-    function textMsgFilter($text) {
-        htmlentities($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        //https://www.php.net/manual/en/function.htmlentities
+    /**
+     * Trasforma i caratteri del testo in entità HTML (Usato per i messaggi)
+     * 
+     * @param String $text Stringa da convertire
+     */
+    function textMsgFilter(&$text) {
+        $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -153,6 +160,8 @@ class WAF
      * Ottiene un array di valori usati per le iniezioni di SQL o XSS;
      * gli indici alle relative BadWords servono per identificarle tramite il Block ID
      * 
+     * (99 è per tentato XSS [HTML] injection e 98 per tentato accesso alle chat altrui)
+     * 
      * @param String $Type Il tipo di iniezione da cui ricavare i valori
      * 
      * @return Array Gli array di valori malevoli
@@ -216,7 +225,9 @@ class WAF
                     45 => 'onmouseover="',
                     46 => '<BODY onload',
                     47 => '<style',
-                    48 => 'svg onload'
+                    48 => 'svg onload',
+                    49 => 'src=',
+                    50 => 'href='
                 );
 
                 break;

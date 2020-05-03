@@ -239,9 +239,18 @@ class utentiController
             if ($user->getToken() == $_GET['token']) {
                 $user->setActivated(1);
                 try {
+                    \utils\Transaction::beginTransaction();
                     \models\DAOUser::updateUtente($user);
                     $this->viewLogin($user->getUsername());
+                    //creazione cloud chat
+                    $cloudChat = new \models\DOChat(null, 5, 'Cloud chat', null, './utils/imgs/private-cloud.jpg');
+                    \models\DAOChat::insertChat($cloudChat);
+                    $chatId = \models\DAOChat::getLastInsertId();
+                    $chatMember = new \models\DOChatMembers($user->getUserId(), $chatId, null, 3);
+                    \models\DAOChatMembers::insertChatMember($chatMember);
+                    \utils\Transaction::commitTransaction();
                 } catch (\Exception $e) {
+                    \utils\Transaction::rollBackTransaction();
                     $message = "Errore, riprovare più tardi";
                     $this->viewMessagePage($message);
                 }
