@@ -33,9 +33,10 @@
         <?php
         if (!empty($chats)) {
             foreach ($chats as $chat) {
-                if($chat['chatType'] == '5'){
-                    //non mostra la cloud chat
-                }else if ($chat['chatType'] == '1' || $chat['chatType'] == '4') {
+                if ($chat['chatType'] == '5') {
+                    if (count($chats) == 1)
+                        echo '<li><a style="color: #b8bfce"><i>Apri la chat... ah no, non ce ne sono :)</i></a></li>';
+                } else if ($chat['chatType'] == '1' || $chat['chatType'] == '4') {
                     $src = $chat['pathProfilePicture'];
                     echo '<li>
                                 <a href="index.php?controller=chatController&action=viewChatPage&chatId=' . $chat['chatId'] . '" style="padding-top: 0">

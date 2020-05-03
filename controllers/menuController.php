@@ -42,8 +42,9 @@ class menuController
                 )[0];
                 $chats[$i] += ['chatType' => $chatType];
             }
+            $messages = \models\DAOMessage::getOldMessages($chats[$i]['chatId'], $_SESSION['id'], '1');
             $newMessages = \models\DAOMessage::getNewMessages($chats[$i]['chatId'], $_SESSION['id'], '1');
-            if(!is_null($newMessages)) {
+            if(!is_null($newMessages) || is_null($messages)) {
                 $chats[$i] += ['newMessages' => 'true'];
             }
         }

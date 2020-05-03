@@ -235,7 +235,7 @@ class utentiController
     public function confermaRegistrazione()
     { //conferma account tramite link sulla mail
         $user = \models\DAOUser::getUser(array('userId' => $_GET['id']));
-        if ($user != null) {
+        if ($user != null && $user->getActivated() == 0) {
             if ($user->getToken() == $_GET['token']) {
                 $user->setActivated(1);
                 try {
