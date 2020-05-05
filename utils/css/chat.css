@@ -120,6 +120,7 @@ img {
 .incoming_msg_img {
   display: inline-block;
   width: 6%;
+  min-width: 30px;
   max-width: 50px;
   padding-bottom: 5px;
   padding-left: 5px;

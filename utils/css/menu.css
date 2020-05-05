@@ -503,3 +503,19 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+#close-sidebar-right {
+    color: #bdbdbd;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+#close-sidebar-right:hover {
+    color: #ffffff;
+}
+
+.pre-scrollable-right {
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    min-height: 100px;
+}

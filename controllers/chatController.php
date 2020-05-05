@@ -114,6 +114,7 @@ class chatController
                     if(count($userIds) > 50) {
                         throw new Exception('Troppi utenti selezionati: massimo 50 persone!');
                     }
+                    $chatTitle == '' ? 'New group' : $chatTitle; 
                     $targetFilePath = is_null($targetFilePath) ? './utils/imgs/groupDefault.png' : $targetFilePath;
                     $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
                     \models\DAOChat::insertChat($chat);
@@ -131,6 +132,7 @@ class chatController
 
                 case '3':
                     $targetFilePath = is_null($targetFilePath) ? './utils/imgs/groupDefault.png' : $targetFilePath;
+                    $chatTitle == '' ? 'New group' : $chatTitle;
                     $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
@@ -177,15 +179,24 @@ class chatController
         
         //recupera il ChatMember dell'utente per verificare che sia all'interno della chat
         $chatMember = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId'], "userId" => $_SESSION['id']))[0];
+        //recupero dati dei membri della chat
+        $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $chat->getChatId()), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
+        
         if (is_null($chatMember) || is_null($chat)) {       //blocca l'utente nel caso cercasse di entrare nelle chat altrui
             (new \utils\WAF)->showBlockPage('98', 'access to other people\'s chats');
         }
 
+        if($chat->getChatType() == '1' || $chat->getChatType() == '4') {
+            $friendId = ($chatMembers[0]['userId'] !== $_SESSION['id']) ? $chatMembers[0]['userId'] : $chatMembers[1]['userId'];
+            if(is_null(\models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $friendId, 'authorizated' => 1)))){
+                (new \utils\WAF)->showBlockPage('98', 'access to blocked chats');
+            }
+        }
+          
         //salva l'id della chat nella sessione per il refresh dei messaggi
         $_SESSION['chatId'] = $chat->getChatId();
 
-        //recupero dati dei membri della chat e i messaggi
-        $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $chat->getChatId()), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
+        //recupero dei messaggi
         $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $user->getUserId());
         include('views/chatPage.php');
     }

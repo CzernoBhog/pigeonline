@@ -46,10 +46,10 @@
                         $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
                         $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
                         echo '<span style="padding-left: 10px; font-size: smaller">';
-                        echo ($chat['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
+                        echo ($chat['lastActivity'] > $current_timestamp) ? 'Online' : 'Offline';
                     }
                     if ($chat['chatType'] == '4')
-                        echo '<i style="background: none; font-size: 10px; width: 20px; height: 20px; line-height: 20px;" class="fas fa-lock"></i>';
+                        echo '<i style="background: none; font-size: 10px; width: 20px; height: 20px; line-height: 20px; margin-right: 0" class="fas fa-lock"></i>';
                     if (isset($chat['newMessages'])) {
                         echo '<span style="margin-top: 0; float: none" class="badge badge-pill badge-success">New</span>';
                     }

@@ -2,7 +2,7 @@
 
 $("#formSendMessage").on('submit', function (event) {
     event.preventDefault();
-    
+
     if ($('#messageText').val() == '') {
         return;
     }
@@ -76,13 +76,13 @@ $("#formSendMessage").on('submit', function (event) {
     xhr.send(formData);
 });
 
-$(document).ready(function(){
+$(document).ready(function () {
     loadNewMessages();
 });
 
 /* setInterval(function () {
     loadNewMessages();
-}, 2000); */ 
+}, 2000); */
 
 function loadNewMessages() {
     $.ajax({
@@ -96,7 +96,7 @@ function loadNewMessages() {
             /* if(text == 'blocked'){
                 $.redirect('index.php');
             } */
-            if(text != ''){
+            if (text != '') {
                 $('#messaggi').append(text);
                 $("#messaggi").animate({
                     scrollTop: $('#messaggi').prop("scrollHeight")
@@ -105,3 +105,51 @@ function loadNewMessages() {
         }
     });
 }
+
+$('#chatDetails').on('click', function () {
+    $('#rightMenu').load('index.php?controller=menuController&action=caricaMenuChat', function (responseTxt, statusTxt, xhr) {
+        if (statusTxt == "success") {
+
+            $("#close-sidebar-right").click(function () {
+                $('#rightMenu').children().remove();
+                $('.messaging').css('right', '0');
+            });
+
+            if ($(window).width() > 550) {
+                $('.messaging').css('right', '500px');
+                //$('.messaging').css('right', '0');
+            }
+
+            var height = $(window).height();
+            $('.pre-scrollable-right').css('max-height', height - 195);
+
+            $(window).on('resize', function () {
+                var height = $(window).height();
+                $('.pre-scrollable-right').css('max-height', height - 195);
+            });
+
+            aggiornaDescrizione();
+            function aggiornaDescrizione(){
+                $("#descriptionInput").on('click', function () {
+                    let groupDescr = $(this).first().text();
+                    let input = '<input id="descriptionInput" class="form-control search-menu" maxLength="1024" name="description" type="text" value="' + groupDescr + '">';
+                    let parentElement = $(this).parent("li");
+                    parentElement.children("span").remove();
+                    parentElement.append(input);
+                    parentElement.children("input").focus();
+                    
+                    $("#descriptionInput").on('blur', function () {
+                        let groupDescr = $(this).first().val();
+
+                        // TODO: ajax per aggiornare la descrizione
+
+                        let parentElement = $(this).parent("li");
+                        parentElement.children("input").remove();
+                        parentElement.append("<span id='descriptionInput' style='padding: 0 20px 5px 20px'>" + groupDescr + "</span>");
+                        aggiornaDescrizione();
+                    });
+                });
+            }
+        }
+    });
+});

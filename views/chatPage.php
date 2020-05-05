@@ -39,17 +39,17 @@
                         echo ($otherUser['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
                     }
                     echo        '</div>
-                                <button style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
+                                <button id="chatDetails" style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                             </div>';
                 } else {
-                    if($chat->getChatType() != '5'){
+                    if ($chat->getChatType() != '5') {
                         $groupMembers = '';
                         for ($i = 0; $i < count($chatMembers); $i++) {
                             $groupMembers .= $chatMembers[$i]['username'];
                             if ($i < count($chatMembers) - 1)
                                 $groupMembers .= ', ';
                         }
-                    }else{
+                    } else {
                         $groupMembers = "messaggi salvati di " . $user->getUsername();
                     }
                     echo '<div class="outgoing_usr" style="height: 52px; background-color: #dddddd">
@@ -58,7 +58,7 @@
                                     <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $chat->getTitle() . '</span>
                                     <br><span class="span-goup-members">' . $groupMembers . '</span>
                                 </div>
-                                <button style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
+                                <button id="chatDetails" style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                             </div>';
                 }
                 ?>
@@ -67,12 +67,12 @@
                     <?php
                     if (!is_null($messages)) {
                         foreach ($messages as $msg) {
-                            if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime("04/30/2020"))) {
+                            if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime($msg['timeStamp']))) {
                                 $day = "Yesterday";
-                            } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime("04/30/2020"))) {
+                            } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime($msg['timeStamp']))) {
                                 $day = "Today";
                             } else {
-                                $day = date("D M Y", strtotime("04/29/2020"));
+                                $day = date("D M Y", strtotime($msg['timeStamp']));
                             }
 
                             if ($msg['sentBy'] == $_SESSION['id']) {
@@ -106,7 +106,7 @@
                     ?>
 
                     <div id="newMessages"></div>
-                    
+
                 </div>
                 <div class="type_msg">
                     <div class="input_msg_write" style="background: #ddd;">
@@ -127,7 +127,10 @@
                 </div>
 
             </div>
+
         </main>
+
+        <div id="rightMenu"></div>
 
     </div>
 
