@@ -224,4 +224,29 @@ class chatController
         $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $user->getUserId());
         include('views/chatPage.php');
     }
+
+    /**
+     * Aggiunge o revoca i diritti di admin a un utente selezionato, appartenente alla chat attuale
+     * 
+     * @throws Exception $e Exception generale per indicare un errore avvenuto durante l'operazione
+     */
+    public function addRemoveAdmin()
+    {
+        try {
+            $countAdmins = count(\models\DAOChatMembers::getChatMembers(array("chatId" => $_SESSION['chatId'], "userType" => "3")));
+            $chat = \models\DAOChat::getChat(array('chatId' => $_SESSION['chatId']))[0];
+            $chatMember = \models\DAOChatMembers::getChatMembers(array("userId" => $_POST['userId'], "chatId" => $_SESSION['chatId']))[0];
+            if($countAdmins > 1 && ($chatMember->getUserType() === '3' || $chatMember->getUserId() === $_SESSION['id'])) {
+                $chatMember->setUserType( ($chat->getChatType() === '3') ? 1 : 2 );      //revoca i diritti di admin se già lo è
+                echo "removed";
+            } else {
+                $chatMember->setUserType(3);      //rende l'utente selezionato come admin della chat, se non è admin
+                echo "added";
+            }
+            \models\DAOChatMembers::updateChatMember($chatMember);
+        } catch(\Exception $e) {
+            // echo $e->getMessage();
+            echo "error";
+        }
+    }
 }

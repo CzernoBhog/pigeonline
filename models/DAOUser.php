@@ -5,10 +5,10 @@ namespace models;
 class DAOUser
 {
 
-    public static function getUser(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, $tableJoinColumn = null)
+    public static function getUser(array $params, BOOL $orClause = FALSE, BOOL $replaceWithLIKE = FALSE, String $orderBy = NULL, String $select = '*', bool $isArray = FALSE, Array $joinTablesWithOnColumns = null, $tableJoinColumn = null, string $joinType = 'INNER')
     {
         $conn = \utils\Database::connect();
-        $query = \utils\Utility::createWhere($params, 'user', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select);
+        $query = \utils\Utility::createWhere($params, 'user', $orClause, $replaceWithLIKE, $orderBy, $joinTablesWithOnColumns, $tableJoinColumn, $select, $joinType);
         $stmt = $conn->prepare($query);
 
         foreach ($params as $key => $value) {

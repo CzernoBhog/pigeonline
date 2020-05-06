@@ -55,7 +55,7 @@
                 </li>
             </ul>
             <ul>
-                <?php if (isset($users) && count($users) > 2) { ?>
+                <?php if (count($users) > 2 && (($chat->getChatType() == '3' && $mainUser['userType'] == '3') || $chat->getChatType() == '2')) { ?>
                     <div class="sidebar-brand">
                         <a href="#" class="addUser">USERS:</a>
                         <a style="display: contents" href="#" class="addUser">
@@ -65,7 +65,7 @@
                     <div class="sidebar-search">
                         <div>
                             <div class="input-group">
-                                <input id="searchBar" type="text" class="form-control search-menu" placeholder="Search...">
+                                <input id="searchMembers" type="text" class="form-control search-menu" placeholder="Search...">
                                 <div class="input-group-append">
                                     <span class="input-group-text">
                                         <i class="fa fa-search" aria-hidden="true"></i>
@@ -83,16 +83,30 @@
                             echo '<li style="display: flex;">
                                 <a style="padding-top: 0; width: 80%;">
                                     <img class="chat-img fa-pull-left" src="' . $src . '" alt="Avatar">
-                                    <span class="usernameChat" style="padding-left: 10px; font-size: normal; color: white">' . $user['username'] . '</span>';
-                            if ($user['privacyLevel'] != '3') {
+                                    <span class="usernameMember" style="padding-left: 10px; font-size: normal; color: white">' . $user['username'] . '</span>';
+                            if ($user['privacyLevel'] !== '3') {
                                 $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
                                 $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
                                 echo '<br><span style="padding-left: 10px; font-size: smaller">';
                                 echo ($user['lastActivity'] > $current_timestamp) ? 'Online' : 'Offline';
                                 echo '</span></a>';
-                                echo '<a style="width: min-content; padding: 0;" href="#"><i style="color: green" class="fas fa-user-plus"></i></a>';
-                                echo '<a style="width: min-content; padding: 0;" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
                             }
+
+                            if($mainUser['userType'] === '3') {
+                                echo '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
+                                if($user['userType'] !== '3'){
+                                    echo '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Make Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="far fa-star"></i></a>';
+                                }else{
+                                    echo '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Remove Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="fas fa-star"></i></a>';
+                                }
+                            }
+
+                            if(!$user['cantBeRequested']) {
+                                echo '<a class="friendRequest" style="width: min-content; padding: 0;" title="Add friend" userId="' . $user['userId'] . '" id="friendRequest' . $user['userId'] . '"><i style="color: green" class="fas fa-user-plus"></i></a>';
+                            }else if($user['cantBeRequested'] === 'pending'){
+                                echo '<a style="width: min-content; padding: 0;" title="Request sent"><i style="color: yellow" class="fas fa-user-clock"></i></a>';
+                            }
+
                             echo '</li>';
                         }
                         ?>

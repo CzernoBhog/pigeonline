@@ -13,7 +13,16 @@ class menuController
     public function caricaMenuChat()
     {
         $chat = \models\DAOChat::getChat(array('chatId' => $_SESSION['chatId']))[0];
-        $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
+        $mainUser = \models\DAOUser::getUser(
+            array('user.userId' => $_SESSION['id'], 'chatId' => $chat->getChatId()),
+            false,
+            false,
+            null,
+            '*',
+            true,
+            array('chatMembers' => 'userId'),
+            'userId'
+        )[0];
         $otherUser = null;
 
         $users = \models\DAOChatMembers::getChatMembers(
@@ -27,10 +36,36 @@ class menuController
             'userId'
         );
 
-        if ($chat->getChatType() == '1' || $chat->getChatType() == '4') {
-            $otherUser = ($users[0]['userId'] !== $user->getUserId()) ? $users[0] : $users[1];
-        } else if ($chat->getChatType() == '5') {
-            $otherUser = $users[0];
+        switch ($chat->getChatType()) {
+            case '1':   //chat normali
+            case '4':   // chat segrete
+                $otherUser = ($users[0]['userId'] !== $mainUser['userId']) ? $users[0] : $users[1];
+                break;
+
+            case '5':   //chat cloud
+                $otherUser = $users[0];
+                break;
+
+            case '2':   //gruppi
+            case '3':   //canali
+                for ($i = 0; $i < count($users); $i++) {      //ciclo per vedere quali utenti sono nelle amicizie e quali sono bloccati, dell'utente loggato
+                    $isFriend = \models\DAOFriends::getFriends(array("userId" => $_SESSION['id'], "friendId" => $users[$i]['userId']));
+                    $isBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $_SESSION['id'], 'userBlocked' => $users[$i]['userId']));
+                    $imBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $users[$i]['userId'], 'userBlocked' => $_SESSION['id']));
+                    
+                    if(!is_null($isBlocked) || !is_null($imBlocked) || $users[$i]['userId'] === $_SESSION['id']){
+                        $users[$i] += ['cantBeRequested' => true];
+                    }else if(!is_null($isFriend)){             
+                        if($isFriend->getAuthorizated() === '0'){
+                            $users[$i] += ['cantBeRequested' => 'pending'];
+                        }else{
+                            $users[$i] += ['cantBeRequested' => true];
+                        }
+                    }else{
+                        $users[$i] += ['cantBeRequested' => false];
+                    }
+                }
+                break;
         }
 
         include('./views/menuDetailsChat.php');

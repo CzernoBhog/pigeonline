@@ -76,25 +76,33 @@ class friendsController
 
     /**
      * Invia una richiesta di amicizia all'utente selezionato
+     * 
+     * @throws Exception $e Exception generale per indicare un errore avvenuto durante l'operazione
      */
     public function friendRequest()
     {
-        $newFriend = \models\DAOUser::getUser(array('userId' => $_POST['friendId']));
-        if ($newFriend === null) {
-            echo 'error';
-        } else {
-            $request = new \models\DOFriends($_SESSION['id'], $newFriend->getUserId(), 0);
-            try {
-                \models\DAOFriends::insertFriend($request);
-                echo 'success';
-            } catch (\Exception $e) {
+        $isBlockedByYou = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $_SESSION['id'], 'userBlocked' => $_POST['friendId']));     //verifica che l'utente loggato non 
+        $isBlockedByHim = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $_POST['friendId'], 'userBlocked' => $_SESSION['id']));     //abbia bloccato l'altro  e viceversa
+        if($_POST['friendId'] !== $_SESSION['id'] && (is_null($isBlockedByYou) || is_null($isBlockedByYou))) {    //controlla, inoltre, che non riesca a inviarsi richieste da solo
+            $newFriend = \models\DAOUser::getUser(array('userId' => $_POST['friendId']));
+            if ($newFriend === null) {
                 echo 'error';
+            } else {
+                $request = new \models\DOFriends($_SESSION['id'], $newFriend->getUserId(), 0);
+                try {
+                    \models\DAOFriends::insertFriend($request);
+                    echo 'success';
+                } catch (\Exception $e) {
+                    echo 'error';
+                }
             }
         }
     }
 
     /**
      * Accetta una richiesta di amicizia all'utente selezionato
+     * 
+     * @throws Exception $e Exception generale per indicare un errore avvenuto durante l'operazione
      */
     public function acceptDeclineRequest()
     {
@@ -128,6 +136,8 @@ class friendsController
 
     /**
      * elimina una richiesta di amicizia inviata
+     * 
+     * @throws Exception $e Exception generale per indicare un errore avvenuto durante l'operazione
      */
     public function cancelRequest()
     {

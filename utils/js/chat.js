@@ -106,13 +106,20 @@ function loadNewMessages() {
     });
 }
 
+var interval;
 $('#chatDetails').on('click', function () {
+    reloadChatMenu();
+    interval = setInterval(function () { reloadChatMenu() }, 2000);
+});
+
+function reloadChatMenu() {
     $('#rightMenu').load('index.php?controller=menuController&action=caricaMenuChat', function (responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
 
             $("#close-sidebar-right").click(function () {
                 $('#rightMenu').children().remove();
                 $('.messaging').css('right', '0');
+                clearInterval(interval);
             });
 
             if ($(window).width() > 550) {
@@ -129,7 +136,7 @@ $('#chatDetails').on('click', function () {
             });
 
             aggiornaDescrizione();
-            function aggiornaDescrizione(){
+            function aggiornaDescrizione() {
                 $("#descriptionInput").on('click', function () {
                     let groupDescr = $(this).first().text();
                     let input = '<input id="descriptionInput" class="form-control search-menu" maxLength="1024" name="description" type="text" value="' + groupDescr + '">';
@@ -137,7 +144,7 @@ $('#chatDetails').on('click', function () {
                     parentElement.children("span").remove();
                     parentElement.append(input);
                     parentElement.children("input").focus();
-                    
+
                     $("#descriptionInput").on('blur', function () {
                         let groupDescr = $(this).first().val();
 
@@ -150,6 +157,101 @@ $('#chatDetails').on('click', function () {
                     });
                 });
             }
-        }
-    });
-});
+
+            $('.friendRequest').on('click', function () {
+                var friendId = $(this).attr('userId');
+                $('#friendRequest' + friendId).attr('title', 'Request sent')
+                $('#friendRequest' + friendId).html('<i style="color: yellow" class="fas fa-user-clock"></i>');
+                $.ajax({
+                    url: 'index.php',
+                    type: 'POST',
+                    data: {
+                        'friendId': friendId,
+                        'action': 'friendRequest',
+                        'controller': 'friendsController'
+                    },
+                    success: function (result) {
+                        if (result == 'blocked') {
+                            $.redirect('index.php');
+                        }
+                        if (result == 'success') {
+                            $('#friendRequest' + friendId).css("pointer-events", "none"); // disabilita gli eventi del mouse
+                        } else {
+                            $('#friendRequest' + friendId).attr('title', 'Error, resend request')
+                            $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
+                        }
+                    },
+                    error: function (result) {
+                        $('#friendRequest' + friendId).attr('title', 'Error, resend request')
+                        $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
+                    }
+                });
+            });
+
+            $('.addRemoveAdmin').on('click', function () {
+                var userId = $(this).attr('userId');
+                $.ajax({
+                    url: 'index.php',
+                    type: 'POST',
+                    data: {
+                        'userId': userId,
+                        'action': 'addRemoveAdmin',
+                        'controller': 'chatController'
+                    },
+                    success: function (result) {
+                        if (result == 'blocked') {
+                            $.redirect('index.php');
+                        }
+                        if (result == 'added') {
+                            $('#addRemoveAdmin' + userId).html('<i class="fas fa-star"></i>');
+                            $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
+
+                        } else if (result == 'removed') {
+                            $('#addRemoveAdmin' + userId).html('<i class="far fa-star"></i>');
+                            $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
+                        } else {
+                            if ($('#addRemoveAdmin' + userId).attr('title') == 'Make Admin') {
+                                $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                                $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
+                            } else {
+                                $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                                $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
+                            }
+                        }
+                    },
+                    error: function (result) {
+                        if ($('#addRemoveAdmin' + userId).attr('title') == 'Make Admin') {
+                            $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                            $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
+                        } else {
+                            $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                            $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
+                        }
+                    }
+                });
+            });
+
+            $('#searchMembers').on('keyup', function () {
+                filterMember();
+            });
+
+            function filterMember() {
+                var value = $('#searchMembers').val().toLowerCase().trim();
+                var members = $('.pre-scrollable-right li');
+                for (i = 0; i < members.length; i++) {
+                    if ($('.usernameMember')[i] == null) {
+                        return;
+                    }
+                    var memberName = $('.usernameMember')[i].innerText.toLowerCase().trim();
+                    if (memberName.includes(value)) {
+                        $(members[i]).show();
+                    } else {
+                        $(members[i]).hide();
+                    }
+                }
+            }
+
+        }   // chiusura IF success
+
+    });  // chiusura load
+}

@@ -12,16 +12,10 @@ $('#searchBar').on('keyup', function () {
 });
 
 function filterChat() {
-    if ($('#searchBar').val() == '') {
-        return;
-    }
-    var value = $('#searchBar').val().toLowerCase();
+    var value = $('#searchBar').val().toLowerCase().trim();
     var chats = $('.pre-scrollable li');
     for (i = 0; i < chats.length; i++) {
-        if($('.usernameChat')[i] == null){
-            return;
-        }
-        var chatName = $('.usernameChat')[i].innerText.toLowerCase();
+        var chatName = $('.usernameChat')[i].innerText.toLowerCase().trim();
         if (chatName.includes(value)) {
             $(chats[i]).show();
         } else {
@@ -79,7 +73,7 @@ function loadMenu() {
             $(window).on('resize', function () {
                 var height = $(window).height();
                 $('.sidebar-content').css('height', height - 45);
-                $('.pre-scrollable').css('max-height', height - 341);
+                $('.pre-scrollable').css('max-height', height - 341); 
             });
 
             $('.addChat').on('click', function () {

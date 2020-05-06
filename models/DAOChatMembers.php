@@ -60,7 +60,7 @@ class DAOChatMembers
         $query = 'UPDATE chatMembers SET draft=:d, userType=:ut, isTyping=:it WHERE userId = :id AND chatId = :ci';
         try {
             $stmt = $conn->prepare($query);
-            $stmt->bindValue(":ui", $chatMembers->getUserId());
+            $stmt->bindValue(":id", $chatMembers->getUserId());
             $stmt->bindValue(":ci", $chatMembers->getChatId());
             $stmt->bindValue(":d", $chatMembers->getDraft());
             $stmt->bindValue(":ut", $chatMembers->getUserType());
@@ -68,7 +68,8 @@ class DAOChatMembers
             $result = $stmt->execute();
             return $result;
         } catch (\Exception | \PDOException $e) {
-            throw new \Exception('Errore aggiornamento ChatMembers');
+            // throw new \Exception('Errore aggiornamento ChatMembers');
+            throw new \Exception($e->getMessage());
         }
     }
 
