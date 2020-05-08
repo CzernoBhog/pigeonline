@@ -76,13 +76,60 @@ $("#formSendMessage").on('submit', function (event) {
     xhr.send(formData);
 });
 
+var timer = null, bool = false;
+$('#messageText').on('keyup', function() {
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+        isTyping(false)
+    }, 3000);
+    if (bool) {
+        return;
+    } else {
+        bool = true;
+        isTyping(bool);
+    }
+});
+
+function isTyping(typing) {
+    if (!typing)
+        bool = false;
+
+    $.ajax({
+        type: "POST",
+        url: "index.php",
+        data: {
+            "controller": "chatController",
+            "action": "updateIsTyping",
+            "isTyping": typing
+        },
+        success: function (data) {
+            //console.debug(data);
+        }
+    });
+}
+
 $(document).ready(function () {
     loadNewMessages();
 });
 
-/* setInterval(function () {
+setInterval(function () {
     loadNewMessages();
-}, 2000); */
+    checkWhoIsTyping();
+}, 3000);
+
+function checkWhoIsTyping() {
+    $.ajax({
+        type: "POST",
+        url: "index.php",
+        data: {
+            "controller": "chatController",
+            "action": "checkWhoIsTyping"
+        },
+        success: function (data) {
+            //$('.spanTyping').val();
+        }
+    });
+}
 
 function loadNewMessages() {
     $.ajax({
@@ -106,15 +153,26 @@ function loadNewMessages() {
     });
 }
 
-var interval;
+var interval, scrollPoint, preFilterText;
 $('#chatDetails').on('click', function () {
     reloadChatMenu();
-    interval = setInterval(function () { reloadChatMenu() }, 2000);
+    /* interval = setInterval(function () {
+        preFilterText = $("#searchMembers").val();
+        scrollPoint = $("#chatMenuContent").scrollTop();
+        reloadChatMenu();
+    }, 2000); */
 });
 
 function reloadChatMenu() {
     $('#rightMenu').load('index.php?controller=menuController&action=caricaMenuChat', function (responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
+
+            $("#searchMembers").val(preFilterText);
+            filterMember();
+
+            $("#chatMenuContent").animate({
+                scrollTop: scrollPoint
+            }, 0);
 
             $("#close-sidebar-right").click(function () {
                 $('#rightMenu').children().remove();
@@ -133,7 +191,14 @@ function reloadChatMenu() {
             $(window).on('resize', function () {
                 var height = $(window).height();
                 $('.pre-scrollable-right').css('max-height', height - 195);
+                if ($('.messaging').width() < 350) {
+                    $('.messaging').css('right', '0');
+                }
             });
+
+            if ($('.messaging').width() < 350) {
+                $('.messaging').css('right', '0');
+            }
 
             aggiornaDescrizione();
             function aggiornaDescrizione() {
@@ -144,19 +209,69 @@ function reloadChatMenu() {
                     parentElement.children("span").remove();
                     parentElement.append(input);
                     parentElement.children("input").focus();
+                    clearInterval(interval);
 
                     $("#descriptionInput").on('blur', function () {
                         let groupDescr = $(this).first().val();
 
-                        // TODO: ajax per aggiornare la descrizione
+                        ajaxUpdateInfoChat('description', groupDescr);
 
                         let parentElement = $(this).parent("li");
                         parentElement.children("input").remove();
                         parentElement.append("<span id='descriptionInput' style='padding: 0 20px 5px 20px'>" + groupDescr + "</span>");
+                        //riavvio il set interval una volta aggiornato
+                        interval = setInterval(function () {
+                            preFilterText = $("#searchMembers").val();
+                            scrollPoint = $("#chatMenuContent").scrollTop();
+                            reloadChatMenu();
+                        }, 2000);
                         aggiornaDescrizione();
                     });
                 });
             }
+
+            aggiornaTitolo();
+            function aggiornaTitolo() {
+                $("#titleInput").on('click', function () {
+                    let title = $(this).text();
+                    let input = '<input id="titleInput" class="form-control search-menu" maxLength="30" name="title" type="text" value="' + title + '">';
+                    let parentElement = $(this).parent("div.sidebar-brand");
+                    parentElement.children("#titleInput").remove();
+                    parentElement.prepend(input);
+                    parentElement.children("input").focus();
+                    clearInterval(interval);
+
+                    $("#titleInput").on('blur', function () {
+                        let title = $(this).val();
+
+                        ajaxUpdateInfoChat('title', title);
+
+                        let parentElement = $(this).parent("div.sidebar-brand");
+                        parentElement.children("#titleInput").remove();
+                        parentElement.append("<a id='titleInput' href='#'>" + title + "</a>");
+                        //riavvio il set interval una volta aggiornato
+                        interval = setInterval(function () {
+                            preFilterText = $("#searchMembers").val();
+                            scrollPoint = $("#chatMenuContent").scrollTop();
+                            reloadChatMenu();
+                        }, 2000);
+                        aggiornaTitolo();
+                    });
+                });
+            }
+
+            $("#searchMembers").on('click', function () {
+                clearInterval(interval);
+            });
+
+            $("#searchMembers").on('blur', function () {
+                interval = setInterval(function () {
+                    preFilterText = $("#searchMembers").val();
+                    scrollPoint = $("#chatMenuContent").scrollTop();
+                    reloadChatMenu();
+                }, 2000);
+            });
+
 
             $('.friendRequest').on('click', function () {
                 var friendId = $(this).attr('userId');
@@ -235,23 +350,122 @@ function reloadChatMenu() {
                 filterMember();
             });
 
-            function filterMember() {
-                var value = $('#searchMembers').val().toLowerCase().trim();
-                var members = $('.pre-scrollable-right li');
-                for (i = 0; i < members.length; i++) {
-                    if ($('.usernameMember')[i] == null) {
-                        return;
+            //upload photo
+            $('#changePhoto').on('change', function () {
+                $("#formGroupPhoto").submit();
+            });
+
+            $("#formGroupPhoto").on('submit', function (event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "index.php?controller=chatController&action=updateInfoChat&type=pathToChatPhoto",
+                    type: "POST",
+                    data: new FormData(this),
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result == 'blocked') {
+                            $.redirect('index.php');
+                        }
+                        if (result == 'success') {
+                            reloadChatMenu();
+                        } else {
+                            $.notify("Error: Operation failed!", {
+                                animate: {
+                                    enter: 'animated flipInY',
+                                    exit: 'animated flipOutX'
+                                },
+                                type: 'danger',
+                                z_index: 2000
+                            });
+                            setTimeout(function () {
+                                $.notifyClose();
+                            }, 2000);
+                        }
+                    },
+                    error: function (e) {
+                        $.notify("Error: Operation failed!", {
+                            animate: {
+                                enter: 'animated flipInY',
+                                exit: 'animated flipOutX'
+                            },
+                            type: 'danger',
+                            z_index: 2000
+                        });
+                        setTimeout(function () {
+                            $.notifyClose();
+                        }, 2000);
                     }
-                    var memberName = $('.usernameMember')[i].innerText.toLowerCase().trim();
-                    if (memberName.includes(value)) {
-                        $(members[i]).show();
-                    } else {
-                        $(members[i]).hide();
-                    }
-                }
-            }
+                });
+            });
 
         }   // chiusura IF success
 
     });  // chiusura load
 }
+
+function filterMember() {
+    if (typeof $('#searchMembers').val() != "undefined") {
+        var value = $('#searchMembers').val().toLowerCase().trim();
+        var members = $('.pre-scrollable-right li');
+        for (i = 0; i < members.length; i++) {
+            if ($('.usernameMember')[i] == null) {
+                return;
+            }
+            var memberName = $('.usernameMember')[i].innerText.toLowerCase().trim();
+            if (memberName.includes(value)) {
+                $(members[i]).show();
+            } else {
+                $(members[i]).hide();
+            }
+        }
+    }
+}
+
+function ajaxUpdateInfoChat(type, value) {
+    $.ajax({
+        url: 'index.php',
+        type: 'POST',
+        data: {
+            'type': type,
+            'action': 'updateInfoChat',
+            'controller': 'chatController',
+            'value': value
+        },
+        success: function (result) {
+            if (result == 'blocked') {
+                $.redirect('index.php');
+            }
+            if (result == 'success') {
+                reloadChatMenu();
+            } else {
+                $.notify("Error: Operation failed!", {
+                    animate: {
+                        enter: 'animated flipInY',
+                        exit: 'animated flipOutX'
+                    },
+                    type: 'danger',
+                    z_index: 2000
+                });
+                setTimeout(function () {
+                    $.notifyClose();
+                }, 2000);
+            }
+        },
+        error: function (result) {
+            $.notify("Error: Operation failed!", {
+                animate: {
+                    enter: 'animated flipInY',
+                    exit: 'animated flipOutX'
+                },
+                type: 'danger',
+                z_index: 2000
+            });
+            setTimeout(function () {
+                $.notifyClose();
+            }, 2000);
+        }
+    });
+}
+

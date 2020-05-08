@@ -1,8 +1,10 @@
 <nav id="sidebar" class="sidebar-wrapper" style="right: 0px;left: auto; width: 500px">
     <div class="sidebar-brand">
-        <a href="#"><?= is_null($chat->getTitle()) ? $otherUser['username'] : $chat->getTitle() ?></a>
+        <a id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'titleInput' : 'title' ?>" href="#">
+            <?= is_null($chat->getTitle()) ? $otherUser['username'] : $chat->getTitle() ?>
+        </a>
         <?php
-        echo '<i style="padding-right: 15px; color: white"';
+        echo '<i style="padding-right: 15px; color: white; padding-left: 10px;"';
         switch ($chat->getChatType()) {
             case 1:
                 echo ' class="fas fa-user-friends">';
@@ -35,12 +37,21 @@
         </div>
     </div>
     <!-- sidebar-header  -->
-    <div class="sidebar-content" style="scrollbar-width: none; max-height: calc(100% - 95px);">
-
+    <div id="chatMenuContent" class="sidebar-content" style="scrollbar-width: none; max-height: calc(100% - 95px);">
         <div id="menu-content" class="sidebar-menu" style="padding: 0;">
             <ul>
                 <li class="header-menu">
                     <span>PICTURE:</span>
+                    <?php
+                    if(($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3'){
+                        echo '<form class="wrapper" action="" method="POST" enctype="multipart/form-data" id="formGroupPhoto">
+                                    <div style="position: absolute; right: 0; top: 0" class="fileUpload btn btn-primary">
+                                        Change
+                                        <input name="picture" id="changePhoto" type="file" class="upload" />
+                                    </div>
+                                </form>';
+                    }
+                    ?>
                 </li>
                 <li style="display: table; margin: auto; padding: 10px;">
                     <img style="height: 247px; width: 247px; border-radius: 50%;" src="<?= is_null($chat->getPathToChatPhoto()) ? $otherUser['pathProfilePicture'] : $chat->getPathToChatPhoto() ?>" alt="">
@@ -51,7 +62,7 @@
                     <span><?= !is_null($chat->getDescription()) ? 'DESCRIPTION:' : 'MOOD:' ?></span>
                 </li>
                 <li class="header-menu">
-                    <span id="descriptionInput" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
+                    <span id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'descriptionInput' : 'description' ?>" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
                 </li>
             </ul>
             <ul>
@@ -92,18 +103,18 @@
                                 echo '</span></a>';
                             }
 
-                            if($mainUser['userType'] === '3') {
+                            if ($mainUser['userType'] === '3') {
                                 echo '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
-                                if($user['userType'] !== '3'){
+                                if ($user['userType'] !== '3') {
                                     echo '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Make Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="far fa-star"></i></a>';
-                                }else{
+                                } else {
                                     echo '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Remove Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="fas fa-star"></i></a>';
                                 }
                             }
 
-                            if(!$user['cantBeRequested']) {
+                            if (!$user['cantBeRequested']) {
                                 echo '<a class="friendRequest" style="width: min-content; padding: 0;" title="Add friend" userId="' . $user['userId'] . '" id="friendRequest' . $user['userId'] . '"><i style="color: green" class="fas fa-user-plus"></i></a>';
-                            }else if($user['cantBeRequested'] === 'pending'){
+                            } else if ($user['cantBeRequested'] === 'pending') {
                                 echo '<a style="width: min-content; padding: 0;" title="Request sent"><i style="color: yellow" class="fas fa-user-clock"></i></a>';
                             }
 

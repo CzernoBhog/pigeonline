@@ -105,16 +105,16 @@ class chatController
                         //inserisce l'utente che crea la chat come membro
                         $chatMember = new \models\DOChatMembers($creatorUser->getUserId(), $chatId, null, 2);
                         \models\DAOChatMembers::insertChatMember($chatMember);
-                    }else{
+                    } else {
                         throw new Exception('Errore creazione chat.');
-                    }             
+                    }
                     break;
 
                 case '2':
-                    if(count($userIds) > 50) {
+                    if (count($userIds) > 50) {
                         throw new Exception('Troppi utenti selezionati: massimo 50 persone!');
                     }
-                    $chatTitle == '' ? 'New group' : $chatTitle; 
+                    $chatTitle == '' ? 'New group' : $chatTitle;
                     $targetFilePath = is_null($targetFilePath) ? './utils/imgs/groupDefault.png' : $targetFilePath;
                     $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
                     \models\DAOChat::insertChat($chat);
@@ -176,23 +176,23 @@ class chatController
     {
         $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
         $chat = \models\DAOChat::getChat(array("chatId" => $_GET['chatId']))[0];
-        
+
         //recupera il ChatMember dell'utente per verificare che sia all'interno della chat
         $chatMember = \models\DAOChatMembers::getChatMembers(array("chatId" => $_GET['chatId'], "userId" => $_SESSION['id']))[0];
         //recupero dati dei membri della chat
         $chatMembers = \models\DAOChatMembers::getChatMembers(array("chatId" => $chat->getChatId()), FALSE, FALSE, 'username', '*', TRUE, array('user' => 'userId', 'userDetails' => 'userId'), 'userId');
-        
+
         if (is_null($chatMember) || is_null($chat)) {       //blocca l'utente nel caso cercasse di entrare nelle chat altrui
             (new \utils\WAF)->showBlockPage('98', 'access to other people\'s chats');
         }
 
-        if($chat->getChatType() == '1' || $chat->getChatType() == '4') {
+        if ($chat->getChatType() == '1' || $chat->getChatType() == '4') {
             $friendId = ($chatMembers[0]['userId'] !== $_SESSION['id']) ? $chatMembers[0]['userId'] : $chatMembers[1]['userId'];
-            if(is_null(\models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $friendId, 'authorizated' => 1)))){
+            if (is_null(\models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $friendId, 'authorizated' => 1)))) {
                 (new \utils\WAF)->showBlockPage('98', 'access to blocked chats');
             }
         }
-          
+
         //salva l'id della chat nella sessione per il refresh dei messaggi
         $_SESSION['chatId'] = $chat->getChatId();
 
@@ -208,12 +208,12 @@ class chatController
     {
         $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
         $chat = \models\DAOChat::getChat(
-            array("userId" => $_SESSION['id'], 'chatType' => 5), 
-            FALSE, 
-            FALSE, 
-            NULL, 
-            'chat.*', 
-            FALSE, 
+            array("userId" => $_SESSION['id'], 'chatType' => 5),
+            FALSE,
+            FALSE,
+            NULL,
+            'chat.*',
+            FALSE,
             array('chatMembers' => 'chatId'),
             'chatId'
         )[0];
@@ -236,17 +236,119 @@ class chatController
             $countAdmins = count(\models\DAOChatMembers::getChatMembers(array("chatId" => $_SESSION['chatId'], "userType" => "3")));
             $chat = \models\DAOChat::getChat(array('chatId' => $_SESSION['chatId']))[0];
             $chatMember = \models\DAOChatMembers::getChatMembers(array("userId" => $_POST['userId'], "chatId" => $_SESSION['chatId']))[0];
-            if($countAdmins > 1 && ($chatMember->getUserType() === '3' || $chatMember->getUserId() === $_SESSION['id'])) {
-                $chatMember->setUserType( ($chat->getChatType() === '3') ? 1 : 2 );      //revoca i diritti di admin se già lo è
+            if ($countAdmins > 1 && ($chatMember->getUserType() === '3' || $chatMember->getUserId() === $_SESSION['id'])) {
+                $chatMember->setUserType(($chat->getChatType() === '3') ? 1 : 2);      //revoca i diritti di admin se già lo è
                 echo "removed";
             } else {
                 $chatMember->setUserType(3);      //rende l'utente selezionato come admin della chat, se non è admin
                 echo "added";
             }
             \models\DAOChatMembers::updateChatMember($chatMember);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // echo $e->getMessage();
             echo "error";
+        }
+    }
+
+    /**
+     * Aggiorna la foto gruppo/canale, la descrizione e il nome
+     */
+    public function updateInfoChat()
+    {
+        try {
+            $chat = \models\DAOChat::getChat(array("chatId" => $_SESSION['chatId']))[0];
+            switch ($_REQUEST['type']) {
+                case 'description':
+                    $chat->setDescription($_POST['value']);
+                    break;
+                case 'pathToChatPhoto':
+                    //aggiunge foto alla cartella e rimuove quella precedente
+                    $targetFilePath = $chat->getPathToChatPhoto();
+
+                    if (!empty($_FILES["picture"]["name"])) {
+                        // File upload path
+                        $targetDir = "./utils/imgs/groupsPhoto/";
+                        $fileName = basename($_FILES["picture"]["name"]);
+                        $targetFilePath = $targetDir . $chat->getChatId() . $fileName;
+                        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+                        // Allow certain file formats
+                        $allowTypes = array('jpg', 'png', 'jpeg');
+                        if (in_array($fileType, $allowTypes)) {
+                            // Upload file to server
+                            if (move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath)) {
+                                if ($chat->getPathToChatPhoto() != './utils/imgs/groupDefault.png')
+                                    unlink($chat->getPathToChatPhoto());
+                            } else {
+                                die("Sorry, there was an error uploading your file.");
+                            }
+                        } else {
+                            die('Sorry, only JPG, JPEG & PNG files are allowed to upload.');
+                        }
+                    }
+
+                    $chat->setPathToChatPhoto($targetFilePath);
+                    break;
+                case 'title':
+                    $chat->setTitle($_POST['value']);
+                    break;
+                default:
+                    throw new \Exception('error');
+            }
+            \models\DAOChat::updateChat($chat);
+            echo 'success';
+        } catch (\Exception $e) {
+            //echo $e->getMessage();
+            echo 'error';
+        }
+    }
+
+    /**
+     * Aggiorna lo stato di scrittura (sta scrivendo oppure no) dell'utente
+     */
+    public function updateIsTyping()
+    {
+        try {
+            $chatMember = \models\DAOChatMembers::getChatMembers(array("userId" => $_SESSION['id'], "chatId" => $_SESSION['chatId']))[0];
+            $chatMember->setIsTyping(($_POST['isTyping'] === 'true') ? 1 : 0);
+            \models\DAOChatMembers::updateChatMember($chatMember);
+            echo "success";
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            //echo 'error';
+        }
+    }
+
+    /**
+     * Recupera quali utenti stanno scrivendo nella chat attuale
+     */
+    public function checkWhoIsTyping()
+    {
+        try {
+            $chatMembers = \models\DAOChatMembers::getChatMembers(
+                array(
+                    "chatId" => $_SESSION['chatId'],
+                    "isTyping" => 1
+                ),
+                FALSE,
+                FALSE,
+                'username',
+                'chatMembers.*, user.username',
+                TRUE,
+                array("user" => "userId"),
+                "userId"
+            );
+            if (!is_null($chatMembers)) {
+                $mainUser = array_search($_SESSION['id'], array_column($chatMembers, 'userId'));
+                if ($mainUser == 'false'){
+                    unset($chatMembers[$mainUser]);
+                }       
+                echo json_encode($chatMembers);
+            } else {
+                echo "none";
+            }
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            //echo 'error';
         }
     }
 }

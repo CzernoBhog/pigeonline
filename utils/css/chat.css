@@ -142,6 +142,9 @@ img {
   padding: 5px 10px 5px 12px;
   width: max-content;
   max-width: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+  text-overflow: ellipsis;
 }
 
 .time_date {
@@ -175,6 +178,9 @@ img {
   max-width: 100%;
   float: right;
   margin-right: 10px;
+  overflow: auto;
+  scrollbar-width: thin;
+  text-overflow: ellipsis;
 }
 
 .outgoing_msg {
@@ -278,4 +284,23 @@ img {
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
+}
+
+.fileUpload {
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+}
+
+.fileUpload input.upload {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  height: 37px;
 }

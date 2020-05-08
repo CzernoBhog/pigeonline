@@ -116,7 +116,7 @@
                         } else {
                         ?>
                             <form action="" method="POST" enctype="multipart/form-data" id="formSendMessage">
-                                <input autocomplete="off" style="padding-left: 15px;" type="text" class="write_msg" name="messageText" id="messageText" placeholder="Type a message" />
+                                <input autocomplete="off" style="padding-left: 15px; padding-right: 100px" type="text" class="write_msg" name="messageText" id="messageText" placeholder="Type a message" />
                                 <button class="msg_send_btn" style="right: 55px;" type="button"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
                                 <button id="BTNSendMessage" type="submit" class="msg_send_btn" style="right: 20px;" type="button"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
                             </form>
