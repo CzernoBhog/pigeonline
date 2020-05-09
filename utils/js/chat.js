@@ -77,9 +77,9 @@ $("#formSendMessage").on('submit', function (event) {
 });
 
 var timer = null, bool = false;
-$('#messageText').on('keyup', function() {
+$('#messageText').on('keyup', function () {
     clearTimeout(timer);
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
         isTyping(false)
     }, 3000);
     if (bool) {
@@ -108,14 +108,16 @@ function isTyping(typing) {
     });
 }
 
+var chatMembers;
 $(document).ready(function () {
+    chatMembers = $(".span-group-members").text();
     loadNewMessages();
 });
 
-setInterval(function () {
+/* setInterval(function () {
     loadNewMessages();
     checkWhoIsTyping();
-}, 3000);
+}, 3000); */
 
 function checkWhoIsTyping() {
     $.ajax({
@@ -126,7 +128,24 @@ function checkWhoIsTyping() {
             "action": "checkWhoIsTyping"
         },
         success: function (data) {
-            //$('.spanTyping').val();
+            if (data === "none") {
+                $('.span-group-members').text(chatMembers);
+            } else {
+                data = JSON.parse(data);
+                string = "";
+                for (let index = 0; index < data.length; index++) {
+                    string += data[index]['username'];
+                    if (index == data.length - 1) {
+                        if (data.length > 1)
+                            string += ' are typing...'
+                        else
+                            string += ' is typing...'
+                    } else {
+                        string += ', ';
+                    }
+                }
+                $('.span-group-members').text(string);
+            }
         }
     });
 }
@@ -204,7 +223,7 @@ function reloadChatMenu() {
             function aggiornaDescrizione() {
                 $("#descriptionInput").on('click', function () {
                     let groupDescr = $(this).first().text();
-                    let input = '<input id="descriptionInput" class="form-control search-menu" maxLength="1024" name="description" type="text" value="' + groupDescr + '">';
+                    let input = '<input id="descriptionInput" class="form-control search-menu" maxLength="1024" name="description" type="text" value="' + groupDescr.trim() + '">';
                     let parentElement = $(this).parent("li");
                     parentElement.children("span").remove();
                     parentElement.append(input);
@@ -218,7 +237,7 @@ function reloadChatMenu() {
 
                         let parentElement = $(this).parent("li");
                         parentElement.children("input").remove();
-                        parentElement.append("<span id='descriptionInput' style='padding: 0 20px 5px 20px'>" + groupDescr + "</span>");
+                        parentElement.append("<span id='descriptionInput' style='padding: 0 20px 5px 20px'>" + groupDescr.trim() + "</span>");
                         //riavvio il set interval una volta aggiornato
                         interval = setInterval(function () {
                             preFilterText = $("#searchMembers").val();
@@ -234,7 +253,7 @@ function reloadChatMenu() {
             function aggiornaTitolo() {
                 $("#titleInput").on('click', function () {
                     let title = $(this).text();
-                    let input = '<input id="titleInput" class="form-control search-menu" maxLength="30" name="title" type="text" value="' + title + '">';
+                    let input = '<input id="titleInput" class="form-control search-menu" maxLength="30" name="title" type="text" value="' + title.trim() + '">';
                     let parentElement = $(this).parent("div.sidebar-brand");
                     parentElement.children("#titleInput").remove();
                     parentElement.prepend(input);
@@ -248,7 +267,7 @@ function reloadChatMenu() {
 
                         let parentElement = $(this).parent("div.sidebar-brand");
                         parentElement.children("#titleInput").remove();
-                        parentElement.append("<a id='titleInput' href='#'>" + title + "</a>");
+                        parentElement.prepend("<a id='titleInput' href='#'>" + title.trim() + "</a>");
                         //riavvio il set interval una volta aggiornato
                         interval = setInterval(function () {
                             preFilterText = $("#searchMembers").val();
@@ -299,6 +318,54 @@ function reloadChatMenu() {
                     error: function (result) {
                         $('#friendRequest' + friendId).attr('title', 'Error, resend request')
                         $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
+                    }
+                });
+            });
+
+            $('#abbandona').on('click', function () {
+                var userId = $(this).attr('userId');
+                $.ajax({
+                    url: 'index.php',
+                    type: 'POST',
+                    data: {
+                        'action': 'removeUserFromChat',
+                        'controller': 'chatController'
+                    },
+                    success: function (result) {
+                        if (result == 'success') {
+                            $.redirect('index.php', { 'action': 'viewHomePage' });
+                        } else {
+                            errorNotify();
+                        }
+                    },
+                    error: function (result) {
+                        errorNotify();
+                    }
+                });
+            });
+
+            $('.removeUser').on('click', function () {
+                var userId = $(this).attr('userId');
+                $.ajax({
+                    url: 'index.php',
+                    type: 'POST',
+                    data: {
+                        'userId': userId,
+                        'action': 'removeUserFromChat',
+                        'controller': 'chatController'
+                    },
+                    success: function (result) {
+                        if (result == 'blocked') {
+                            $.redirect('index.php');
+                        }
+                        if (result == 'success') {
+                            reloadChatMenu();
+                        } else {
+                            errorNotify();
+                        }
+                    },
+                    error: function (result) {
+                        errorNotify();
                     }
                 });
             });
@@ -371,33 +438,17 @@ function reloadChatMenu() {
                         if (result == 'success') {
                             reloadChatMenu();
                         } else {
-                            $.notify("Error: Operation failed!", {
-                                animate: {
-                                    enter: 'animated flipInY',
-                                    exit: 'animated flipOutX'
-                                },
-                                type: 'danger',
-                                z_index: 2000
-                            });
-                            setTimeout(function () {
-                                $.notifyClose();
-                            }, 2000);
+                            errorNotify();
                         }
                     },
                     error: function (e) {
-                        $.notify("Error: Operation failed!", {
-                            animate: {
-                                enter: 'animated flipInY',
-                                exit: 'animated flipOutX'
-                            },
-                            type: 'danger',
-                            z_index: 2000
-                        });
-                        setTimeout(function () {
-                            $.notifyClose();
-                        }, 2000);
+                        errorNotify();
                     }
                 });
+            });
+
+            $('#addUser').on('click', function () {
+                loadModalAddUser();
             });
 
         }   // chiusura IF success
@@ -440,32 +491,65 @@ function ajaxUpdateInfoChat(type, value) {
             if (result == 'success') {
                 reloadChatMenu();
             } else {
-                $.notify("Error: Operation failed!", {
-                    animate: {
-                        enter: 'animated flipInY',
-                        exit: 'animated flipOutX'
-                    },
-                    type: 'danger',
-                    z_index: 2000
-                });
-                setTimeout(function () {
-                    $.notifyClose();
-                }, 2000);
+                errorNotify();
             }
         },
         error: function (result) {
-            $.notify("Error: Operation failed!", {
-                animate: {
-                    enter: 'animated flipInY',
-                    exit: 'animated flipOutX'
-                },
-                type: 'danger',
-                z_index: 2000
-            });
-            setTimeout(function () {
-                $.notifyClose();
-            }, 2000);
+            errorNotify();
         }
     });
 }
 
+function errorNotify() {
+    $.notify("Error: Operation failed!", {
+        animate: {
+            enter: 'animated flipInY',
+            exit: 'animated flipOutX'
+        },
+        type: 'danger',
+        z_index: 2000
+    });
+    /* setTimeout(function () {
+        $.notifyClose();
+    }, 2000); */
+}
+
+function loadModalAddUser() {
+    $("#modal").load("./index.php?controller=chatController&action=mostraModaleAddUser", function (responseTxt, statusTxt, xhr) {
+        if (statusTxt == "success") {
+            $('#addChatModal').modal('show');
+
+            $(function () {
+                window.fs_test = $('#selectUsers').fSelect();
+            });
+
+            $("#formAddUser").on('submit', function (event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "index.php?controller=chatController&action=addUserFromChat",
+                    type: "POST",
+                    data: new FormData(this),
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result == 'blocked') {
+                            $.redirect('index.php');
+                        }
+                        if (result == 'success') {
+                            reloadChatMenu();
+                        } else {
+                            errorNotify();
+                        }
+                    },
+                    error: function (e) {
+                        errorNotify();
+                    }
+                });
+            });
+        }
+        if (statusTxt == "error") {
+            alert("Errore imprevisto, riprovare")
+        }
+    });
+}

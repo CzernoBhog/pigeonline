@@ -97,7 +97,7 @@ class chatController
                     $chat = new \models\DOChat(NULL, $chatType);
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
-                    $isFriend = \models\DAOFriends::getFriends(array('friendId' => $_POST['users']));
+                    $isFriend = \models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $_POST['users']));
                     if (!is_null($isFriend)) {
                         //inserisce l'amico come membro della chat
                         $chatMember = new \models\DOChatMembers($_POST['users'], $chatId, null, 2);
@@ -120,7 +120,7 @@ class chatController
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
                     foreach ($userIds as $id) {
-                        $isFriend = \models\DAOFriends::getFriends(array('friendId' => $id));
+                        $isFriend = \models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $id));
                         if (!is_null($isFriend)) {
                             $chatMember = new \models\DOChatMembers($id, $chatId, null, 2);
                             \models\DAOChatMembers::insertChatMember($chatMember);
@@ -137,7 +137,7 @@ class chatController
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
                     foreach ($userIds as $id) {
-                        $isFriend = \models\DAOFriends::getFriends(array('friendId' => $id));
+                        $isFriend = \models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $id));
                         if (!is_null($isFriend)) {
                             $chatMember = new \models\DOChatMembers($id, $chatId, null, 1);
                             \models\DAOChatMembers::insertChatMember($chatMember);
@@ -167,6 +167,33 @@ class chatController
     {
         $detailsFriends = \models\DAOFriends::getFriendsDetails($_SESSION['id'], 1); //lista amici effettivi
         include('./views/modalAddChat.php');
+    }
+
+    /**
+     * Genera div modale per avvio di una nuova chat
+     */
+    public function mostraModaleAddUser()
+    {
+        $detailsFriends = \models\DAOFriends::getFriendsDetails($_SESSION['id'], 1); //lista amici effettivi
+        $alreadyMembers = \models\DAOChatMembers::getChatMembers(
+            array("chatId" => $_SESSION['chatId'], 'friends.userId' => $_SESSION['id']),
+            FALSE,
+            FALSE,
+            NULL,
+            'user.username',
+            TRUE,
+            array("friends" => "friendId", 'user' => 'userId'),
+            'userId'
+        );
+
+        for ($i=0; $i < count($detailsFriends); $i++) {
+            $result = array_search($detailsFriends[$i]->getUsername(), array_column($alreadyMembers, 'username'));
+            if($result !== 'false'){
+                unset($detailsFriends[$i]);
+            }
+        }
+
+        include('./views/modalAddUser.php');
     }
 
     /**
@@ -339,9 +366,9 @@ class chatController
             );
             if (!is_null($chatMembers)) {
                 $mainUser = array_search($_SESSION['id'], array_column($chatMembers, 'userId'));
-                if ($mainUser == 'false'){
+                if ($mainUser == 'false') {
                     unset($chatMembers[$mainUser]);
-                }       
+                }
                 echo json_encode($chatMembers);
             } else {
                 echo "none";
@@ -349,6 +376,78 @@ class chatController
         } catch (\Exception $e) {
             echo $e->getMessage();
             //echo 'error';
+        }
+    }
+
+    /**
+     * Rimuove l'utente passato dalla chat
+     */
+    public function removeUserFromChat()
+    {
+        $id = isset($_POST['userId']) ? $_POST['userId'] : $_SESSION['id'];
+        try {
+            \utils\Transaction::beginTransaction();
+            $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $_SESSION['chatId']));
+            $chatMember = \models\DAOChatMembers::getChatMembers(array('chatId' => $_SESSION['chatId'], 'userId' => $id))[0];
+            $admins = \models\DAOChatMembers::getChatMembers(array('chatId' => $_SESSION['chatId'], 'userType' => 3));
+
+            $otherChatMembers = array_filter(
+                $chatMembers,
+                function ($member) use ($id) {
+                    return $member->getUserId() !== $id;
+                }
+            );
+
+            if (!is_null($chatMember)) {
+                if (count($otherChatMembers) === 0) {
+                    // TODO eliminare i files
+                } else if (count($admins) == 1 && $chatMember->getUserType() == '3') {
+                    $otherMember = reset($otherChatMembers);
+                    $otherMember->setUserType(3);
+                    \models\DAOChatMembers::deleteChatMember($chatMember);
+                    \models\DAOChatMembers::updateChatMember($otherMember);
+                } else {
+                    \models\DAOChatMembers::deleteChatMember($chatMember);
+                }
+            } else {
+                throw new \Exception('Utente non trovato');
+            }
+            \utils\Transaction::commitTransaction();
+            echo 'success';
+        } catch (\Exception $e) {
+            //echo $e->getMessage();
+            \utils\Transaction::rollBackTransaction();
+            echo 'error';
+        }
+    }
+
+    /**
+     * Aggiunge uno o più utenti alla chat
+     */
+    public function addUserFromChat()
+    {
+        try {
+            \utils\Transaction::beginTransaction();
+            $chat = \models\DAOChat::getChat(array('chatId' => $_SESSION['chatId']))[0];
+            foreach ($_POST['users'] as $userId) {
+                $isFriend = \models\DAOFriends::getFriends(array('userId' => $_SESSION['id'], 'friendId' => $userId));
+                if (is_null($isFriend)) {       // controlla se è effettivamente suo amico
+                    throw new \Exception('Uno degli utenti non è tuo amico');
+                }
+                $chatMember = \models\DAOChatMembers::getChatMembers(array('chatId' => $_SESSION['chatId'], 'userId' => $userId))[0];
+                if (is_null($chatMember)) {     // controlla se non è già presente nella chat
+                    $userType = $chat->getChatType() == '2' ? 2 : 1;
+                    $newChatMember = new \models\DOChatMembers($userId, $_SESSION['chatId'], null, $userType);
+                    \models\DAOChatMembers::insertChatMember($newChatMember);
+                } else {
+                    throw new \Exception('Utente già presente nella chat');
+                }
+            }
+            \utils\Transaction::commitTransaction();
+            echo 'success';
+        } catch (\Exception $e) {
+            \utils\Transaction::rollBackTransaction();
+            echo 'error';
         }
     }
 }

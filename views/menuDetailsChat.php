@@ -43,10 +43,10 @@
                 <li class="header-menu">
                     <span>PICTURE:</span>
                     <?php
-                    if(($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3'){
+                    if (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') {
                         echo '<form class="wrapper" action="" method="POST" enctype="multipart/form-data" id="formGroupPhoto">
                                     <div style="position: absolute; right: 0; top: 0" class="fileUpload btn btn-primary">
-                                        Change
+                                        Change <i class="fas fa-pencil-alt"></i>
                                         <input name="picture" id="changePhoto" type="file" class="upload" />
                                     </div>
                                 </form>';
@@ -59,19 +59,23 @@
             </ul>
             <ul>
                 <li class="header-menu">
-                    <span><?= !is_null($chat->getDescription()) ? 'DESCRIPTION:' : 'MOOD:' ?></span>
+                    <span><?= ($chat->getChatType() == '3' || $chat->getChatType() == '2') ? 'DESCRIPTION:' : 'MOOD:' ?></span>
                 </li>
                 <li class="header-menu">
                     <span id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'descriptionInput' : 'description' ?>" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
                 </li>
             </ul>
             <ul>
-                <?php if (count($users) > 2 && (($chat->getChatType() == '3' && $mainUser['userType'] == '3') || $chat->getChatType() == '2')) { ?>
+                <?php if (($chat->getChatType() != '1' || $chat->getChatType() != '4' || $chat->getChatType() != '5') && (($chat->getChatType() == '3' && $mainUser['userType'] == '3') || $chat->getChatType() == '2')) { ?>
                     <div class="sidebar-brand">
-                        <a href="#" class="addUser">USERS:</a>
-                        <a style="display: contents" href="#" class="addUser">
-                            <i style="padding-right: 15px" class="fa fa-plus"></i>
-                        </a>
+                        <a href="#">USERS:</a>
+                        <?php
+                        if (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') {
+                            echo '<a id="addUser" style="display: contents" title="Add user" href="#">
+                                        <i style="padding-right: 15px" class="fa fa-plus"></i>
+                                    </a>';
+                        }
+                        ?>
                     </div>
                     <div class="sidebar-search">
                         <div>
@@ -104,7 +108,9 @@
                             }
 
                             if ($mainUser['userType'] === '3') {
-                                echo '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
+                                if($mainUser['userId'] !== $user['userId']) {
+                                    echo '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove user" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
+                                }
                                 if ($user['userType'] !== '3') {
                                     echo '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Make Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="far fa-star"></i></a>';
                                 } else {
@@ -142,8 +148,8 @@
                             echo '<i style="margin: 0 " class="fa fa-user-lock fa-pull-left"></i>
                                         <span style="padding: 0; margin-top: 3px; color: #db4949" class="fa-pull-left">Blocca</span>';
                         else
-                            echo '<i style="margin: 0 " class="fa fa-sign-out-alt fa-pull-left"></i>
-                                        <span style="padding: 0; margin-top: 3px; color: #db4949" class="fa-pull-left">Abbandona</span>';
+                            echo '<i style="margin: 0" class="fa fa-sign-out-alt fa-pull-left"></i>
+                                        <span id="abbandona" style="padding: 0; margin-top: 3px; color: #db4949" class="fa-pull-left">Abbandona</span>';
                         ?>
                     </a>
                 </li>

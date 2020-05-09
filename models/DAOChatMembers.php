@@ -79,7 +79,7 @@ class DAOChatMembers
         $query = 'DELETE FROM chatMembers WHERE userId = :id AND chatId = :ci';
         try {
             $stmt = $conn->prepare($query);
-            $stmt->bindValue(":ui", $chatMembers->getUserId());
+            $stmt->bindValue(":id", $chatMembers->getUserId());
             $stmt->bindValue(":ci", $chatMembers->getChatId());
             $result = $stmt->execute();
             return $result;
