@@ -1,4 +1,39 @@
-//var fileSelect = document.getElementById('pictureInput');
+$('#uploadFileInChat').on('change', function () {
+    var fileName = $(this).val().split("\\").pop();
+    $('#fileName').html(fileName);
+    readURL(this);
+    $('#fileText').val('');
+    $('#modalSendFile').modal('show');  
+});
+
+$("#formUploadFile").on('submit', function (event) {
+    event.preventDefault();
+    var formData = new FormData(this);
+    var input = document.getElementById('uploadFileInChat');
+    formData.append('file', input.files[0], input.files[0].name);
+    $.ajax({
+        url: "index.php?controller=messageController&action=sendMessage",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        cache: false,
+        processData: false,
+        success: function (result) {
+            if (result == 'blocked') {
+                $.redirect('index.php');
+            }
+            if (result == 'success') {
+                loadNewMessages();
+                $('#modalSendFile').modal('hide');  
+            } else {
+                errorNotify('Error: File not uloaded! Retry.');
+            }
+        },
+        error: function (e) {
+            errorNotify('Error: File not uloaded! Retry.');
+        }
+    });
+});
 
 $("#formSendMessage").on('submit', function (event) {
     event.preventDefault();
@@ -10,42 +45,11 @@ $("#formSendMessage").on('submit', function (event) {
     $('#BTNSendMessage').html('<i class="fa fa-spinner" aria-hidden="true"></i>');
 
     var formData = new FormData();
-
-    /* var files = fileSelect.files;
-    for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-
-        if (!file.type.match('image.*')) {
-            continue;
-        }
-
-        formData.append('picture', file, file.name);
-    } */
-
     formData.append('ajax', 'true');
     formData.append('messageText', $('#messageText').val());
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'index.php?controller=messageController&action=sendMessage', true);
-
-    /* xhr.onload = function () {
-        if (xhr.status === 200) {
-            uploadButton.innerHTML = 'Upload';
-        } else {
-            $('#errorType').text("Immagine non supportata");
-            $.notify("Error: Image not supported!", {
-                animate: {
-                    enter: 'animated flipInY',
-                    exit: 'animated flipOutX'
-                },
-                type: 'danger',
-                z_index: 2000
-            });
-            setTimeout(function () {
-                $.notifyClose();
-            }, 2000);
-        }
-    }; */
 
     xhr.onreadystatechange = function () {
         if (this.readyState == 2 && this.status == 403) {
@@ -57,17 +61,7 @@ $("#formSendMessage").on('submit', function (event) {
                 loadNewMessages();
                 $('#messageText').val('');
             } else {
-                $.notify("Error: Message not sent! Retry.", {
-                    animate: {
-                        enter: 'animated flipInY',
-                        exit: 'animated flipOutX'
-                    },
-                    type: 'danger',
-                    z_index: 2000
-                });
-                setTimeout(function () {
-                    $.notifyClose();
-                }, 2000);
+                errorNotify("Error: Message not sent! Retry.");
             }
             $('#BTNSendMessage').html('<i class="fa fa-paper-plane" aria-hidden="true"></i>');
         }
@@ -128,7 +122,7 @@ function checkWhoIsTyping() {
             "action": "checkWhoIsTyping"
         },
         success: function (data) {
-            if (data === "none") {
+            if (data === "none" || data == '[]') {
                 $('.span-group-members').text(chatMembers);
             } else {
                 data = JSON.parse(data);
@@ -500,8 +494,8 @@ function ajaxUpdateInfoChat(type, value) {
     });
 }
 
-function errorNotify() {
-    $.notify("Error: Operation failed!", {
+function errorNotify(text = "Error: Operation failed!") {
+    $.notify(text, {
         animate: {
             enter: 'animated flipInY',
             exit: 'animated flipOutX'

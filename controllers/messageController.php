@@ -12,14 +12,34 @@ class messageController
     public function sendMessage()
     {
         $chatId = $_SESSION["chatId"];
-        $text = $_POST['messageText'];
+        $text = (isset($_POST['messageText'])) ? $_POST['messageText'] : NULL;
+        $file = (isset($_FILES["file"])) ? $_FILES : NULL;
+        $filePath = NULL;
         try {
-            $message = new \models\DOMessage(NULL, NULL, NULL, NULL, $text, NULL, 1, FALSE, FALSE, $_SESSION['id'], NULL, $chatId, FALSE);
+            if(!is_null($file)) {           // File allegato senza testo
+                if(filesize($file["file"]["size"]) <= 32 * 1024 * 1024) {      // controlla se maggiore di 32MB
+                    $msgType = 2;
+                    if(!file_exists($chatDirPath = "./utils/filesChats/" . $_SESSION['chatId'])) {
+                        if (!mkdir($chatDirPath, 0777, true)) {
+                            throw new \Exception('Failed to create folders...');
+                        }
+                    }
+                    $filePath = $chatDirPath . '/' . basename($file["file"]["name"]);
+                    if (!move_uploaded_file($_FILES["file"]["tmp_name"], $filePath)) {
+                        throw new \Exception("Sorry, there was an error uploading your file.");
+                    }
+                    if(!is_null($text)) {       // Testo con file allegato
+                        $msgType = 3;
+                    }
+                } else {
+                    throw new \Exception("File di dimensioni superiori a 32MB");
+                }
+            } else {                        // Solo testo
+                $msgType = 1;
+            }
+            $message = new \models\DOMessage(NULL, NULL, NULL, $filePath, $text, NULL, $msgType, FALSE, FALSE, $_SESSION['id'], NULL, $chatId, FALSE);
             \models\DAOMessage::insertMessage($message);
             $messageId = \models\DAOMessage::getLastInsertId();
-            //non serve, lo fa già carica messaggi
-            //$seenBy = new \models\DOSeenBy($_SESSION['id'], $messageId);
-            //\models\DAOSeenBy::insertSeenBy($seenBy);
             echo '1';
         } catch (\Exception $e) {
             echo $e->getMessage();

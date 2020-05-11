@@ -2,7 +2,6 @@
 <div class="modal fade" id="addChatModal" role="dialog">
     <div class="modal-dialog">
         <!-- Modal content-->
-
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Add a New Chat</h4>

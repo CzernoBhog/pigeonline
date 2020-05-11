@@ -218,11 +218,11 @@ img {
   color: #fff;
   cursor: pointer;
   font-size: 17px;
-  height: 33px;
   position: absolute;
   right: 0;
   top: 6px;
-  width: 33px;
+  height: 38px;
+  width: 38px;
 }
 
 .messaging {

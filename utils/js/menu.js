@@ -148,9 +148,13 @@ function readURL(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
 
-        reader.onload = function (e) {
-            $('#imgPicture').attr('src', e.target.result);
-            $('#imgPictureGroup').attr('src', e.target.result);
+        if (!input.files[0].type.match('image.*')) {
+            $('#fileImg').attr('src', './utils/imgs/fileIcon.png');
+        }else{
+            reader.onload = function (e) {
+                $('#imgPicture').attr('src', e.target.result);
+                $('#fileImg').attr('src', e.target.result);
+            }  
         }
 
         reader.readAsDataURL(input.files[0]);

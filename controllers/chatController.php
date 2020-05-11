@@ -75,7 +75,7 @@ class chatController
             // File upload path
             $targetDir = "./utils/imgs/groupsPhoto/";
             $fileName = basename($_FILES["photo"]["name"]);
-            $targetFilePath = $targetDir . rand(0, 100) . $fileName;
+            $targetFilePath = $targetDir . rand(0, 10000) . $fileName;
             $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
             // Allow certain file formats
             $allowTypes = array('jpg', 'png', 'jpeg');
@@ -155,13 +155,13 @@ class chatController
             echo 'true';
         } catch (\Exception $e) {
             Transaction::rollBackTransaction();
-            die($e->getMessage());
-            //die("Errore imprevisto");
+            //die($e->getMessage());
+            die("Errore imprevisto");
         }
     }
 
     /**
-     * genera div modale per avvio di una nuova chat
+     * genera div modale per avvio di una nuova chat mostraModaleUploadFile
      */
     public function mostraModaleAddChat()
     {
@@ -174,26 +174,31 @@ class chatController
      */
     public function mostraModaleAddUser()
     {
-        $detailsFriends = \models\DAOFriends::getFriendsDetails($_SESSION['id'], 1); //lista amici effettivi
+        $oldDetailsFriends = \models\DAOFriends::getFriendsDetails($_SESSION['id'], 1); //lista amici effettivi
         $alreadyMembers = \models\DAOChatMembers::getChatMembers(
             array("chatId" => $_SESSION['chatId'], 'friends.userId' => $_SESSION['id']),
             FALSE,
             FALSE,
             NULL,
-            'user.username',
+            'user.userId',
             TRUE,
             array("friends" => "friendId", 'user' => 'userId'),
             'userId'
         );
 
-        for ($i=0; $i < count($detailsFriends); $i++) {
-            $result = array_search($detailsFriends[$i]->getUsername(), array_column($alreadyMembers, 'username'));
-            if($result !== 'false'){
-                unset($detailsFriends[$i]);
+        $detailsFriends = array();
+        if(is_null($alreadyMembers)){
+        	$detailsFriends = $oldDetailsFriends;
+        }else{
+            for ($i=0; $i < count($oldDetailsFriends); $i++) {
+                $result = array_search($oldDetailsFriends[$i]->getUserId(), array_column($alreadyMembers, 'userId'));
+                if($result === 'false'){
+                    $detailsFriends[] = $oldDetailsFriends[$i];
+                }
             }
         }
 
-        include('./views/modalAddUser.php');
+		include('./views/modalAddUser.php');
     }
 
     /**
