@@ -72,6 +72,20 @@ class DAOChat
         }
     }
 
+    public static function deleteChat($chatId)
+    {
+        $conn = \utils\Database::connect();
+        $query = 'DELETE FROM chat WHERE chatId = :ci';
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(":ci", $chatId);
+            $result = $stmt->execute();
+            return $result;
+        } catch (\Exception | \PDOException $e) {
+            throw new \Exception('Errore eliminazione Chat');
+        }
+    }
+
     public static function getLastInsertId()
     {
         $conn = \utils\Database::connect();

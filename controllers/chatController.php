@@ -15,7 +15,20 @@ class chatController
      */
     public function deleteChat()
     {
-        // TODO
+        try {
+            $chat = \models\DAOChat::getChat(array("chatId" => $_SESSION['chatId']))[0];
+            \models\DAOChat::deleteChat($chat->getChatId());
+            if ($chat->getPathToChatPhoto() != './utils/imgs/groupDefault.png') {
+                unlink($chat->getPathToChatPhoto());
+            }
+            $dir = './utils/filesChats/' . $chat->getChatId();
+            array_map('unlink', glob("$dir/*.*"));
+            rmdir($dir);
+            return true;
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            return false;
+        }
     }
 
     /**
@@ -187,18 +200,18 @@ class chatController
         );
 
         $detailsFriends = array();
-        if(is_null($alreadyMembers)){
-        	$detailsFriends = $oldDetailsFriends;
-        }else{
-            for ($i=0; $i < count($oldDetailsFriends); $i++) {
+        if (is_null($alreadyMembers)) {
+            $detailsFriends = $oldDetailsFriends;
+        } else {
+            for ($i = 0; $i < count($oldDetailsFriends); $i++) {
                 $result = array_search($oldDetailsFriends[$i]->getUserId(), array_column($alreadyMembers, 'userId'));
-                if($result === 'false'){
+                if ($result === 'false') {
                     $detailsFriends[] = $oldDetailsFriends[$i];
                 }
             }
         }
 
-		include('./views/modalAddUser.php');
+        include('./views/modalAddUser.php');
     }
 
     /**
@@ -405,7 +418,9 @@ class chatController
 
             if (!is_null($chatMember)) {
                 if (count($otherChatMembers) === 0) {
-                    // TODO eliminare i files
+                    if(!$this->deleteChat()){
+                        throw new \Exception('Impossibile eliminare chat');
+                    }
                 } else if (count($admins) == 1 && $chatMember->getUserType() == '3') {
                     $otherMember = reset($otherChatMembers);
                     $otherMember->setUserType(3);

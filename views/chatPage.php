@@ -66,40 +66,13 @@
                 <div class="msg_history" id="messaggi">
                     <?php
                     if (!is_null($messages)) {
-                        foreach ($messages as $msg) {
-                            if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime($msg['timeStamp']))) {
-                                $day = "Yesterday";
-                            } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime($msg['timeStamp']))) {
-                                $day = "Today";
-                            } else {
-                                $day = date("D M Y", strtotime($msg['timeStamp']));
-                            }
-
-                            if ($msg['sentBy'] == $_SESSION['id']) {
-                                echo '<div class="outgoing_msg">
-                                            <div class="sent_msg">
-                                                <p>' . $msg["text"] . '</p>';
-                                echo '<span style="float: right; text-align: right" class="time_date">' . date("H:i", strtotime($msg["timeStamp"])) . ' | ' . $day;
-                                echo (!is_null($msg['seen'])) ? '<i class="fa fa-check-double check-out"></i></span></div></div>' : '<i class="fa fa-check check-out"></i></span></div></div>';
-                            } else {
-                                echo '<div class="incoming_msg">
-                                        <div class="incoming_msg_img"> <img style="border-radius: 50%;" src="' . $msg["pathProfilePicture"] . '" alt="sunil"> </div>
-                                        <div class="received_msg">
-                                            <div class="received_withd_msg">
-                                                <p>' . $msg["text"] . '</p>';
-                                echo (!is_null($msg['seen'])) ? '<i class="fa fa-check-double check-in"></i>' : '<i class="fa fa-check check-in"></i>';
-                                echo '<span class="time_date">' . date("H:i", strtotime($msg["timeStamp"])) . ' | ' . $day . '</span>
-                                            </div>
-                                        </div>
-                                    </div>';
-                            }
-                        }
+                        include('./views/newMessages.php');
                         echo '<div style="width: 100%" class="received_withd_msg">
-                                    <p style="margin: auto; color: white; background: #31353d none repeat scroll 0 0">Nuovi messaggi</p>
+                                    <p style="margin: auto; color: white; background: #31353d none repeat scroll 0 0;margin-bottom: 5px;">Nuovi messaggi</p>
                                 </div>';
                     } else {
                         echo '<div style="width: 100%" class="received_withd_msg">
-                                    <p style="margin: auto; color: white; background: #31353d none repeat scroll 0 0">Inizio messaggi</p>
+                                    <p style="margin: auto; color: white; background: #31353d none repeat scroll 0 0;margin-bottom: 5px;">Inizio messaggi</p>
                                 </div>';
                     }
 
@@ -140,7 +113,7 @@
 
     <div id="modal"></div>
     <?php
-     require_once('./views/modalSendFile.php');
+    require_once('./views/modalSendFile.php');
     ?>
 
     <!-- CONTENUTO DELLA PAGINA  -->

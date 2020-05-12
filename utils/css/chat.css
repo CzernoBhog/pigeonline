@@ -145,6 +145,7 @@ img {
   overflow: auto;
   scrollbar-width: thin;
   text-overflow: ellipsis;
+  word-wrap: break-word;
 }
 
 .time_date {
@@ -181,6 +182,7 @@ img {
   overflow: auto;
   scrollbar-width: thin;
   text-overflow: ellipsis;
+  word-wrap: break-word;
 }
 
 .outgoing_msg {

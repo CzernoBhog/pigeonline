@@ -17,7 +17,7 @@ class messageController
         $filePath = NULL;
         try {
             if(!is_null($file)) {           // File allegato senza testo
-                if(filesize($file["file"]["size"]) <= 32 * 1024 * 1024) {      // controlla se maggiore di 32MB
+                if(filesize($file["file"]["tmp_name"]) <= 32 * 1024 * 1024) {      // controlla se maggiore di 32MB
                     $msgType = 2;
                     if(!file_exists($chatDirPath = "./utils/filesChats/" . $_SESSION['chatId'])) {
                         if (!mkdir($chatDirPath, 0777, true)) {
@@ -40,7 +40,7 @@ class messageController
             $message = new \models\DOMessage(NULL, NULL, NULL, $filePath, $text, NULL, $msgType, FALSE, FALSE, $_SESSION['id'], NULL, $chatId, FALSE);
             \models\DAOMessage::insertMessage($message);
             $messageId = \models\DAOMessage::getLastInsertId();
-            echo '1';
+            echo 'success';
         } catch (\Exception $e) {
             echo $e->getMessage();
         }

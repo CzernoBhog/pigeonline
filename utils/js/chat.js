@@ -1,3 +1,23 @@
+function downloadFile() {
+    $('input[type=image]').on('click', function(){
+        fetch($(this).attr('filePath'))
+        .then(resp => resp.blob())
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          // the filename you want
+          a.download = $(this).attr('fileName');
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(() => errorNotify('Error downloading file!'));
+    });   
+}
+downloadFile();
+
 $('#uploadFileInChat').on('change', function () {
     var fileName = $(this).val().split("\\").pop();
     $('#fileName').html(fileName);
@@ -57,7 +77,7 @@ $("#formSendMessage").on('submit', function (event) {
             $.redirect('index.php');
         }
         if (this.readyState == 4 && this.status == 200) {
-            if (this.responseText == '1') {
+            if (this.responseText == 'success') {
                 loadNewMessages();
                 $('#messageText').val('');
             } else {
@@ -161,6 +181,7 @@ function loadNewMessages() {
                 $("#messaggi").animate({
                     scrollTop: $('#messaggi').prop("scrollHeight")
                 }, 0);
+                downloadFile();
             }
         }
     });

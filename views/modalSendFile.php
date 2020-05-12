@@ -7,12 +7,12 @@
             </div>
             <form action="" method="POST" enctype="multipart/form-data" id="formUploadFile">
                 <div class="modal-body">
-                    <img id="fileImg" style="height: 70px; width: 70px; margin-right: 20px" src="" />
+                    <img id="fileImg" style="width: 70px; margin-right: 20px" src="" />
                     <span id="fileName"></span>
                     <div id="input"></div>
                     <div class="form-group">
                         <label for="message-text" class="col-form-label">Message (optional):</label>
-                        <textarea id="fileText" class="form-control" id="message-text"></textarea>
+                        <textarea id="fileText" class="form-control" name="messageText" id="message-text"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

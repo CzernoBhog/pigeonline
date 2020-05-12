@@ -15,11 +15,13 @@ function filterChat() {
     var value = $('#searchBar').val().toLowerCase().trim();
     var chats = $('.pre-scrollable li');
     for (i = 0; i < chats.length; i++) {
-        var chatName = $('.usernameChat')[i].innerText.toLowerCase().trim();
-        if (chatName.includes(value)) {
-            $(chats[i]).show();
-        } else {
-            $(chats[i]).hide();
+        if (typeof $('.usernameChat')[i] != 'undefined') {
+            var chatName = $('.usernameChat')[i].innerText.toLowerCase().trim();
+            if (chatName.includes(value)) {
+                $(chats[i]).show();
+            } else {
+                $(chats[i]).hide();
+            }
         }
     }
 }
@@ -73,7 +75,7 @@ function loadMenu() {
             $(window).on('resize', function () {
                 var height = $(window).height();
                 $('.sidebar-content').css('height', height - 45);
-                $('.pre-scrollable').css('max-height', height - 341); 
+                $('.pre-scrollable').css('max-height', height - 341);
             });
 
             $('.addChat').on('click', function () {
@@ -150,11 +152,12 @@ function readURL(input) {
 
         if (!input.files[0].type.match('image.*')) {
             $('#fileImg').attr('src', './utils/imgs/fileIcon.png');
-        }else{
+        } else {
             reader.onload = function (e) {
                 $('#imgPicture').attr('src', e.target.result);
                 $('#fileImg').attr('src', e.target.result);
-            }  
+                $('#imgPictureGroup').attr('src', e.target.result);
+            }
         }
 
         reader.readAsDataURL(input.files[0]);
