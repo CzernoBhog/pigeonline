@@ -10,8 +10,9 @@ namespace models;
         private $pathProfilePicture;
         private $lastActivity;
         private $privacyLevel;
+        private $lastModify;
         
-        public function __construct($userId  = NULL, $username = NULL, $mood = NULL, $isOnline = NULL, $lastActivity = NULL, $privacyLevel = NULL, $pathProfilePicture = NULL) {
+        public function __construct($userId  = NULL, $username = NULL, $mood = NULL, $isOnline = NULL, $lastActivity = NULL, $privacyLevel = NULL, $pathProfilePicture = NULL, $lastModify = null) {
             if (func_get_args() != null) {
                 $this->userId = $userId;
                 $this->username = $username;
@@ -20,6 +21,7 @@ namespace models;
                 $this->privacyLevel = $privacyLevel;
                 $this->lastActivity = $lastActivity;
                 $this->pathProfilePicture = $pathProfilePicture;
+                $this->lastModify = $lastModify;
             }
         }
 
@@ -79,4 +81,11 @@ namespace models;
             $this->privacyLevel = $privacyLevel;
         }
 
+        public function getLastModify(){
+            return $this->lastModify;
+        }
+    
+        public function setLastModify($lastModify){
+            $this->lastModify = $lastModify;
+        }
     }

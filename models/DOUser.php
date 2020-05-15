@@ -16,8 +16,9 @@ class DOUser
     private $activated;
     private $token;
     private $userIp;
+    private $lastModify;
 
-    public function __construct($userId = null, $name = null, $surname = null, $email = null, $mood = null, $username = null, $password = null, $pathProfilePicture = null, $activated = null, $token = null, $userIp = null)
+    public function __construct($userId = null, $name = null, $surname = null, $email = null, $mood = null, $username = null, $password = null, $pathProfilePicture = null, $activated = null, $token = null, $userIp = null, $lastModify = null)
     {
         if (func_get_args() != null) {
             $this->userId = $userId;
@@ -30,6 +31,7 @@ class DOUser
             $this->pathProfilePicture = $pathProfilePicture;
             $this->token = $token;
             $this->userIp = $userIp;
+            $this->lastModify = $lastModify;
         }
     }
 
@@ -142,4 +144,12 @@ class DOUser
     {
         return $this->userIp;
     }
+
+    public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
+	}
 }

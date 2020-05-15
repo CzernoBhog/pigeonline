@@ -108,7 +108,7 @@
                             }
 
                             if ($mainUser['userType'] === '3') {
-                                if($mainUser['userId'] !== $user['userId']) {
+                                if ($mainUser['userId'] !== $user['userId']) {
                                     echo '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove user" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
                                 }
                                 if ($user['userType'] !== '3') {
@@ -128,7 +128,27 @@
                         }
                         ?>
                     </div>
-                <?php } ?>
+                <?php } else { ?>
+                    <div class="sidebar-brand">
+                        <a href="#">SHARED GROUPS:</a>
+                    </div>
+
+                    <?php
+                    if(!is_null($sharedGroups)) {
+                        foreach ($sharedGroups as $group) {
+                            echo '<li style="display: flex;">
+                                    <a style="padding-top: 0; width: 80%;">
+                                        <img class="chat-img fa-pull-left" src="' . $group['pathToChatPhoto'] . '" alt="Avatar">
+                                        <span class="usernameMember" style="padding-left: 10px; font-size: normal; color: white">' . $group['title'] . '</span>
+                                        <br><span style="padding-left: 10px; font-size: smaller">' . $group['description'] .'</span>
+                                    </a>
+                                </li>';
+                        }
+                    } else {
+                        echo '<li><a style="color: #b8bfce"><i>Non avete nessun gruppo in comune</i></a></li>';
+                    }
+                }
+                    ?>
             </ul>
         </div>
         <!-- sidebar-menu  -->

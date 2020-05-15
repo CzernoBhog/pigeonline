@@ -40,10 +40,22 @@ class friendsController
         $alreadyFriends = \models\DAOFriends::getFriendsDetails($user->getUserId());
         $blockedBy = \models\DAOUsersBlocked::getUsersBlocked(array('userBlocked' => $user->getUserId()));
         $userBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $user->getUserId()));
+        $alreadyRequested = \models\DAOFriends::getFriends(array('friendId' => $user->getUserId(), 'authorizated' => 0));
+        if(!is_array($alreadyRequested)){
+            $alreadyRequested = array($alreadyRequested);
+        }
 
         if (!is_null($users)) {
             if (($index = array_search($user->getUserId(), array_column($users, 'userId'))) !== false) {
                 unset($users[$index]);
+            }
+
+            if (!is_null($alreadyRequested)) {
+                foreach ($alreadyRequested as $request) {
+                    if (($index = array_search($request->getUserId(), array_column($users, 'userId'))) !== false) {
+                        unset($users[$index]);
+                    }
+                }
             }
 
             if (!is_null($alreadyFriends)) {

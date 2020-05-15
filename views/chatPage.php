@@ -7,12 +7,10 @@
 
     <link href="utils/css/menu.css" rel="stylesheet">
     <link href="utils/css/chat.css" rel="stylesheet">
-
 </head>
 
 <body style="background-color: #7c7e83">
     <!-- #bfbfbf  -  #b3b3b3  -  #a6a6a6 -->
-
     <div class="page-wrapper chiller-theme toggled">
         <a id="show-sidebar" class="btn btn-sm btn-dark" href="#" style="z-index: 10">
             <i class="fas fa-bars"></i>
@@ -22,7 +20,6 @@
         ?>
 
         <main class="page-content">
-
             <div class="messaging" style="padding: 0;">
 
                 <?php
@@ -115,6 +112,15 @@
     <?php
     require_once('./views/modalSendFile.php');
     ?>
+    <!-- right click menu -->
+    <div style="padding: 0" class="dropdown-menu dropdown-menu-sm" id="context-menu">
+        <a class="dropdown-item" href="#">Copy</a>
+        <a class="dropdown-item" href="#">Delete</a>
+        <a class="dropdown-item" href="#">Modify</a>
+        <a class="dropdown-item" href="#">Pin</a>
+        <a class="dropdown-item" href="#">Quote</a>
+        <a class="dropdown-item" href="#">Forwards</a>
+    </div>
 
     <!-- CONTENUTO DELLA PAGINA  -->
 
@@ -123,6 +129,7 @@
     <?php require_once('./utils/includeBody.php'); ?>
     <script src="./utils/js/menu.js"></script>
     <script src="./utils/js/chat.js"></script>
+    <script src="./utils/js/message.js"></script>
 
     <script>
         $("#messaggi").animate({

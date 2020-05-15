@@ -16,11 +16,11 @@ class messageController
         $file = (isset($_FILES["file"])) ? $_FILES : NULL;
         $filePath = NULL;
         try {
-            if(!is_null($file)) {           // File allegato senza testo
-                if(filesize($file["file"]["tmp_name"]) <= 32 * 1024 * 1024) {      // controlla se maggiore di 32MB
+            if (!is_null($file)) {           // File allegato senza testo
+                if (filesize($file["file"]["tmp_name"]) <= 32 * 1024 * 1024) {      // controlla se maggiore di 32MB
                     $msgType = 2;
-                    if(!file_exists($chatDirPath = "./utils/filesChats/" . $_SESSION['chatId'])) {
-                        if (!mkdir($chatDirPath, 0777, true)) {
+                    if (!file_exists($chatDirPath = "./utils/filesChats/" . $_SESSION['chatId'])) {
+                        if (!mkdir($chatDirPath, 0766, true)) {
                             throw new \Exception('Failed to create folders...');
                         }
                     }
@@ -28,7 +28,7 @@ class messageController
                     if (!move_uploaded_file($_FILES["file"]["tmp_name"], $filePath)) {
                         throw new \Exception("Sorry, there was an error uploading your file.");
                     }
-                    if(!is_null($text)) {       // Testo con file allegato
+                    if (!is_null($text)) {       // Testo con file allegato
                         $msgType = 3;
                     }
                 } else {
@@ -51,7 +51,6 @@ class messageController
      */
     public function caricaMessaggi()
     {
-        //var_dump($_SESSION);
         $chat = \models\DAOChat::getChat(array("chatId" => $_SESSION['chatId']))[0];
         $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chat->getChatId()));
 
@@ -60,7 +59,6 @@ class messageController
 
         try {
             \utils\Transaction::beginTransaction();
-
             if (is_null($messages)) {
                 //TODO sistemare limit 100 o forse no
                 $messages = \models\DAOMessage::getMessage(
@@ -82,17 +80,19 @@ class messageController
                     $seenBy = new \models\DOSeenBy($_SESSION['id'], $message['messageId']);
                     \models\DAOSeenBy::insertSeenBy($seenBy);
                     $views = \models\DAOSeenBy::getSeenBy(array('messageId' => $message['messageId']));
-                    if(count($views) == 2 && ($chat->getChatType() == 1 || $chat->getChatType() == 4)){
+                    if (count($views) == 2 && ($chat->getChatType() == 1 || $chat->getChatType() == 4)) {
                         \models\DAOMessage::updateSeenToTrue($message['messageId']);
                         \models\DAOSeenBy::deleteSeenBy($message['messageId']);
-                    }else if(count($views) == count($chatMembers) && ($chat->getChatType() == 2 || $chat->getChatType() == 3)){
+                    } else if (count($views) == count($chatMembers) && ($chat->getChatType() == 2 || $chat->getChatType() == 3)) {
                         \models\DAOMessage::updateSeenToTrue($message['messageId']);
                         \models\DAOSeenBy::deleteSeenBy($message['messageId']);
-                    }else if(count($views) == 1 && $chat->getChatType() == 5){
+                    } else if (count($views) == 1 && $chat->getChatType() == 5) {
                         \models\DAOMessage::updateSeenToTrue($message['messageId']);
                         \models\DAOSeenBy::deleteSeenBy($message['messageId']);
                     }
                 }
+   
+                include('./views/newMessages.php');
             }
             \utils\Transaction::commitTransaction();
         } catch (\Exception $e) {
@@ -100,7 +100,14 @@ class messageController
             echo $e->getMessage();
             $messages = null;
         }
+    }
 
-        include('./views/newMessages.php');
+    /**
+     * @todo
+     */
+    public function deleteMessage()
+    {
+        $message = \models\DAOMessage::getMessage(array("messageId" => $_POST['messageId'], "chatId" => $_SESSION['chatId']));
+        \models\DAOMessage::deleteMessage($message);
     }
 }

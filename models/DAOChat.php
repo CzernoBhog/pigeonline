@@ -38,6 +38,19 @@ class DAOChat
         return NULL;
     }
 
+    public static function getSharedGroups($userIdOne, $userIdTwo)
+    {
+        $conn = \utils\Database::connect();
+        $query = "SELECT * FROM chat join chatmembers as cm1 USING(chatId) join chatmembers AS cm2 using (chatId) WHERE chatType = 2 and cm1.userId = :uiu and cm2.userId = :uid";
+        $stmt = $conn->prepare($query);
+        $stmt->bindValue(":uiu", $userIdOne);
+        $stmt->bindValue(":uid", $userIdTwo);
+        $stmt->execute();
+        
+        $resultSet = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return (count($resultSet) > 0) ? $resultSet : NULL;
+    }
+
     public static function insertChat($chat)
     {
         $conn = \utils\Database::connect();

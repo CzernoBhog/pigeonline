@@ -13,7 +13,7 @@ class DAOFriends
         $stmt = $conn->prepare($query);
 
         foreach ($params as $key => $value) {
-            if ($value != "") {
+            if ($value !== "") {
                 $stmt->bindValue(str_replace('.', '', $key), $value);
             }
         }

@@ -5,14 +5,16 @@ class DOFriends{
 
     private $userId;
     private $friendId;
-    private $authorizated;
+	private $authorizated;
+	private $lastModify;
 
-    public function __construct($userId = null, $friendId = null, $authorizated = null)
+    public function __construct($userId = null, $friendId = null, $authorizated = null, $lastModify = null)
     {
         if (func_get_args() != null) {
             $this->userId = $userId;
             $this->friendId = $friendId;
-            $this->authorizated = $authorizated;
+			$this->authorizated = $authorizated;
+			$this->lastModify = $lastModify;
         }
     }
 
@@ -40,6 +42,13 @@ class DOFriends{
 		$this->authorizated = $authorizated;
 	}
 
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
+	}
 }
 
 ?>

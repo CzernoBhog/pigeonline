@@ -1,95 +1,3 @@
-function downloadFile() {
-    $('input[type=image]').on('click', function(){
-        fetch($(this).attr('filePath'))
-        .then(resp => resp.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          // the filename you want
-          a.download = $(this).attr('fileName');
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-        })
-        .catch(() => errorNotify('Error downloading file!'));
-    });   
-}
-downloadFile();
-
-$('#uploadFileInChat').on('change', function () {
-    var fileName = $(this).val().split("\\").pop();
-    $('#fileName').html(fileName);
-    readURL(this);
-    $('#fileText').val('');
-    $('#modalSendFile').modal('show');  
-});
-
-$("#formUploadFile").on('submit', function (event) {
-    event.preventDefault();
-    var formData = new FormData(this);
-    var input = document.getElementById('uploadFileInChat');
-    formData.append('file', input.files[0], input.files[0].name);
-    $.ajax({
-        url: "index.php?controller=messageController&action=sendMessage",
-        type: "POST",
-        data: formData,
-        contentType: false,
-        cache: false,
-        processData: false,
-        success: function (result) {
-            if (result == 'blocked') {
-                $.redirect('index.php');
-            }
-            if (result == 'success') {
-                loadNewMessages();
-                $('#modalSendFile').modal('hide');  
-            } else {
-                errorNotify('Error: File not uloaded! Retry.');
-            }
-        },
-        error: function (e) {
-            errorNotify('Error: File not uloaded! Retry.');
-        }
-    });
-});
-
-$("#formSendMessage").on('submit', function (event) {
-    event.preventDefault();
-
-    if ($('#messageText').val() == '') {
-        return;
-    }
-
-    $('#BTNSendMessage').html('<i class="fa fa-spinner" aria-hidden="true"></i>');
-
-    var formData = new FormData();
-    formData.append('ajax', 'true');
-    formData.append('messageText', $('#messageText').val());
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'index.php?controller=messageController&action=sendMessage', true);
-
-    xhr.onreadystatechange = function () {
-        if (this.readyState == 2 && this.status == 403) {
-            //blocked
-            $.redirect('index.php');
-        }
-        if (this.readyState == 4 && this.status == 200) {
-            if (this.responseText == 'success') {
-                loadNewMessages();
-                $('#messageText').val('');
-            } else {
-                errorNotify("Error: Message not sent! Retry.");
-            }
-            $('#BTNSendMessage').html('<i class="fa fa-paper-plane" aria-hidden="true"></i>');
-        }
-    };
-
-    xhr.send(formData);
-});
-
 var timer = null, bool = false;
 $('#messageText').on('keyup', function () {
     clearTimeout(timer);
@@ -133,13 +41,14 @@ $(document).ready(function () {
     checkWhoIsTyping();
 }, 3000); */
 
-function checkWhoIsTyping() {
+function checkWhoIsTyping(timestamp) {
     $.ajax({
         type: "POST",
         url: "index.php",
         data: {
             "controller": "chatController",
-            "action": "checkWhoIsTyping"
+            "action": "checkWhoIsTyping",
+            "timestamp": timestamp
         },
         success: function (data) {
             if (data === "none" || data == '[]') {
@@ -159,29 +68,6 @@ function checkWhoIsTyping() {
                     }
                 }
                 $('.span-group-members').text(string);
-            }
-        }
-    });
-}
-
-function loadNewMessages() {
-    $.ajax({
-        type: "POST",
-        url: "index.php",
-        data: {
-            'controller': 'messageController',
-            'action': 'caricaMessaggi'
-        },
-        success: function (text) {
-            /* if(text == 'blocked'){
-                $.redirect('index.php');
-            } */
-            if (text != '') {
-                $('#messaggi').append(text);
-                $("#messaggi").animate({
-                    scrollTop: $('#messaggi').prop("scrollHeight")
-                }, 0);
-                downloadFile();
             }
         }
     });

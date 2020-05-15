@@ -2,6 +2,7 @@
 
 namespace controllers;
 
+use Exception;
 use utils\Transaction;
 
 require_once('utils/autoload.php');
@@ -242,12 +243,35 @@ class utentiController
                     \utils\Transaction::beginTransaction();
                     \models\DAOUser::updateUtente($user);
                     $this->viewLogin($user->getUsername());
+
                     //creazione cloud chat
                     $cloudChat = new \models\DOChat(null, 5, 'Cloud chat', null, './utils/imgs/private-cloud.jpg');
                     \models\DAOChat::insertChat($cloudChat);
                     $chatId = \models\DAOChat::getLastInsertId();
                     $chatMember = new \models\DOChatMembers($user->getUserId(), $chatId, null, 3);
                     \models\DAOChatMembers::insertChatMember($chatMember);
+
+                    //creazione della chiave pubblica e privata per l'utente
+                    mkdir("./utils/keys/".$user->getUserId());
+
+                    $path = "C:\\Users\\Utente\\Desktop\\EasyPHP-Devserver-17\\eds-binaries\\php\\php713vc14x86x190913130004\\extras\\ssl\\openssl.cnf";
+                    $configs = array(
+                        'config' => $path,
+                        'digest_alg' => 'sha256',
+                        'private_key_bits' => 2048,
+                        'private_key_type' => OPENSSL_KEYTYPE_RSA,
+                    );
+                    $resource = openssl_pkey_new($configs);
+                    
+                    //esporta la chiave privata su un file
+                    openssl_pkey_export($resource, $privateKey, NULL, $configs);
+                    file_put_contents("./utils/keys/".$user->getUserId()."/private.key", $privateKey);
+                    //esporta la chiave pubblica su un file
+                    $publicKey = openssl_pkey_get_details($resource)['key'];
+                    file_put_contents("./utils/keys/".$user->getUserId()."/public.key", $publicKey);
+                    //libera la chiave dalla memoria
+                    openssl_free_key($resource);
+
                     \utils\Transaction::commitTransaction();
                 } catch (\Exception $e) {
                     \utils\Transaction::rollBackTransaction();
@@ -267,8 +291,9 @@ class utentiController
     public function updateActivity()
     {
         $currentTime = date('Y-m-d H:i:s');
-        $userDetails = new \models\DOUserDetails($_SESSION['id'], 1, $currentTime);
-        \models\DAOUserDetails::updateUserDetails($userDetails);
+        $userDetails = \models\DAOUserDetails::getUserDetails(array("userId" => $_SESSION['id']));
+        $newUserDetails = new \models\DOUserDetails($userDetails->getUserDetailsId(), 1, $currentTime);
+        \models\DAOUserDetails::updateUserDetails($newUserDetails);
     }
 
     /**

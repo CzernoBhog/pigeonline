@@ -4,13 +4,15 @@ namespace models;
 class DOUsersBlocked{
 
     private $blockedBy;
-    private $userBlocked;
+	private $userBlocked;
+	private $lastModify;
 
-    public function __construct($blockedBy = null, $userBlocked = null)
+    public function __construct($blockedBy = null, $userBlocked = null, $lastModify = null)
     {
         if (func_get_args() != null) {
             $this->blockedBy = $blockedBy;
-            $this->userBlocked = $userBlocked;
+			$this->userBlocked = $userBlocked;
+			$this->lastModify = $lastModify;
         }
     }
 
@@ -28,6 +30,14 @@ class DOUsersBlocked{
 
 	public function setUserBlocked($userBlocked){
 		$this->userBlocked = $userBlocked;
+	}
+
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
 	}
 
 }

@@ -34,7 +34,8 @@ class Utility implements \JsonSerializable
 
 
     public static function jsonToObject($json, $className)
-    {        // json è un oggetto in notazione JSON
+    {        
+        // json è un oggetto in notazione JSON
         $className = ucfirst($className);       // Per sicurezza, lo metto
         $obj = new $className();        // Creo l'oggetto con il nome della classe data
 

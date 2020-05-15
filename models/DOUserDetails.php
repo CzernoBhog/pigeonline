@@ -7,16 +7,18 @@ class DOUserDetails{
     private $isOnline;
     private $lastActivity;
     private $privacyLevel;
-    private $userId;
+	private $userId;
+	private $lastModify;
 
-    public function __construct($userDetailsId = null, $isOnline = null, $lastActivity = null, $privacyLevel = null, $userId = null)
+    public function __construct($userDetailsId = null, $isOnline = null, $lastActivity = null, $privacyLevel = null, $userId = null, $lastModify = null)
     {
         if (func_get_args() != null) {
             $this->userDetailsId = $userDetailsId;
             $this->isOnline = $isOnline;
             $this->lastActivity = $lastActivity;
             $this->privacyLevel = $privacyLevel;
-            $this->userId = $userId;
+			$this->userId = $userId;
+			$this->lastModify = $lastModify;
         }
     }
 
@@ -58,6 +60,14 @@ class DOUserDetails{
 
 	public function setUserId($userId){
 		$this->userId = $userId;
+	}
+
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
 	}
 
 }

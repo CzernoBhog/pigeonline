@@ -10,27 +10,41 @@ if (!is_null($messages)) {
         }
 
         if ($msg['sentBy'] == $_SESSION['id']) {
-            echo '<div class="outgoing_msg">
+            echo '<div class="outgoing_msg" id="' . $msg["messageId"] . '">
                     <div class="sent_msg">';
         } else {
-            echo '<div class="incoming_msg">
+            echo '<div class="incoming_msg" id="' . $msg["messageId"] . '">
                     <div class="incoming_msg_img"> <img style="border-radius: 50%;" src="' . $msg["pathProfilePicture"] . '" alt="sunil"> </div>
                     <div class="received_msg">
                         <div class="received_withd_msg">';
         }
 
-        echo '<p>';
+        echo '<p class="jumbotron">';
         if (!is_null($msg['filePath'])) {
             $fileType = pathinfo($msg['filePath'], PATHINFO_EXTENSION);
-            $allowTypes = array('jpg', 'png', 'jpeg');
-            if (in_array($fileType, $allowTypes)) {
-                echo '<img style="height: 100%; width: 100%; padding: 5px 0 15px 0; max-width:400px" src="' . $msg['filePath'] . '" />
+            $imageType = array('jpg', 'png', 'jpeg', 'gif');
+            $audioType = array('mp3', 'WAV', 'WMA');
+            $videoType = array('mp4', 'mkv');
+            if (in_array($fileType, $audioType)) {
+                echo '<audio controls>
+                            <source class="file" src="' . $msg['filePath'] . '" type="audio/'. $fileType .'">
+                        </audio>
+                        <br><span>' . $msg["text"] . '</span>';
+            } else if (in_array($fileType, $videoType)) {
+                echo '<video width="100%" height="100%" controls>
+                            <source class="file" src="' . $msg['filePath'] . '" type="video/'. $fileType .'">
+                        </video>
+                        <br><span>' . $msg["text"] . '</span>';
+            } else if (in_array($fileType, $imageType)) {
+                echo '<img class="file" style="height: 100%; width: 100%; padding: 5px 0 15px 0; max-width:400px" src="' . $msg['filePath'] . '" />
                         <br><span>' . $msg["text"] . '</span>';
             } else {
                 $fileName = explode('/', $msg['filePath']);
                 $fileName = end($fileName);
-                echo '<input fileName="'. $fileName .'" filePath="'. $msg['filePath'] .'" title="Click to download" type="image" style="height: 15%; width: 15%;padding: 5px 0 0 0" src="./utils/imgs/dwnFileIcon.png" /><span style="float: right;width: 80%;padding: inherit;">' . $fileName . '</span>
-                        <br><span style="margin-top:15px">' . $msg["text"] . '</span>';
+                echo '<input class="file" fileName="' . $fileName . '" filePath="' . $msg['filePath'] . '" title="Click to download" type="image" style="height: 15%; width: 15%;padding: 5px 0 0 0;min-width:20%" src="./utils/imgs/dwnFileIcon.png" /><span style="float: right;width: 80%;padding: inherit;">' . $fileName . '</span>';
+                if ($msg["text"] !== '') {
+                    echo '<br><span style="margin-top:15px;display: inline-block">' . $msg["text"] . '</span>';
+                }
             }
         } else {
             echo $msg["text"];

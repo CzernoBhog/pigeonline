@@ -8,17 +8,27 @@ class DOChatMembers
     private $chatId;
     private $draft;
     private $userType;
-    private $isTyping;
+	private $isTyping;
+	private $lastModify;
 
-    public function __construct($userId = NULL, $chatId = NULL, $draft = NULL, $userType = NULL, $isTyping = NULL){
+    public function __construct($userId = NULL, $chatId = NULL, $draft = NULL, $userType = NULL, $isTyping = NULL, $lastModify = null){
         if(func_get_args() != null) {
             $this->userId = $userId;
             $this->chatId = $chatId;
             $this->draft = $draft;
             $this->userType = $userType;
-            $this->isTyping = $isTyping;
+			$this->isTyping = $isTyping;
+			$this->lastModify = $lastModify;
         }
     }
+
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
+	}
 
     public function getUserId(){
 		return $this->userId;

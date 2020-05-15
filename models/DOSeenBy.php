@@ -4,13 +4,15 @@ namespace models;
 class DOSeenBy{
 
     private $userId;
-    private $messageId;
+	private $messageId;
+	private $lastModify;
 
-    public function __construct($userId = null, $messageId = null)
+    public function __construct($userId = null, $messageId = null, $lastModify = null)
     {
         if (func_get_args() != null) {
             $this->userId = $userId;
-            $this->messageId = $messageId;
+			$this->messageId = $messageId;
+			$this->lastModify = $lastModify;
         }
     }
 
@@ -28,6 +30,14 @@ class DOSeenBy{
 
 	public function setMessageId($messageId){
 		$this->messageId = $messageId;
+	}
+
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
 	}
 
 }

@@ -40,6 +40,7 @@ class menuController
             case '1':   //chat normali
             case '4':   // chat segrete
                 $otherUser = ($users[0]['userId'] !== $mainUser['userId']) ? $users[0] : $users[1];
+                $sharedGroups = \models\DAOChat::getSharedGroups($mainUser['userId'], $otherUser['userId']);
                 break;
 
             case '5':   //chat cloud
@@ -52,16 +53,16 @@ class menuController
                     $isFriend = \models\DAOFriends::getFriends(array("userId" => $_SESSION['id'], "friendId" => $users[$i]['userId']));
                     $isBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $_SESSION['id'], 'userBlocked' => $users[$i]['userId']));
                     $imBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $users[$i]['userId'], 'userBlocked' => $_SESSION['id']));
-                    
-                    if(!is_null($isBlocked) || !is_null($imBlocked) || $users[$i]['userId'] === $_SESSION['id']){
+
+                    if (!is_null($isBlocked) || !is_null($imBlocked) || $users[$i]['userId'] === $_SESSION['id']) {
                         $users[$i] += ['cantBeRequested' => true];
-                    }else if(!is_null($isFriend)){             
-                        if($isFriend->getAuthorizated() === '0'){
+                    } else if (!is_null($isFriend)) {
+                        if ($isFriend->getAuthorizated() === '0') {
                             $users[$i] += ['cantBeRequested' => 'pending'];
-                        }else{
+                        } else {
                             $users[$i] += ['cantBeRequested' => true];
                         }
-                    }else{
+                    } else {
                         $users[$i] += ['cantBeRequested' => false];
                     }
                 }
@@ -117,7 +118,44 @@ class menuController
                 $chats[$i] += ['newMessages' => 'true'];
             }
         }
-
         include('./views/menuContent.php');
     }
+
+    /*  public function checkUpdates()
+    {
+        $timestamp = $_POST['timestamp'];
+        $chats = \models\DAOChat::getChat(array('chatMemebers.userId' => $_SESSION['id']), FALSE, FALSE, NULL, 'chat.*', TRUE, array('chatMemebers' => 'chatId'), 'chatId');
+
+        $updates = array();
+        foreach ($chats as $chat) {
+            $messages = \models\DAOMessage::getOldMessages($chat['chatId'], $_SESSION['id'], '1');
+            $newMessages = \models\DAOMessage::getNewMessages($chat['chatId'], $_SESSION['id'], '1');
+            if (!is_null($newMessages) || is_null($messages)) {
+                $chat[] = ['newMessages' => 'true'];
+            }
+            switch ($chat['chatType']) {
+                case '1':
+                case '4':
+                    $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chat['chatId']));
+                    $friendId = ($chatMembers[0]->getUserId() !== $_SESSION['id']) ? $chatMembers[0]->getUserId() : $chatMembers[1]->getUserId();
+                    $otherUser = \models\DAOUser::getUser(array('userId' => $friendId), FALSE, FALSE, NULL, 'user.*, userDetails.lastActivity', TRUE, array('userDetails' => 'userId'), 'userId');
+                    if ($otherUser['lastModify'] > $timestamp) {
+                        $chat[] = $otherUser;
+                    }
+                    if($otherUser['lastModify'] > $timestamp || isset($chat['newMessages'])){
+                        $updates[] = $chat;
+                    }
+                    break;
+                case '2':
+                case '3':
+                    if ($chat['lastModify'] > $timestamp || isset($chat['newMessages'])) {
+                        $updates[] = $chat;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    } */
 }

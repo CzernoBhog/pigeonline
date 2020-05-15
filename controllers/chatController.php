@@ -21,9 +21,13 @@ class chatController
             if ($chat->getPathToChatPhoto() != './utils/imgs/groupDefault.png') {
                 unlink($chat->getPathToChatPhoto());
             }
+
             $dir = './utils/filesChats/' . $chat->getChatId();
-            array_map('unlink', glob("$dir/*.*"));
-            rmdir($dir);
+            if (file_exists($dir)) {
+                array_map('unlink', glob("$dir/*.*"));
+                rmdir($dir);
+            }
+
             return true;
         } catch (\Exception $e) {
             echo $e->getMessage();
@@ -80,7 +84,7 @@ class chatController
             }
         }
 
-        $chatTitle = trim($_POST['name']) == '' ? null : $_POST['name'];
+        $chatTitle = trim($_POST['name']);
         $chatDescription = trim($_POST['description']) == '' ? null : $_POST['description'];
 
         $targetFilePath = null;
@@ -127,7 +131,9 @@ class chatController
                     if (count($userIds) > 50) {
                         throw new Exception('Troppi utenti selezionati: massimo 50 persone!');
                     }
-                    $chatTitle == '' ? 'New group' : $chatTitle;
+                    if ($chatTitle == "") {
+                        $chatTitle = 'New group';
+                    }
                     $targetFilePath = is_null($targetFilePath) ? './utils/imgs/groupDefault.png' : $targetFilePath;
                     $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
                     \models\DAOChat::insertChat($chat);
@@ -145,7 +151,9 @@ class chatController
 
                 case '3':
                     $targetFilePath = is_null($targetFilePath) ? './utils/imgs/groupDefault.png' : $targetFilePath;
-                    $chatTitle == '' ? 'New group' : $chatTitle;
+                    if ($chatTitle == "") {
+                        $chatTitle = 'New group';
+                    }
                     $chat = new \models\DOChat(NULL, $_POST['chatType'], $chatTitle, $chatDescription, $targetFilePath);
                     \models\DAOChat::insertChat($chat);
                     $chatId = \models\DAOChat::getLastInsertId();
@@ -418,7 +426,7 @@ class chatController
 
             if (!is_null($chatMember)) {
                 if (count($otherChatMembers) === 0) {
-                    if(!$this->deleteChat()){
+                    if (!$this->deleteChat()) {
                         throw new \Exception('Impossibile eliminare chat');
                     }
                 } else if (count($admins) == 1 && $chatMember->getUserType() == '3') {

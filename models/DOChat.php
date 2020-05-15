@@ -9,16 +9,26 @@ class DOChat{
     private $title;
 	private $description;
 	private $pathToChatPhoto;
+	private $lastModify;
 
-    public function __construct($chatId = NULL, $chatType = NULL, $title = NULL, $description = NULL, $pathToChatPhoto = NULL){
+    public function __construct($chatId = NULL, $chatType = NULL, $title = NULL, $description = NULL, $pathToChatPhoto = NULL, $lastModify = null){
         if(func_get_args() != null) {
             $this->chatId = $chatId;
             $this->chatType = $chatType;
             $this->title = $title;
 			$this->description = $description;
 			$this->pathToChatPhoto = $pathToChatPhoto;
+			$this->lastModify = $lastModify;
         }
     }
+
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
+	}
 
     public function getChatId(){
 		return $this->chatId;

@@ -16,10 +16,11 @@ class DOMessage{
     private $sentBy;
     private $quotedMessage;
     private $chatId;
-    private $inoltred;
+	private $inoltred;
+	private $lastModify;
 
 
-    public function __construct($messageId = NULL, $ttl = NULL, $seen = NULL, $filePath = NULL, $text = NULL, $timeStamp = NULL, $messageType = NULL, $edited = NULL, $pinned = NULL, $sentBy = NULL, $quotedMessage = NULL, $chatId = NULL, $inoltred = NULL)
+    public function __construct($messageId = NULL, $ttl = NULL, $seen = NULL, $filePath = NULL, $text = NULL, $timeStamp = NULL, $messageType = NULL, $edited = NULL, $pinned = NULL, $sentBy = NULL, $quotedMessage = NULL, $chatId = NULL, $inoltred = NULL, $lastModify = null)
     {
         if(func_get_args() != null) {
             $this->messageId = $messageId;
@@ -34,7 +35,8 @@ class DOMessage{
             $this->sentBy = $sentBy;
             $this->quotedMessage = $quotedMessage;
             $this->chatId = $chatId;
-            $this->inoltred = $inoltred;
+			$this->inoltred = $inoltred;
+			$this->lastModify = $lastModify;
         }
     }
 
@@ -142,7 +144,14 @@ class DOMessage{
 	public function setInoltred($inoltred){
 		$this->inoltred = $inoltred;
     }
-    
+	
+	public function getLastModify(){
+		return $this->lastModify;
+	}
+
+	public function setLastModify($lastModify){
+		$this->lastModify = $lastModify;
+	}
 }
 
 ?>
