@@ -2,9 +2,9 @@ $(document).ready(function () {
     //load del menu sul div content e aggiunte del jquery per il funzionamento di modifica profilo, modifica indirizzi e inserisci utente gestiti attraverso div modale
     loadMenu();
 
-    /* setInterval(function () {
+    setInterval(function () {
         loadMenu();
-    }, 5000); */
+    }, 5000);  
 });
 
 $('#searchBar').on('keyup', function () {
@@ -31,6 +31,12 @@ function loadMenu() {
         if (statusTxt == "success") {
 
             filterChat();
+
+            var href = window.location.href.split('/')[5].replace('#','');;
+
+            $('#imgChatPageTopBanner').attr('src', $('a[href$="' + href + '"] img').attr('src'));
+            $('#nameChatPageTopBanner').text($('a[href$="' + href + '"] span:first').text());
+            $('#onOffChatPageTopBanner').text($('a[href$="' + href + '"] span:eq(1)').text().substring(0, $('a[href$="' + href + '"] span:eq(1)').text().length - 3)); // "12345.0");
 
             $(".sidebar-dropdown > a").click(function () {
                 $(".sidebar-submenu").slideUp(200);

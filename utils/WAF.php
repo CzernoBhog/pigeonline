@@ -61,7 +61,7 @@ class WAF
      * 
      * @todo
      */
-    static function generateEncryptionKeys() {
+    /*static function generateEncryptionKeys() {
         // Genera una chiave privatae e una chiave pubblica, restituendo un ID della risorsa
         $resource = openssl_pkey_new(array(
             "digest_alg" => "sha512",
@@ -75,10 +75,9 @@ class WAF
         // Estrae la chiave pubblica dalla risorsa, sottoforma di stringa   (la funzione restituisce un array di dettagli)
         $publickey = openssl_pkey_get_details($resource)["key"];
 
-        /* 
-            TODO: Trovare un posto per la chiave pubblica e uno sicuro per la chiave privata
-        */
-    }
+        // TODO: Trovare un posto per la chiave pubblica e uno sicuro per la chiave privata
+        
+    }*/
 
     /**
      * Mostra la View di blocco
@@ -175,10 +174,10 @@ class WAF
                     1 => '´',
                     2 => 'SELECT FROM',
                     3 => 'SELECT * FROM',
-                    4 => 'ONION',
+                    4 => 'SET',
                     5 => 'union',
                     6 => 'UNION',
-                    7 => 'UDPATE users SET',
+                    7 => 'UPDATE ',
                     8 => 'WHERE username',
                     9 => 'DROP TABLE',
                     10 => '0x50',

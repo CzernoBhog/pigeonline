@@ -74,7 +74,7 @@
                     <div style="padding: 3px" id="selectFriend">
                         <div class="custom-control custom-checkbox mb-3">
                             <input type="checkbox" class="custom-control-input" id="secret" name="isSecret">
-                            <label class="custom-control-label" for="secret">Secret chat</label>
+                            <label class="custom-control-label" for="secret">Secret chat - Se attivi l'opzione "chat segreta" i messaggi della chat verranno criptati ulteriormente aumentandone la sicurezza e inoltre verranno eliminati definitivamente non appena visualizzati</label>
                         </div>
 
                         <select id="selectChat" name='users'>

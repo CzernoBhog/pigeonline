@@ -101,13 +101,13 @@ class DAOMessage
         }
     }
 
-    public static function deleteMessage($message)
+    public static function deleteMessage($messageId)
     {
         $conn = \utils\Database::connect();
         $query = 'DELETE FROM message WHERE messageId = :mi';
         try {
             $stmt = $conn->prepare($query);
-            $stmt->bindValue(":mi", $message->getMessageId());
+            $stmt->bindValue(":mi", $messageId);
             $result = $stmt->execute();
             return $result;
         } catch (\Exception | \PDOException $e) {

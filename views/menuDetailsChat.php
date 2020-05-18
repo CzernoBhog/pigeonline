@@ -1,6 +1,6 @@
 <nav id="sidebar" class="sidebar-wrapper" style="right: 0px;left: auto; width: 500px">
     <div class="sidebar-brand">
-        <a id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'titleInput' : 'title' ?>" href="#">
+        <a class="chatTitle" id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'titleInput' : 'title' ?>" href="#">
             <?= is_null($chat->getTitle()) ? $otherUser['username'] : $chat->getTitle() ?>
         </a>
         <?php
@@ -54,7 +54,7 @@
                     ?>
                 </li>
                 <li style="display: table; margin: auto; padding: 10px;">
-                    <img style="height: 247px; width: 247px; border-radius: 50%;" src="<?= is_null($chat->getPathToChatPhoto()) ? $otherUser['pathProfilePicture'] : $chat->getPathToChatPhoto() ?>" alt="">
+                    <img id="chatPhoto" style="height: 247px; width: 247px; border-radius: 50%;" src="<?= is_null($chat->getPathToChatPhoto()) ? $otherUser['pathProfilePicture'] : $chat->getPathToChatPhoto() ?>" alt="">
                 </li>
             </ul>
             <ul>
@@ -62,7 +62,7 @@
                     <span><?= ($chat->getChatType() == '3' || $chat->getChatType() == '2') ? 'DESCRIPTION:' : 'MOOD:' ?></span>
                 </li>
                 <li class="header-menu">
-                    <span id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'descriptionInput' : 'description' ?>" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
+                    <span class="chatDescription" id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'descriptionInput' : 'description' ?>" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
                 </li>
             </ul>
             <ul>
@@ -91,7 +91,7 @@
                     </div>
                     <!-- sidebar-search  -->
 
-                    <div class="pre-scrollable-right">
+                    <div id="members" class="pre-scrollable-right">
                         <?php
                         foreach ($users as $user) {
                             $src = $user['pathProfilePicture'];
@@ -128,7 +128,7 @@
                         }
                         ?>
                     </div>
-                <?php } else { ?>
+                <?php } else if ($chat->getChatType() != '5') { ?>
                     <div class="sidebar-brand">
                         <a href="#">SHARED GROUPS:</a>
                     </div>

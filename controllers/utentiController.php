@@ -265,10 +265,10 @@ class utentiController
                     
                     //esporta la chiave privata su un file
                     openssl_pkey_export($resource, $privateKey, NULL, $configs);
-                    file_put_contents("./utils/keys/".$user->getUserId()."/private.key", $privateKey);
+                    file_put_contents("./utils/keys/".$user->getUserId()."/private.pem", $privateKey);
                     //esporta la chiave pubblica su un file
                     $publicKey = openssl_pkey_get_details($resource)['key'];
-                    file_put_contents("./utils/keys/".$user->getUserId()."/public.key", $publicKey);
+                    file_put_contents("./utils/keys/".$user->getUserId()."/public.pem", $publicKey);
                     //libera la chiave dalla memoria
                     openssl_free_key($resource);
 

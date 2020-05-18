@@ -6,6 +6,16 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
     if (!is_null($array)) {
         $cont = 0;
         foreach ($array as $friend) {
+            if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime($friend->getLastActivity()))) {
+                $day = "Yesterday";
+            } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime($friend->getLastActivity()))) {
+                $day = "Today";
+            } else {
+                $day = date("D M Y", strtotime($friend->getLastActivity()));
+            }
+
+            $lastActivity = date("H:i", strtotime($friend->getLastActivity())) . ' | ' . $day;
+
             $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
             $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
             $src = $friend->getPathProfilePicture();
@@ -22,7 +32,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                     switch ($friend->getPrivacyLevel()) {
                         case 1:
-                            echo ($friend->getLastActivity() > $current_timestamp) ? '<p><i style="color: green">Online</i>' : '<p><i style="color: red">Offline</i> - ' . $friend->getLastActivity() . '</p>';
+                            echo ($friend->getLastActivity() > $current_timestamp) ? '<p><i style="color: green">Online</i>' : '<p><i style="color: red">Offline</i> - ' . $lastActivity . '</p>';
                             break;
 
                         case 2:
@@ -62,7 +72,7 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
 
                         switch ($friend->getPrivacyLevel()) {
                             case 1:
-                                echo ' - ' . $friend->getLastActivity() . '</p>';
+                                echo ' - ' . $lastActivity . '</p>';
                                 break;
 
                             case 2:

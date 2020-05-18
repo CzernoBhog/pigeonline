@@ -19,8 +19,8 @@ if (isset($_REQUEST['action'])) {
 }
 
 // Viene controllato se l'utente è autenticato o meno
-if (empty($_SESSION)) {
-    switch($action){        // Queste pagine non necessitano di autenticazione, quindi posso essere aperte
+if (!isset($_SESSION['id'])) {
+    switch ($action) {        // Queste pagine non necessitano di autenticazione, quindi posso essere aperte
         case "viewRegistration":
         case "viewLogin":
         case "viewFirstPage":
@@ -29,6 +29,7 @@ if (empty($_SESSION)) {
         case 'viewMessagePage':
         case 'registraUtente':
         case 'confermaRegistrazione':
+        case 'login':
             (new controllers\utentiController)->$action();
             exit;
 

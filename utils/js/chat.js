@@ -76,18 +76,50 @@ function checkWhoIsTyping(timestamp) {
 var interval, scrollPoint, preFilterText;
 $('#chatDetails').on('click', function () {
     reloadChatMenu();
-    /* interval = setInterval(function () {
-        preFilterText = $("#searchMembers").val();
+    interval = setInterval(function () {
         scrollPoint = $("#chatMenuContent").scrollTop();
-        reloadChatMenu();
-    }, 2000); */
+        chatMenuUpdates();
+    }, 2000);
 });
+
+function chatMenuUpdates() {
+    $.ajax({
+        type: "POST",
+        url: "index.php?controller=menuController&action=chatMenuUpdates",
+        data: {
+            'title': $('.chatTitle').text().trim(),
+            'description': $('.chatDescription').text().trim(),
+            'photo': $('#chatPhoto').attr('src').trim()
+        },
+        success: function (updates) {
+            updates = JSON.parse(updates);
+
+            if (typeof updates['chat'] !== 'undefined') {
+                if (updates['chat'].hasOwnProperty('title')) {
+                    $('.chatTitle').html(updates['chat']['title']);
+                }
+                if (updates['chat'].hasOwnProperty('description')) {
+                    $('.chatDescription').html(updates['chat']['description']);
+                }
+                if (updates['chat'].hasOwnProperty('photo')) {
+                    $('#chatPhoto').attr('src', updates['chat']['photo']);
+                }
+            }
+
+            //let key = Object.keys(updates);
+            if (typeof updates['members'] !== 'undefined') {
+                $('#members').html(updates['members'])
+                filterMember();
+                eventMemberList();
+            }
+        }
+    });
+}
 
 function reloadChatMenu() {
     $('#rightMenu').load('index.php?controller=menuController&action=caricaMenuChat', function (responseTxt, statusTxt, xhr) {
         if (statusTxt == "success") {
 
-            $("#searchMembers").val(preFilterText);
             filterMember();
 
             $("#chatMenuContent").animate({
@@ -129,7 +161,6 @@ function reloadChatMenu() {
                     parentElement.children("span").remove();
                     parentElement.append(input);
                     parentElement.children("input").focus();
-                    clearInterval(interval);
 
                     $("#descriptionInput").on('blur', function () {
                         let groupDescr = $(this).first().val();
@@ -139,12 +170,6 @@ function reloadChatMenu() {
                         let parentElement = $(this).parent("li");
                         parentElement.children("input").remove();
                         parentElement.append("<span id='descriptionInput' style='padding: 0 20px 5px 20px'>" + groupDescr.trim() + "</span>");
-                        //riavvio il set interval una volta aggiornato
-                        interval = setInterval(function () {
-                            preFilterText = $("#searchMembers").val();
-                            scrollPoint = $("#chatMenuContent").scrollTop();
-                            reloadChatMenu();
-                        }, 2000);
                         aggiornaDescrizione();
                     });
                 });
@@ -159,7 +184,6 @@ function reloadChatMenu() {
                     parentElement.children("#titleInput").remove();
                     parentElement.prepend(input);
                     parentElement.children("input").focus();
-                    clearInterval(interval);
 
                     $("#titleInput").on('blur', function () {
                         let title = $(this).val();
@@ -169,59 +193,12 @@ function reloadChatMenu() {
                         let parentElement = $(this).parent("div.sidebar-brand");
                         parentElement.children("#titleInput").remove();
                         parentElement.prepend("<a id='titleInput' href='#'>" + title.trim() + "</a>");
-                        //riavvio il set interval una volta aggiornato
-                        interval = setInterval(function () {
-                            preFilterText = $("#searchMembers").val();
-                            scrollPoint = $("#chatMenuContent").scrollTop();
-                            reloadChatMenu();
-                        }, 2000);
                         aggiornaTitolo();
                     });
                 });
             }
 
-            $("#searchMembers").on('click', function () {
-                clearInterval(interval);
-            });
-
-            $("#searchMembers").on('blur', function () {
-                interval = setInterval(function () {
-                    preFilterText = $("#searchMembers").val();
-                    scrollPoint = $("#chatMenuContent").scrollTop();
-                    reloadChatMenu();
-                }, 2000);
-            });
-
-
-            $('.friendRequest').on('click', function () {
-                var friendId = $(this).attr('userId');
-                $('#friendRequest' + friendId).attr('title', 'Request sent')
-                $('#friendRequest' + friendId).html('<i style="color: yellow" class="fas fa-user-clock"></i>');
-                $.ajax({
-                    url: 'index.php',
-                    type: 'POST',
-                    data: {
-                        'friendId': friendId,
-                        'action': 'friendRequest',
-                        'controller': 'friendsController'
-                    },
-                    success: function (result) {
-                        if (result == 'blocked') {
-                            $.redirect('index.php');
-                        }
-                        if (result == 'success') {
-                            $('#friendRequest' + friendId).css("pointer-events", "none"); // disabilita gli eventi del mouse
-                        } else {
-                            $('#friendRequest' + friendId).attr('title', 'Error, resend request')
-                            $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
-                        }
-                    },
-                    error: function (result) {
-                        $('#friendRequest' + friendId).attr('title', 'Error, resend request')
-                        $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
-                    }
-                });
-            });
+            eventMemberList();
 
             $('#abbandona').on('click', function () {
                 var userId = $(this).attr('userId');
@@ -241,75 +218,6 @@ function reloadChatMenu() {
                     },
                     error: function (result) {
                         errorNotify();
-                    }
-                });
-            });
-
-            $('.removeUser').on('click', function () {
-                var userId = $(this).attr('userId');
-                $.ajax({
-                    url: 'index.php',
-                    type: 'POST',
-                    data: {
-                        'userId': userId,
-                        'action': 'removeUserFromChat',
-                        'controller': 'chatController'
-                    },
-                    success: function (result) {
-                        if (result == 'blocked') {
-                            $.redirect('index.php');
-                        }
-                        if (result == 'success') {
-                            reloadChatMenu();
-                        } else {
-                            errorNotify();
-                        }
-                    },
-                    error: function (result) {
-                        errorNotify();
-                    }
-                });
-            });
-
-            $('.addRemoveAdmin').on('click', function () {
-                var userId = $(this).attr('userId');
-                $.ajax({
-                    url: 'index.php',
-                    type: 'POST',
-                    data: {
-                        'userId': userId,
-                        'action': 'addRemoveAdmin',
-                        'controller': 'chatController'
-                    },
-                    success: function (result) {
-                        if (result == 'blocked') {
-                            $.redirect('index.php');
-                        }
-                        if (result == 'added') {
-                            $('#addRemoveAdmin' + userId).html('<i class="fas fa-star"></i>');
-                            $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
-
-                        } else if (result == 'removed') {
-                            $('#addRemoveAdmin' + userId).html('<i class="far fa-star"></i>');
-                            $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
-                        } else {
-                            if ($('#addRemoveAdmin' + userId).attr('title') == 'Make Admin') {
-                                $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
-                                $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
-                            } else {
-                                $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
-                                $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
-                            }
-                        }
-                    },
-                    error: function (result) {
-                        if ($('#addRemoveAdmin' + userId).attr('title') == 'Make Admin') {
-                            $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
-                            $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
-                        } else {
-                            $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
-                            $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
-                        }
                     }
                 });
             });
@@ -452,5 +360,106 @@ function loadModalAddUser() {
         if (statusTxt == "error") {
             alert("Errore imprevisto, riprovare")
         }
+    });
+}
+
+function eventMemberList() {
+    $('.friendRequest').on('click', function () {
+        var friendId = $(this).attr('userId');
+        $('#friendRequest' + friendId).attr('title', 'Request sent')
+        $('#friendRequest' + friendId).html('<i style="color: yellow" class="fas fa-user-clock"></i>');
+        $.ajax({
+            url: 'index.php',
+            type: 'POST',
+            data: {
+                'friendId': friendId,
+                'action': 'friendRequest',
+                'controller': 'friendsController'
+            },
+            success: function (result) {
+                if (result == 'blocked') {
+                    $.redirect('index.php');
+                }
+                if (result == 'success') {
+                    $('#friendRequest' + friendId).css("pointer-events", "none"); // disabilita gli eventi del mouse
+                } else {
+                    $('#friendRequest' + friendId).attr('title', 'Error, resend request')
+                    $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
+                }
+            },
+            error: function (result) {
+                $('#friendRequest' + friendId).attr('title', 'Error, resend request')
+                $('#friendRequest' + friendId).html('<i style="color: red" class="fas fa-user-plus"></i>');
+            }
+        });
+    });
+
+    $('.removeUser').on('click', function () {
+        var userId = $(this).attr('userId');
+        $.ajax({
+            url: 'index.php',
+            type: 'POST',
+            data: {
+                'userId': userId,
+                'action': 'removeUserFromChat',
+                'controller': 'chatController'
+            },
+            success: function (result) {
+                if (result == 'blocked') {
+                    $.redirect('index.php');
+                }
+                if (result == 'success') {
+                    reloadChatMenu();
+                } else {
+                    errorNotify();
+                }
+            },
+            error: function (result) {
+                errorNotify();
+            }
+        });
+    });
+
+    $('.addRemoveAdmin').on('click', function () {
+        var userId = $(this).attr('userId');
+        $.ajax({
+            url: 'index.php',
+            type: 'POST',
+            data: {
+                'userId': userId,
+                'action': 'addRemoveAdmin',
+                'controller': 'chatController'
+            },
+            success: function (result) {
+                if (result == 'blocked') {
+                    $.redirect('index.php');
+                }
+                if (result == 'added') {
+                    $('#addRemoveAdmin' + userId).html('<i class="fas fa-star"></i>');
+                    $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
+
+                } else if (result == 'removed') {
+                    $('#addRemoveAdmin' + userId).html('<i class="far fa-star"></i>');
+                    $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
+                } else {
+                    if ($('#addRemoveAdmin' + userId).attr('title') == 'Make Admin') {
+                        $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                        $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
+                    } else {
+                        $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                        $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
+                    }
+                }
+            },
+            error: function (result) {
+                if ($('#addRemoveAdmin' + userId).attr('title') == 'Make Admin') {
+                    $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                    $('#addRemoveAdmin' + userId).attr('title', 'Make Admin');
+                } else {
+                    $('#addRemoveAdmin' + userId).html('<i style="color: red" class="fas fa-star"></i>');
+                    $('#addRemoveAdmin' + userId).attr('title', 'Remove Admin');
+                }
+            }
+        });
     });
 }

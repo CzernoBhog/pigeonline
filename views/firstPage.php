@@ -43,7 +43,7 @@
 
         <main role="main" class="inner cover">
             <img class="mb-4" src="./utils/imgs/logoProgetto.png" alt="" width="80" height="80">
-            <h1 class="cover-heading">Chat with PiegOnLine.</h1>
+            <h1 class="cover-heading">Chat with PigeOnLine.</h1>
             <p class="lead">PigeOnLine is an instant messaging web application.</p>
             <br><br>
             <p class="lead">

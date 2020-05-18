@@ -41,7 +41,7 @@ class friendsController
         $blockedBy = \models\DAOUsersBlocked::getUsersBlocked(array('userBlocked' => $user->getUserId()));
         $userBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $user->getUserId()));
         $alreadyRequested = \models\DAOFriends::getFriends(array('friendId' => $user->getUserId(), 'authorizated' => 0));
-        if(!is_array($alreadyRequested)){
+        if(!is_array($alreadyRequested) && !is_null($alreadyRequested)){
             $alreadyRequested = array($alreadyRequested);
         }
 

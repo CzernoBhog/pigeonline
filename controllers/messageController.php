@@ -11,13 +11,14 @@ class messageController
      */
     public function sendMessage()
     {
-        $chatId = $_SESSION["chatId"];
+        $chat = \models\DAOChat::getChat(array("chatId" => $_SESSION['chatId']))[0];
         $text = (isset($_POST['messageText'])) ? $_POST['messageText'] : NULL;
         $file = (isset($_FILES["file"])) ? $_FILES : NULL;
         $filePath = NULL;
+        $ttl = NULL;
         try {
             if (!is_null($file)) {           // File allegato senza testo
-                if (filesize($file["file"]["tmp_name"]) <= 32 * 1024 * 1024) {      // controlla se maggiore di 32MB
+                if (filesize($file["file"]["tmp_name"]) <= 64 * 1024 * 1024) {      // controlla se maggiore di 64MB
                     $msgType = 2;
                     if (!file_exists($chatDirPath = "./utils/filesChats/" . $_SESSION['chatId'])) {
                         if (!mkdir($chatDirPath, 0766, true)) {
@@ -37,7 +38,38 @@ class messageController
             } else {                        // Solo testo
                 $msgType = 1;
             }
-            $message = new \models\DOMessage(NULL, NULL, NULL, $filePath, $text, NULL, $msgType, FALSE, FALSE, $_SESSION['id'], NULL, $chatId, FALSE);
+
+            if ($chat->getChatType() === '4') {
+                $chatMembers = \models\DAOChatMembers::getChatMembers(array('chatId' => $chat->getChatId()));
+                $otherMemeberId = ($chatMembers[0]->getUserId() !== $_SESSION['id']) ? $chatMembers[0]->getUserId() : $chatMembers[1]->getUserId();
+                //recupero chiave privata del mittente e chiave pubblica del destinatario
+                $senderPrivK = openssl_pkey_get_private(file_get_contents("./utils/keys/" . $_SESSION['id'] . "/private.pem"));
+                $receiverPubK = openssl_pkey_get_public(file_get_contents("./utils/keys/" . $otherMemeberId . "/public.pem"));
+
+                // $receiverPrivK = openssl_pkey_get_private(file_get_contents("./utils/keys/" . $otherMemeberId . "/private.pem"));
+                // $senderPubK = openssl_pkey_get_public(file_get_contents("./utils/keys/" . $_SESSION['id'] . "/public.pem"));
+
+                //$error = openssl_error_string();
+
+                // PrivKey Mitt. -> PubKey Dest.
+                // PrivKey Dest. -> PubKey MItt.
+                if (!is_null($text)) {
+                    openssl_private_encrypt($text, $text, $senderPrivK);
+                    openssl_public_encrypt($text, $text, $receiverPubK);
+                }
+
+                // openssl_private_decrypt($text, $text, $receiverPrivK);
+                // openssl_public_decrypt($text, $text, $senderPubK);
+
+                if (!is_null($filePath)) {
+                    openssl_private_encrypt($filePath, $filePath, $senderPrivK);
+                    openssl_public_encrypt($filePath, $filePath, $receiverPubK);
+                }
+
+                $ttl = 1;
+            }
+
+            $message = new \models\DOMessage(NULL, $ttl, NULL, $filePath, $text, NULL, $msgType, FALSE, FALSE, $_SESSION['id'], NULL, $chat->getChatId(), FALSE);
             \models\DAOMessage::insertMessage($message);
             $messageId = \models\DAOMessage::getLastInsertId();
             echo 'success';
@@ -76,24 +108,49 @@ class messageController
             }
 
             if (!is_null($messages)) {
-                foreach ($messages as $message) {
-                    $seenBy = new \models\DOSeenBy($_SESSION['id'], $message['messageId']);
-                    \models\DAOSeenBy::insertSeenBy($seenBy);
-                    $views = \models\DAOSeenBy::getSeenBy(array('messageId' => $message['messageId']));
-                    if (count($views) == 2 && ($chat->getChatType() == 1 || $chat->getChatType() == 4)) {
-                        \models\DAOMessage::updateSeenToTrue($message['messageId']);
-                        \models\DAOSeenBy::deleteSeenBy($message['messageId']);
-                    } else if (count($views) == count($chatMembers) && ($chat->getChatType() == 2 || $chat->getChatType() == 3)) {
-                        \models\DAOMessage::updateSeenToTrue($message['messageId']);
-                        \models\DAOSeenBy::deleteSeenBy($message['messageId']);
-                    } else if (count($views) == 1 && $chat->getChatType() == 5) {
-                        \models\DAOMessage::updateSeenToTrue($message['messageId']);
-                        \models\DAOSeenBy::deleteSeenBy($message['messageId']);
+                foreach ($messages as &$message) {
+                    if ($message['seen'] != '1') {
+                        $seenBy = new \models\DOSeenBy($_SESSION['id'], $message['messageId']);
+                        \models\DAOSeenBy::insertSeenBy($seenBy);
+                        $views = \models\DAOSeenBy::getSeenBy(array('messageId' => $message['messageId']));
+                        
+                        if($chat->getChatType() == 4) {
+                            $otherMemeberId = ($chatMembers[0]->getUserId() !== $message['sentBy']) ? $chatMembers[0]->getUserId() : $chatMembers[1]->getUserId();
+
+                            $receiverPrivK = openssl_pkey_get_private(file_get_contents("./utils/keys/" . $otherMemeberId . "/private.pem"));
+                            $senderPubK = openssl_pkey_get_public(file_get_contents("./utils/keys/" . $message['sentBy'] . "/public.pem"));
+                            
+                            if(!is_null($message['text'])) {
+                                openssl_private_decrypt($message['text'], $message['text'], $receiverPrivK);
+                                openssl_public_decrypt($message['text'], $message['text'], $senderPubK);
+                            }
+                            
+                            if(!is_null($message['filePath'])){
+                                openssl_private_decrypt($message['filePath'], $message['filePath'], $receiverPrivK);
+                                openssl_public_decrypt($message['filePath'], $message['filePath'], $senderPubK);
+                            }
+                        }
+
+                        if (count($views) == 2 && ($chat->getChatType() == 1 || $chat->getChatType() == 4)) {
+                            if(!is_null($message['ttl'])) {
+                                \models\DAOMessage::deleteMessage($message['messageId']);
+                            } else {
+                                \models\DAOMessage::updateSeenToTrue($message['messageId']);
+                            } 
+                            \models\DAOSeenBy::deleteSeenBy($message['messageId']);
+                        } else if (count($views) == count($chatMembers) && ($chat->getChatType() == 2 || $chat->getChatType() == 3)) {
+                            \models\DAOMessage::updateSeenToTrue($message['messageId']);
+                            \models\DAOSeenBy::deleteSeenBy($message['messageId']);
+                        } else if (count($views) == 1 && $chat->getChatType() == 5) {
+                            \models\DAOMessage::updateSeenToTrue($message['messageId']);
+                            \models\DAOSeenBy::deleteSeenBy($message['messageId']);
+                        }
                     }
                 }
-   
+
                 include('./views/newMessages.php');
             }
+
             \utils\Transaction::commitTransaction();
         } catch (\Exception $e) {
             \utils\Transaction::rollBackTransaction();
@@ -108,6 +165,6 @@ class messageController
     public function deleteMessage()
     {
         $message = \models\DAOMessage::getMessage(array("messageId" => $_POST['messageId'], "chatId" => $_SESSION['chatId']));
-        \models\DAOMessage::deleteMessage($message);
+        \models\DAOMessage::deleteMessage($message->getMessageId());
     }
 }

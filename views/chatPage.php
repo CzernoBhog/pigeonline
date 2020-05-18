@@ -27,12 +27,12 @@
                     $otherUser = ($chatMembers[0]['userId'] !== $_SESSION['id']) ? $chatMembers[0] : $chatMembers[1];
                     echo '<div class="outgoing_usr" style="height: 52px; background-color: #dddddd">
                                 <div style="height: 50px; padding: 2px 2px 2px 2px;">
-                                    <img style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $otherUser['pathProfilePicture'] . '" alt="Avatar">
-                                    <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $otherUser['username'] . '</span>';
+                                    <img id="imgChatPageTopBanner" style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $otherUser['pathProfilePicture'] . '" alt="Avatar">
+                                    <span id="nameChatPageTopBanner" style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $otherUser['username'] . '</span>';
                     if ($otherUser['privacyLevel'] != '3') {
                         $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
                         $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
-                        echo '<br><span class="span-group-members" style="padding-left: 10px; font-size: smaller">';
+                        echo '<br><span id="onOffChatPageTopBanner" class="span-group-members" style="padding-left: 10px; font-size: smaller">';
                         echo ($otherUser['lastActivity'] > $current_timestamp) ? 'Online</span>' : 'Offline</span>';
                     }
                     echo        '</div>
@@ -51,8 +51,8 @@
                     }
                     echo '<div class="outgoing_usr" style="height: 52px; background-color: #dddddd">
                                 <div style="height: 50px; padding: 2px 2px 2px 2px;">
-                                    <img style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $chat->getPathToChatPhoto() . '" alt="Avatar">
-                                    <span style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $chat->getTitle() . '</span>
+                                    <img id="imgChatPageTopBanner" style="width: 48px; height: 48px;" class="chat-img fa-pull-left" src="' . $chat->getPathToChatPhoto() . '" alt="Avatar">
+                                    <span id="nameChatPageTopBanner" style="padding-left: 10px; font-size: large; color: Black; height: 25px; display: inline-block;">' . $chat->getTitle() . '</span>
                                     <br><span class="span-group-members">' . $groupMembers . '</span>
                                 </div>
                                 <button id="chatDetails" style="right: 15px;" class="msg_send_btn" type="button"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
