@@ -22,7 +22,14 @@
         <main class="page-content">
             <div class="container container-block">
                 <div class="jumbotron">
-                    <h1 class="display-4">Benvenuto <?= $user->getName() . " " . $user->getSurname(); ?>!</h1>
+                    <div class="row">
+                        <div class="col-8" style="align-content: center; display: grid;">
+                            <h1 class="display-4" style="margin: auto; font-size: 300%">Benvenuto <?= $user->getName() . " " . $user->getSurname(); ?>!</h1>
+                        </div>
+                        <div class="col-4">
+                            <img class="fa-pull-right" style="width: 200px" src="./utils/imgs/piccioneScemo.png">
+                        </div>
+                    </div>
 
                     <br>
 
@@ -31,15 +38,12 @@
                     <p>In alternativa puoi farti degli amici cliccando su <b>Friends</b> e cercando gli username dei tuoi amici per richiedergli l'amicizia e una volta accettata vedere se sono online o offline e molto altro</p>
                     <p>Se hai già degli amici, allora creati, cliccando su <b>Chat</b>, una chat normale, un gruppo oppure un canale per condividere cose a persone, perchè è bello condividere cose a persone</p>
                     <p>Se vuoi, puoi sempre cambiare alcune impostazioni del profilo cliccando su <b>settings</b> in basso al menu di sinistra</p>
-                    
+
                     <hr class="my-4">
 
                     <p>Per altre informazioni puoi sempre <a href="mailto:pigeonline.project@gmail.com">contattarci</a> e sperare in una risposta, perchè essendo alle Hawaii a goderci la vita è dura trovare del tempo :)</p>
                     <p>Per il resto, buon divertimento :D</p>
                     <p>Lo staff :)</p>
-                    <!-- <p class="lead">
-                        <a class="btn btn-primary btn-lg" href="index.php?controller=controllerUtenti&action=visualizzaLista" role="button">Vedi Lista</a>
-                    </p> -->
                 </div>
             </div>
         </main>
