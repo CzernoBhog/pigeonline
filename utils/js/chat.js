@@ -51,7 +51,9 @@ function checkWhoIsTyping(timestamp) {
             "timestamp": timestamp
         },
         success: function (data) {
-            if (data === "none" || data == '[]') {
+            if (data === "blocked") {
+                $.redirect('index.php');
+            } else if (data === "none" || data == '[]') {
                 $('.span-group-members').text(chatMembers);
             } else {
                 data = JSON.parse(data);
@@ -73,14 +75,19 @@ function checkWhoIsTyping(timestamp) {
     });
 }
 
-var interval, scrollPoint, preFilterText;
-$('#chatDetails').on('click', function () {
-    reloadChatMenu();
-    interval = setInterval(function () {
-        scrollPoint = $("#chatMenuContent").scrollTop();
-        chatMenuUpdates();
-    }, 2000);
-});
+var interval, scrollPoint;
+buttonOpenMenuDetailsChat();
+
+function buttonOpenMenuDetailsChat() {
+    $('#chatDetails').on('click', function () {
+        reloadChatMenu();
+        interval = setInterval(function () {
+            scrollPoint = $("#chatMenuContent").scrollTop();
+            chatMenuUpdates();
+        }, 2000);
+        $('#chatDetails').off();
+    });
+}
 
 function chatMenuUpdates() {
     $.ajax({
@@ -130,6 +137,7 @@ function reloadChatMenu() {
                 $('#rightMenu').children().remove();
                 $('.messaging').css('right', '0');
                 clearInterval(interval);
+                buttonOpenMenuDetailsChat();
             });
 
             if ($(window).width() > 550) {
@@ -156,11 +164,12 @@ function reloadChatMenu() {
             function aggiornaDescrizione() {
                 $("#descriptionInput").on('click', function () {
                     let groupDescr = $(this).first().text();
-                    let input = '<input id="descriptionInput" class="form-control search-menu" maxLength="1024" name="description" type="text" value="' + groupDescr.trim() + '">';
+                    let input = '<textarea id="descriptionInput" class="form-control" maxLength="1024" name="description" autofocus>' + groupDescr.trim() + '</textarea>';
                     let parentElement = $(this).parent("li");
                     parentElement.children("span").remove();
                     parentElement.append(input);
                     parentElement.children("input").focus();
+                    clearInterval(interval);
 
                     $("#descriptionInput").on('blur', function () {
                         let groupDescr = $(this).first().val();
@@ -171,6 +180,11 @@ function reloadChatMenu() {
                         parentElement.children("input").remove();
                         parentElement.append("<span id='descriptionInput' style='padding: 0 20px 5px 20px'>" + groupDescr.trim() + "</span>");
                         aggiornaDescrizione();
+
+                        interval = setInterval(function () {
+                            scrollPoint = $("#chatMenuContent").scrollTop();
+                            chatMenuUpdates();
+                        }, 2000);
                     });
                 });
             }
@@ -184,6 +198,7 @@ function reloadChatMenu() {
                     parentElement.children("#titleInput").remove();
                     parentElement.prepend(input);
                     parentElement.children("input").focus();
+                    clearInterval(interval);
 
                     $("#titleInput").on('blur', function () {
                         let title = $(this).val();
@@ -194,6 +209,11 @@ function reloadChatMenu() {
                         parentElement.children("#titleInput").remove();
                         parentElement.prepend("<a id='titleInput' href='#'>" + title.trim() + "</a>");
                         aggiornaTitolo();
+
+                        interval = setInterval(function () {
+                            scrollPoint = $("#chatMenuContent").scrollTop();
+                            chatMenuUpdates();
+                        }, 2000);
                     });
                 });
             }

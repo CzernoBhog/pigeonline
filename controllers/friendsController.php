@@ -48,12 +48,14 @@ class friendsController
         if (!is_null($users)) {
             if (($index = array_search($user->getUserId(), array_column($users, 'userId'))) !== false) {
                 unset($users[$index]);
+                $users = array_values($users);
             }
 
             if (!is_null($alreadyRequested)) {
                 foreach ($alreadyRequested as $request) {
                     if (($index = array_search($request->getUserId(), array_column($users, 'userId'))) !== false) {
                         unset($users[$index]);
+                        $users = array_values($users);
                     }
                 }
             }
@@ -62,6 +64,7 @@ class friendsController
                 foreach ($alreadyFriends as $friend) {
                     if (($index = array_search($friend->getUserId(), array_column($users, 'userId'))) !== false) {
                         unset($users[$index]);
+                        $users = array_values($users);
                     }
                 }
             }
@@ -70,6 +73,7 @@ class friendsController
                 foreach ($blockedBy as $user) {
                     if (($index = array_search($user->getBlockedBy(), array_column($users, 'userId'))) !== false) {
                         unset($users[$index]);
+                        $users = array_values($users);
                     }
                 }
             }
@@ -78,6 +82,7 @@ class friendsController
                 foreach ($userBlocked as $user) {
                     if (($index = array_search($user->getUserBlocked(), array_column($users, 'userId'))) !== false) {
                         unset($users[$index]);
+                        $users = array_values($users);
                     }
                 }
             }

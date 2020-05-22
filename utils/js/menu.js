@@ -36,7 +36,7 @@ function loadMenu() {
 
             $('#imgChatPageTopBanner').attr('src', $('a[href$="' + href + '"] img').attr('src'));
             $('#nameChatPageTopBanner').text($('a[href$="' + href + '"] span:first').text());
-            $('#onOffChatPageTopBanner').text($('a[href$="' + href + '"] span:eq(1)').text().substring(0, $('a[href$="' + href + '"] span:eq(1)').text().length - 3)); // "12345.0");
+            $('#onOffChatPageTopBanner').text($('a[href$="' + href + '"] span:eq(1)').text().replace('New', ''));
 
             $(".sidebar-dropdown > a").click(function () {
                 $(".sidebar-submenu").slideUp(200);

@@ -37,7 +37,7 @@
 
                         <!-- descrizione -->
                         <div class="input-group">
-                            <input autocomplete="off" type="text" id="inputDescription" name="description" class="form-control" placeholder="Description">
+                            <textarea autocomplete="off" type="text" id="inputDescription" name="description" class="form-control" placeholder="Description"></textarea>
                             <div class="input-group-append">
                                 <span class="input-group-text">Description</span>
                             </div>

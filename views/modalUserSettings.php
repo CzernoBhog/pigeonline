@@ -39,7 +39,7 @@
 
                     <!-- mood -->
                     <div class="input-group">
-                        <input autocomplete="off" type="text" id="inputMood" name="mood" class="form-control" placeholder="Mood" value="<?= is_null($user->getMood()) ? '' : $user->getMood() ?>">
+                        <textarea autocomplete="off" type="text" id="inputMood" name="mood" class="form-control" placeholder="Mood"><?= is_null($user->getMood()) ? '' : $user->getMood() ?></textarea>
                         <div class="input-group-append">
                             <span class="input-group-text">Mood</span>
                         </div>
@@ -64,7 +64,7 @@
 
                     <!-- Immagine Profilo -->
                     <div class="form-group" style="display: flex; align-items: end;">
-                        <div class="input-group input-file"  style="display: flex; align-items: end;" id="picture">
+                        <div class="input-group input-file" style="display: flex; align-items: end;" id="picture">
                             <?php
                             if (is_null($user->getPathProfilePicture())) {
                                 echo '<img id="imgPicture" style="height: 70px; width: 70px; margin-right: 20px" src="./utils/imgs/img_avatar.png"/>';

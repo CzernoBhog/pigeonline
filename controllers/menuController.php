@@ -79,16 +79,6 @@ class menuController
     {
         $chat = \models\DAOChat::getChat(array('chatId' => $_SESSION['chatId']))[0];
         $updates = array();
-        if ($chat->getTitle() != $_POST['title']) {
-            $updates['chat']['title'] = $chat->getTitle();
-        }
-        if ($chat->getDescription() != $_POST['description']) {
-            $updates['chat']['description'] = $chat->getDescription();
-        }
-        if ($chat->getPathToChatPhoto() != $_POST['photo']) {
-            $updates['chat']['photo'] = $chat->getPathToChatPhoto();
-        }
-
         $mainUser = \models\DAOUser::getUser(
             array('user.userId' => $_SESSION['id'], 'chatId' => $chat->getChatId()),
             false,
@@ -100,72 +90,106 @@ class menuController
             'userId'
         )[0];
 
-        if($chat->getChatType() == 2 || ($chat->getChatType() == 3 && $mainUser['userType'] == '3'))
-        $users = \models\DAOChatMembers::getChatMembers(
-            array('chatId' => $_SESSION['chatId']),
-            FALSE,
-            FALSE,
-            'username',
-            'chatMembers.*, user.username, user.pathProfilePicture, user.mood, userDetails.lastActivity, userDetails.privacyLevel',
-            TRUE,
-            array('user' => 'userId', 'userDetails' => 'userId'),
-            'userId'
-        );
-
-        for ($i = 0; $i < count($users); $i++) {      //ciclo per vedere quali utenti sono nelle amicizie e quali sono bloccati, dell'utente loggato
-            $isFriend = \models\DAOFriends::getFriends(array("userId" => $_SESSION['id'], "friendId" => $users[$i]['userId']));
-            $isBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $_SESSION['id'], 'userBlocked' => $users[$i]['userId']));
-            $imBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $users[$i]['userId'], 'userBlocked' => $_SESSION['id']));
-
-            if (!is_null($isBlocked) || !is_null($imBlocked) || $users[$i]['userId'] === $_SESSION['id']) {
-                $users[$i] += ['cantBeRequested' => true];
-            } else if (!is_null($isFriend)) {
-                if ($isFriend->getAuthorizated() === '0') {
-                    $users[$i] += ['cantBeRequested' => 'pending'];
-                } else {
-                    $users[$i] += ['cantBeRequested' => true];
-                }
-            } else {
-                $users[$i] += ['cantBeRequested' => false];
+        if ($chat->getChatType() == 2 || $chat->getChatType() == 3 || $chat->getChatType() == 5) {
+            if ($chat->getTitle() != $_POST['title']) {
+                $updates['chat']['title'] = $chat->getTitle();
+            }
+            if ($chat->getDescription() != $_POST['description'] && $chat->getDescription() != null) {
+                $updates['chat']['description'] = $chat->getDescription();
+            }
+            if ($chat->getPathToChatPhoto() != $_POST['photo']) {
+                $updates['chat']['photo'] = $chat->getPathToChatPhoto();
+            }
+        } else {
+            $users = \models\DAOChatMembers::getChatMembers(
+                array('chatId' => $_SESSION['chatId']),
+                FALSE,
+                FALSE,
+                'username',
+                'chatMembers.*, user.username, user.pathProfilePicture, user.mood, userDetails.lastActivity, userDetails.privacyLevel',
+                TRUE,
+                array('user' => 'userId', 'userDetails' => 'userId'),
+                'userId'
+            );
+            $otherUser = ($users[0]['userId'] !== $mainUser['userId']) ? $users[0] : $users[1];
+            if ($otherUser['username'] != $_POST['title']) {
+                $updates['chat']['title'] = $otherUser['username'];
+            }
+            if ($otherUser['mood'] != $_POST['description'] && $otherUser['mood'] != '') {
+                $updates['chat']['description'] = $otherUser['mood'];
+            }
+            if ($otherUser['pathProfilePicture'] != $_POST['photo']) {
+                $updates['chat']['photo'] = $otherUser['pathProfilePicture'];
             }
         }
 
-        $members = '';
-        foreach ($users as $user) {
-            $src = $user['pathProfilePicture'];
-            $members .= '<li style="display: flex;">
+        if ($chat->getChatType() == 2 || ($chat->getChatType() == 3 && $mainUser['userType'] == '3')) {
+            $users = \models\DAOChatMembers::getChatMembers(
+                array('chatId' => $_SESSION['chatId']),
+                FALSE,
+                FALSE,
+                'username',
+                'chatMembers.*, user.username, user.pathProfilePicture, user.mood, userDetails.lastActivity, userDetails.privacyLevel',
+                TRUE,
+                array('user' => 'userId', 'userDetails' => 'userId'),
+                'userId'
+            );
+
+            for ($i = 0; $i < count($users); $i++) {      //ciclo per vedere quali utenti sono nelle amicizie e quali sono bloccati, dell'utente loggato
+                $isFriend = \models\DAOFriends::getFriends(array("userId" => $_SESSION['id'], "friendId" => $users[$i]['userId']));
+                $isBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $_SESSION['id'], 'userBlocked' => $users[$i]['userId']));
+                $imBlocked = \models\DAOUsersBlocked::getUsersBlocked(array('blockedBy' => $users[$i]['userId'], 'userBlocked' => $_SESSION['id']));
+
+                if (!is_null($isBlocked) || !is_null($imBlocked) || $users[$i]['userId'] === $_SESSION['id']) {
+                    $users[$i] += ['cantBeRequested' => true];
+                } else if (!is_null($isFriend)) {
+                    if ($isFriend->getAuthorizated() === '0') {
+                        $users[$i] += ['cantBeRequested' => 'pending'];
+                    } else {
+                        $users[$i] += ['cantBeRequested' => true];
+                    }
+                } else {
+                    $users[$i] += ['cantBeRequested' => false];
+                }
+            }
+
+            $members = '';
+            foreach ($users as $user) {
+                $src = $user['pathProfilePicture'];
+                $members .= '<li style="display: flex;">
                     <a style="padding-top: 0; width: 80%;">
                         <img class="chat-img fa-pull-left" src="' . $src . '" alt="Avatar">
                         <span class="usernameMember" style="padding-left: 10px; font-size: normal; color: white">' . $user['username'] . '</span>';
-            if ($user['privacyLevel'] !== '3') {
-                $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
-                $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
-                $members .= '<br><span style="padding-left: 10px; font-size: smaller">';
-                $members .= ($user['lastActivity'] > $current_timestamp) ? 'Online' : 'Offline';
-                $members .= '</span></a>';
-            }
-
-            if ($mainUser['userType'] === '3') {
-                if ($mainUser['userId'] !== $user['userId']) {
-                    $members .= '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove user" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
+                if ($user['privacyLevel'] !== '3') {
+                    $current_timestamp = strtotime(date("Y-m-d H:i:s") . '- 10 second');
+                    $current_timestamp = date('Y-m-d H:i:s', $current_timestamp);
+                    $members .= '<br><span style="padding-left: 10px; font-size: smaller">';
+                    $members .= ($user['lastActivity'] > $current_timestamp) ? 'Online' : 'Offline';
+                    $members .= '</span></a>';
                 }
-                if ($user['userType'] !== '3') {
-                    $members .= '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Make Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="far fa-star"></i></a>';
-                } else {
-                    $members .= '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Remove Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="fas fa-star"></i></a>';
+
+                if ($mainUser['userType'] === '3') {
+                    if ($mainUser['userId'] !== $user['userId']) {
+                        $members .= '<a class="removeUser" style="width: min-content; padding: 0;" title="Remove user" userId="' . $user['userId'] . '" id="removeUser' . $user['userId'] . '" href="#"><i style="color: #db4949" class="fas fa-user-minus"></i></a>';
+                    }
+                    if ($user['userType'] !== '3') {
+                        $members .= '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Make Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="far fa-star"></i></a>';
+                    } else {
+                        $members .= '<a class="addRemoveAdmin" style="width: min-content; padding: 0;" title="Remove Admin" userId="' . $user['userId'] . '" id="addRemoveAdmin' . $user['userId'] . '" href="#"><i class="fas fa-star"></i></a>';
+                    }
                 }
+
+                if (!$user['cantBeRequested']) {
+                    $members .= '<a class="friendRequest" style="width: min-content; padding: 0;" title="Add friend" userId="' . $user['userId'] . '" id="friendRequest' . $user['userId'] . '"><i style="color: green" class="fas fa-user-plus"></i></a>';
+                } else if ($user['cantBeRequested'] === 'pending') {
+                    $members .= '<a style="width: min-content; padding: 0;" title="Request sent"><i style="color: yellow" class="fas fa-user-clock"></i></a>';
+                }
+
+                $members .= '</li>';
             }
 
-            if (!$user['cantBeRequested']) {
-                $members .= '<a class="friendRequest" style="width: min-content; padding: 0;" title="Add friend" userId="' . $user['userId'] . '" id="friendRequest' . $user['userId'] . '"><i style="color: green" class="fas fa-user-plus"></i></a>';
-            } else if ($user['cantBeRequested'] === 'pending') {
-                $members .= '<a style="width: min-content; padding: 0;" title="Request sent"><i style="color: yellow" class="fas fa-user-clock"></i></a>';
-            }
-
-            $members .= '</li>';
+            $updates['members'] = $members;
         }
-
-        $updates['members'] = $members;
 
         echo json_encode($updates);
     }

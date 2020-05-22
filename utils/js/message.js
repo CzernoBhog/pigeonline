@@ -72,6 +72,7 @@ $("#formUploadFile").on('submit', function (event) {
     event.preventDefault();
     var formData = new FormData(this);
     var input = document.getElementById('uploadFileInChat');
+    $('#uploadFile').text('Uploading...');
     formData.append('file', input.files[0], input.files[0].name);
     $.ajax({
         url: "index.php?controller=messageController&action=sendMessage",
@@ -88,10 +89,12 @@ $("#formUploadFile").on('submit', function (event) {
                 loadNewMessages();
                 $('#modalSendFile').modal('hide');
             } else {
+                $('#uploadFile').text('Retry');
                 errorNotify('Error: File not uploaded! Retry.');
             }
         },
         error: function (e) {
+            $('#uploadFile').text('Retry');
             errorNotify('Error: File not uploaded! Retry.');
         }
     });

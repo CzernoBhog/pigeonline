@@ -62,7 +62,7 @@
                     <span><?= ($chat->getChatType() == '3' || $chat->getChatType() == '2') ? 'DESCRIPTION:' : 'MOOD:' ?></span>
                 </li>
                 <li class="header-menu">
-                    <span class="chatDescription" id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'descriptionInput' : 'description' ?>" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
+                    <span style="white-space: break-spaces;" class="chatDescription" id="<?= (($chat->getChatType() == '3' || $chat->getChatType() == '2') && $mainUser['userType'] == '3') ? 'descriptionInput' : 'description' ?>" style="padding: 0 20px 5px 20px; width: 100%"><?= !is_null($chat->getDescription()) ? ($chat->getDescription() == '' ? 'none' : $chat->getDescription()) : ($otherUser['mood'] == '' ? 'none' : $otherUser['mood']) ?></span>
                 </li>
             </ul>
             <ul>
@@ -128,7 +128,7 @@
                         }
                         ?>
                     </div>
-                <?php } else if ($chat->getChatType() != '5') { ?>
+                <?php } else if ($chat->getChatType() != '5' && $chat->getChatType() != '3') { ?>
                     <div class="sidebar-brand">
                         <a href="#">SHARED GROUPS:</a>
                     </div>
@@ -140,7 +140,6 @@
                                     <a style="padding-top: 0; width: 80%;">
                                         <img class="chat-img fa-pull-left" src="' . $group['pathToChatPhoto'] . '" alt="Avatar">
                                         <span class="usernameMember" style="padding-left: 10px; font-size: normal; color: white">' . $group['title'] . '</span>
-                                        <br><span style="padding-left: 10px; font-size: smaller">' . $group['description'] .'</span>
                                     </a>
                                 </li>';
                         }

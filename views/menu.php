@@ -1,7 +1,7 @@
 <nav id="sidebar" class="sidebar-wrapper">
     <div class="sidebar-content" style="scrollbar-width: none;">
         <div class="sidebar-brand">
-            <a href="#">PigeOnLine</a>
+            <a href="index.php?action=viewHomePage">PigeOnLine</a>
             <a style="display: contents" href="index.php">
                 <i style="padding-right: 15px" class="fa fa-sign-out-alt"></i>
             </a>

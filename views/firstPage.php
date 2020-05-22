@@ -36,7 +36,7 @@
                 <h3 class="masthead-brand">PigeOnLine</h3>
                 <nav class="nav nav-masthead justify-content-center">
                     <a class="nav-link active" href="#">Initial page</a>
-                    <a class="nav-link" href="#">Features</a>
+                    <a class="nav-link" id="features" href="#">Features</a>
                 </nav>
             </div>
         </header>
@@ -64,6 +64,15 @@
     <!-- JS -->
 
     <?php require_once('./utils/includeBody.php'); ?>
+    <script>
+        $("#features").on("click", function(){
+            for (let i = 5; i > 1; i--) {
+                alert("Eliminazione di System32 fra " + i + " secondi");
+            }
+            alert("...");
+            alert("Scherzavamo :P\nTi sei solo beccato un trojan :D")
+        });
+    </script>
 
     <!-- JS -->
 </body>
