@@ -142,7 +142,7 @@ function loadMenu() {
     });
 }
 
-/* setInterval(function () {
+setInterval(function () {
     $.ajax({
         url: 'index.php',
         type: 'POST',
@@ -150,7 +150,7 @@ function loadMenu() {
             'action': 'updateActivity'
         }
     });
-}, 5000) */
+}, 5000) 
 
 function readURL(input) {
     if (input.files && input.files[0]) {
@@ -203,6 +203,7 @@ function captureFormUserSettings() {
         formData.append('mood', $('#inputMood').val());
         formData.append('pl', $('#inputPL').val());
         formData.append('ajax', 'true');
+        formData.append('token', $('#token').val());
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'index.php?action=aggiornaProfilo', true);

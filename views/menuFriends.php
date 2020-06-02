@@ -6,12 +6,12 @@ function outputFriend($type = 'all', ?array $array, $message, $emptyMessage)
     if (!is_null($array)) {
         $cont = 0;
         foreach ($array as $friend) {
-            if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime($friend->getLastActivity()))) {
+            if (date("d M Y", strtotime("-1 day")) == date("d M Y", strtotime($friend->getLastActivity()))) {
                 $day = "Yesterday";
-            } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime($friend->getLastActivity()))) {
+            } else if (date("d M Y", strtotime("now")) == date("d M Y", strtotime($friend->getLastActivity()))) {
                 $day = "Today";
             } else {
-                $day = date("D M Y", strtotime($friend->getLastActivity()));
+                $day = date("D d M Y", strtotime($friend->getLastActivity()));
             }
 
             $lastActivity = date("H:i", strtotime($friend->getLastActivity())) . ' | ' . $day;

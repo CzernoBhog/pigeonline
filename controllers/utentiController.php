@@ -311,6 +311,16 @@ class utentiController
      */
     public function aggiornaProfilo()
     {
+        try {
+            if(!isset($_POST['token'])){
+                throw new Exception("Token non trovato");
+            }
+            \utils\WAF::verifyCSRF($_POST['token']);
+        } catch (\Exception $e) {
+            echo 'error';
+            return;
+        }
+
         $user = \models\DAOUser::getUser(array('userId' => $_SESSION['id']));
         $mood = $_POST['mood'] != '' ? $_POST['mood'] : null;
         $username = $_POST['username'] != '' ? $_POST['username'] : $user->getUsername();

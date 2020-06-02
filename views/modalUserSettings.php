@@ -11,6 +11,10 @@
             </div>
 
             <form action="" method="post" id="formProfilo" enctype="multipart/form-data">
+
+                <!-- Token per il CSRF -->
+                <input name="token" id="token" value="<?= \utils\WAF::getCSRF() ?>" hidden>
+
                 <div class="modal-body">
                     <!-- Username -->
                     <div class="input-group">

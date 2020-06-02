@@ -144,9 +144,9 @@ function loadNewMessages() {
             'action': 'caricaMessaggi',
         },
         success: function (text) {
-            /* if(text == 'blocked'){
+            if(text == 'blocked'){
                 $.redirect('index.php');
-            } */
+            } 
             if (text != '') {
                 $('#messaggi').append(text);
                 $("#messaggi").animate({

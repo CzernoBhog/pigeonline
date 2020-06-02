@@ -1,12 +1,12 @@
 <?php
 if (!is_null($messages)) {
     foreach ($messages as $msg) {
-        if (date("D M Y", strtotime("-1 day")) == date("D M Y", strtotime($msg['timeStamp']))) {
+        if (date("d M Y", strtotime("-1 day")) == date("d M Y", strtotime($msg['timeStamp']))) {
             $day = "Yesterday";
-        } else if (date("D M Y", strtotime("now")) == date("D M Y", strtotime($msg['timeStamp']))) {
+        } else if (date("d M Y", strtotime("now")) == date("d M Y", strtotime($msg['timeStamp']))) {
             $day = "Today";
         } else {
-            $day = date("D M Y", strtotime($msg['timeStamp']));
+            $day = date("D d M Y", strtotime($msg['timeStamp']));
         }
 
         if ($msg['sentBy'] == $_SESSION['id']) {

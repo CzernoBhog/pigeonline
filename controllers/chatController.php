@@ -213,7 +213,7 @@ class chatController
         } else {
             for ($i = 0; $i < count($oldDetailsFriends); $i++) {
                 $result = array_search($oldDetailsFriends[$i]->getUserId(), array_column($alreadyMembers, 'userId'));
-                if ($result === 'false') {
+                if ($result === false) {
                     $detailsFriends[] = $oldDetailsFriends[$i];
                 }
             }

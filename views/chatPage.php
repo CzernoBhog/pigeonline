@@ -87,10 +87,12 @@
                         ?>
                             <form class="wrapper" action="" method="POST" enctype="multipart/form-data" id="formSendMessage">
                                 <input autocomplete="off" style="padding-left: 15px; padding-right: 100px" type="text" class="write_msg" name="messageText" id="messageText" placeholder="Type a message" />
+                                <?php if($chat->getChatType() != '4') { //disabilito invio file nell chat segrete, da implementare successivamente ?>
                                 <div style="position: absolute;right: 62px;bottom: 4px;border-radius: 50%;background: #05728f none repeat scroll 0 0;margin: 0" class="fileUpload btn btn-primary">
                                     <i class="fas fa-paperclip"></i>
                                     <input name="file" id="uploadFileInChat" type="file" class="upload" />
                                 </div>
+                                <?php } ?>
                                 <!-- <button class="msg_send_btn" style="right: 55px;" type="button"><i class="fa fa-paperclip" aria-hidden="true"></i></button> -->
                                 <button id="BTNSendMessage" type="submit" class="msg_send_btn" style="right: 20px;" type="button"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
                             </form>

@@ -339,7 +339,7 @@ class WAF
 
 
     /**
-     * Recupera il token CSRF oppure ne crea uno nuovo se non esiste o se scaduto
+     * Recupera il token CSRF oppure ne crea uno nuovo se non esiste o se è scaduto
      * 
      * @return String Un token generato casualmente e salvato in sessione
      */
@@ -362,6 +362,14 @@ class WAF
         return $_SESSION['token'];
     }
 
+    /*
+        <post action="www.banca.com/index.php?action=aggiornaProfilo">
+            <img>
+            <input> ---> password
+        </post>
+        
+    */
+
     /**
      * Verifica che il token passato dal form di login sia quello salvato in sessione,
      * questo per evitare operazioni indesiderate di Cross-Site Request Forgery (CSRF)
@@ -370,7 +378,7 @@ class WAF
      * 
      * @return True Nel caso sia stato validato il token
      * 
-     * @throws Exception Nel caso il token non sia stato validato, fosse scaduto oppure non fosse esistente in sessione
+     * @throws Exception Nel caso il token non sia stato validato, sia scaduto oppure non esista in sessione
      */
     static function verifyCSRF($formToken)
     {

@@ -36,10 +36,10 @@ $(document).ready(function () {
     loadNewMessages();
 });
 
-/* setInterval(function () {
+setInterval(function () {
     loadNewMessages();
     checkWhoIsTyping();
-}, 3000); */
+}, 3000); 
 
 function checkWhoIsTyping(timestamp) {
     $.ajax({
@@ -338,9 +338,9 @@ function errorNotify(text = "Error: Operation failed!") {
         type: 'danger',
         z_index: 2000
     });
-    /* setTimeout(function () {
+    setTimeout(function () {
         $.notifyClose();
-    }, 2000); */
+    }, 2000); 
 }
 
 function loadModalAddUser() {

