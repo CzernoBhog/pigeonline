@@ -251,6 +251,30 @@ class chatController
 
         //recupero dei messaggi
         $messages = \models\DAOMessage::getOldMessages($chat->getChatId(), $user->getUserId());
+        
+        if (!is_null($messages)) {
+        	foreach ($messages as &$message) {
+            	if ($message['seen'] != '1') {
+                    if($chat->getChatType() == 4) {
+                    	$otherMemeberId = ($chatMembers[0]['userId'] !== $message['sentBy']) ? $chatMembers[0]['userId'] : $chatMembers[1]['userId'];
+
+                        $receiverPrivK = openssl_pkey_get_private(file_get_contents("./utils/keys/" . $otherMemeberId . "/private.pem"));
+                        $senderPubK = openssl_pkey_get_public(file_get_contents("./utils/keys/" . $message['sentBy'] . "/public.pem"));
+
+                        if(!is_null($message['text'])) {
+                            openssl_private_decrypt($message['text'], $message['text'], $receiverPrivK);
+                            openssl_public_decrypt($message['text'], $message['text'], $senderPubK);
+                        }
+
+                        if(!is_null($message['filePath'])){
+                            openssl_private_decrypt($message['filePath'], $message['filePath'], $receiverPrivK);
+                            openssl_public_decrypt($message['filePath'], $message['filePath'], $senderPubK);
+                        }
+                    }
+                }
+            }
+	    }
+        
         include('views/chatPage.php');
     }
 
