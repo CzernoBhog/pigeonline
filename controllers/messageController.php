@@ -33,7 +33,7 @@ class messageController
                         $msgType = 3;
                     }
                 } else {
-                    throw new \Exception("File di dimensioni superiori a 32MB");
+                    throw new \Exception("File di dimensioni superiori a 64MB");
                 }
             } else {                        // Solo testo
                 $msgType = 1;
