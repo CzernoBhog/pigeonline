@@ -21,7 +21,7 @@ class Mail extends PHPMailer
         $this->Port = 465;
         $this->isHTML(true);
         $this->Username = 'pigeonline.project@gmail.com';
-        $this->Password = 'Chatta_Con_Piccioni';
+        $this->Password = 'pw';
         $this->setFrom('pigeonline.project@gmail.com', 'PigeOnLine');
         //$this->SMTPDebug = 4;
     }
